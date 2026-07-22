@@ -234,6 +234,18 @@ download_airfares_data <- function(file_urls = parent.frame()$file_urls,
                                                         sep = ';')
                             })
 
+            # # isso aqui funciona
+            # dt <- duckplyr::read_csv_duckdb(
+            #   path = temp_local_file,
+            #   options = list(
+            #     delim = ";",
+            #     # types = list("VARCHAR"),
+            #     all_varchar = TRUE,
+            #     encoding = 'UTF-8'
+            #     , skip = 1
+            #   )
+            # )
+
   dt <- data.table::rbindlist(dt, fill = TRUE)
 
   # return to original threads

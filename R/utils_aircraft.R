@@ -151,6 +151,20 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
                             temp_x[, reference_date := xdate]
                             })
 
+
+          # # isso aqui funciona
+          # dt <- duckplyr::read_csv_duckdb(
+          #   path = temp_local_file,
+          #   options = list(
+          #     delim = ";",
+          #     # types = list("VARCHAR"),
+          #     all_varchar = TRUE,
+          #     encoding = 'UTF-8'
+          #     , skip = 1
+          #   )
+          # )
+
+
   dt <- data.table::rbindlist(dt, fill = TRUE)
 
   # return to original threads

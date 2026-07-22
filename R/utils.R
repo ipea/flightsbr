@@ -169,6 +169,13 @@ latlon_to_numeric <- function(df){ # nocov start
   df[, latitude := parzer::parse_lat(latitude) ]
   df[, longitude := parzer::parse_lon(longitude) ]
 
+  # duckplyr
+  # df <- df |>
+  #   mutate(latitude = parzer::parse_lat(latitude),
+  #          longitude = parzer::parse_lon(longitude)
+  #          )
+
+
   # restore warnings
   options(warn = defaultW)
 

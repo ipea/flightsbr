@@ -84,6 +84,30 @@ if (any(type %in% c('public', 'all'))){
                                  sep = ';',
                                  showProgress=showProgress)
 
+  # # isso aqui funciona
+  # dt_public <- duckplyr::read_csv_duckdb(
+  #   path = temp_local_file,
+  #   options = list(
+  #     delim = ";",
+  #     # types = list("VARCHAR"),
+  #     all_varchar = TRUE,
+  #     encoding = 'Latin-1'
+  #     , skip = 1 # 666666666666666666666666666666
+  #     )
+  #   )
+
+  # # isso aqui nao
+  # con <- duckdb::dbConnect(duckdb::duckdb())
+  # duckdb::duckdb_read_csv(
+  #   conn = con,
+  #   files = temp_local_file,
+  #   sep = ';',
+  #   header = T,
+  #   col.types = "VARCHAR",
+  #   encoding = 'Latin-1'
+  #   )
+  # # error "more columns than column names"
+
 
   # return to original threads
   data.table::setDTthreads(orig_threads)
@@ -151,6 +175,18 @@ if (any(type %in% c('private', 'all'))){
                                   sep = ';',
                                   showProgress=showProgress)
 
+  # # isso aqui funciona
+  # dt_private <- duckplyr::read_csv_duckdb(
+  #   path = temp_local_file,
+  #   options = list(
+  #     delim = ";",
+  #     # types = list("VARCHAR"),
+  #     all_varchar = TRUE,
+  #     encoding = 'Latin-1'
+  #     , skip = 1 # 666666666666666666666666666666
+  #     )
+  #   )
+
 
   # return to original threads
   data.table::setDTthreads(orig_threads)
@@ -163,12 +199,19 @@ if (any(type %in% c('private', 'all'))){
     new = janitor::make_clean_names(nnn)
   )
 
+  # duckplyr
+  # names(dt_private) <- janitor::make_clean_names(names(dt_private))
+
   # fix geographical coordinates
   latlon_to_numeric(dt_private)
   altitude_to_numeric(dt_private)
 
   # add type info
    dt_private[, type := 'private']
+
+   # # duckplyr
+   # dt_private <- dt_private |>
+   #   dplyr::mutate(type = 'private')
 
    # convert columns to numeric
    convert_to_numeric(dt_private)

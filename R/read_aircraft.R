@@ -18,7 +18,8 @@
 #' @examples \dontrun{ if (interactive()) {
 #' # Read aircraft data
 #' aircraft <- read_aircraft(date = 202001,
-#'                             showProgress = TRUE)
+#'                           showProgress = TRUE
+#'                           )
 #'
 #'
 #'}}
@@ -45,6 +46,7 @@ read_aircraft <- function(date = NULL,
 
   # get url of files
   file_urls <- get_aircraft_url(date)
+
 
   # download and read data
   dt <- download_aircraft_data(file_url = file_urls,
