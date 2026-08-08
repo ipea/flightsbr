@@ -35,6 +35,7 @@ get_flights_files_available <- function() { # nocov start
   h <- httr2::resp_body_html(resp)
 
   rows <- rvest::html_elements(h, "tbody tr")
+  rows <- rows[-1]
 
   files <- lapply(rows, function(row) {
 
@@ -63,13 +64,15 @@ get_flights_files_available <- function() { # nocov start
       as.numeric(paste0(year, sprintf("%02d", as.numeric(month))))
     )
 
-    data.table::data.table(
+    tbl <- data.table::data.table(
       # year = rep(year, 2L),
       # month = rep(month, 2L),
       date = rep(date, 2L),
       type = c("basica", "combinada"),
       url = c(basica_url, combinada_url)
     )
+
+    return(tbl)
   })
 
   files <- data.table::rbindlist(files, fill = TRUE)

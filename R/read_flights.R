@@ -29,46 +29,55 @@
 #'
 #' f2015 <- read_flights(date = 2015)
 #'}}
-read_flights <- function(date = NULL,
-                         type = 'basica',
-                         showProgress = TRUE,
-                         select = NULL,
-                         cache = TRUE
-                         ){
-
-### check inputs
-  if( ! type %in% c('basica', 'combinada') ){ stop(paste0("Argument 'type' must be either 'basica' or 'combinada'")) }
-  if( ! is.logical(showProgress) ){ stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE.")) }
-  if( ! is.logical(cache) ){ stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE.")) }
+read_flights <- function(
+  date = NULL,
+  type = c("basica", "combinada"),
+  showProgress = TRUE,
+  select = NULL,
+  cache = TRUE
+) {
+  ### check inputs
+  type <- match.arg(type)
+  if (!is.logical(showProgress)) {
+    stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE."))
+  }
+  if (!is.logical(cache)) {
+    stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE."))
+  }
   check_input_date_format(date)
 
-### check date input
-  # get all dates available
-  all_dates <- get_flight_dates_available()
+  ### get files available
+  files <- get_flights_files_available()
 
-  # check if download failed
-  if (is.null(all_dates)) { return(invisible(NULL)) }
+  if (is.null(files)) {
+    return(invisible(NULL))
+  }
 
-  # check dates
-  if (is.null(date)) { date <- max(all_dates) }
-  check_date(date=date, all_dates)
+  files <- files[type == ..type]
 
+  all_dates <- files$date
 
-#### Download and read data
+  ### check date input
+  if (is.null(date)) {
+    date <- max(all_dates)
+  }
+
+  check_date(date = date, all_dates)
+
+  #### Download and read data
 
   # prepare url of online files
-  file_url <- get_flights_url(type=type, date=date)
+  file_url <- get_flights_url(type = type, date = date)
 
   # download and read data
-  dt_list <- download_flights_data(file_url,
-                                   showProgress,
-                                   select,
-                                   cache)
+  dt_list <- download_flights_data(file_url, showProgress, select, cache)
 
   # check if download failed
-  if (is.null(dt)) { return(invisible(NULL)) }
+  if (is.null(dt)) {
+    return(invisible(NULL))
+  }
 
-#### prep data
+  #### prep data
 
   # row bind data tables
   dt <- data.table::rbindlist(dt_list, fill = TRUE)
@@ -86,4 +95,3 @@ read_flights <- function(date = NULL,
 
   return(dt)
 }
-
