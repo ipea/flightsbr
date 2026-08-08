@@ -53,9 +53,14 @@ read_flights <- function(
     return(invisible(NULL))
   }
 
+  # subset files: only required type and dates
   files <- files[type == ..type]
 
+  if(!is.null(date)) {
+    files <- files[date %in% ..date]
+  }
   all_dates <- files$date
+
 
   ### check date input
   if (is.null(date)) {
@@ -65,12 +70,7 @@ read_flights <- function(
   check_date(date = date, all_dates)
 
   #### Download and read data
-
-  # prepare url of online files
-  file_url <- get_flights_url(type = type, date = date)
-
-  # download and read data
-  dt_list <- download_flights_data(file_url, showProgress, select, cache)
+  dt_list <- download_flights_data(files$url, showProgress, select, cache)
 
   # check if download failed
   if (is.null(dt)) {

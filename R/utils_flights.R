@@ -13,19 +13,21 @@ get_flights_files_available <- function() { # nocov start
     "envio-de-informacoes"
   )
 
-  req <- httr2::request(url) |>
-    httr2::req_user_agent(
-      "Mozilla/5.0 (compatible; flightsbr; +https://github.com/ipea/flightsbr)"
-    ) |>
-    httr2::req_headers(
-      Accept = paste0(
-        "text/html,application/xhtml+xml,application/xml;",
-        "q=0.9,*/*;q=0.8"
-      ),
-      `Accept-Language` = "pt-BR,pt;q=0.9,en;q=0.8"
-    ) |>
-    httr2::req_perform()
-  resp <- try(req, silent = TRUE)
+  resp <- try(
+    httr2::request(url) |>
+      httr2::req_user_agent(
+        "Mozilla/5.0 (compatible; flightsbr; +https://github.com/ipea/flightsbr)"
+      ) |>
+      httr2::req_headers(
+        Accept = paste0(
+          "text/html,application/xhtml+xml,application/xml;",
+          "q=0.9,*/*;q=0.8"
+        ),
+        `Accept-Language` = "pt-BR,pt;q=0.9,en;q=0.8"
+      ) |>
+      httr2::req_perform(),
+    silent = TRUE
+  )
 
   if (inherits(resp, "try-error")) {
     message("Problem connecting to ANAC data server. Please try it again.")
@@ -34,56 +36,88 @@ get_flights_files_available <- function() { # nocov start
 
   h <- httr2::resp_body_html(resp)
 
-  rows <- rvest::html_elements(h, "tbody tr")
-  rows <- rows[-1]
+  # rows <- rvest::html_elements(h, "tr")
+  tables <- rvest::html_elements(h, "table")
 
-  files <- lapply(rows, function(row) {
+  files <- lapply(tables, function(tbl) {
+    headers <- tbl |>
+      rvest::html_elements(xpath = "./thead/tr/th") |>
+      rvest::html_text2() |>
+      trimws() |>
+      janitor::make_clean_names()
 
-    cells <- row |>
-      rvest::html_elements("td")
+    required <- c("ano", "mes", "basica", "combinada")
 
-    if (length(cells) < 5L) {
+    if (!all(required %in% headers)) {
       return(NULL)
     }
 
-    year <- cells[[1]] |>
-      rvest::html_text2()
+    year_col <- match("ano", headers)
+    month_col <- match("mes", headers)
+    basica_col <- match("basica", headers)
+    combinada_col <- match("combinada", headers)
 
-    month <- cells[[2]] |>
-      rvest::html_text2()
+    rows <- tbl |>
+      rvest::html_elements(xpath = "./tbody/tr")
 
-    basica_url <- cells[[4]] |>
-      rvest::html_element("a") |>
-      rvest::html_attr("href")
+    out <- lapply(rows, function(row) {
+      cells <- row |>
+        rvest::html_elements(xpath = "./td")
 
-    combinada_url <- cells[[5]] |>
-      rvest::html_element("a") |>
-      rvest::html_attr("href")
+      if (
+        length(cells) <
+          max(
+            year_col,
+            month_col,
+            basica_col,
+            combinada_col
+          )
+      ) {
+        return(NULL)
+      }
 
-    date <- suppressWarnings(
-      as.numeric(paste0(year, sprintf("%02d", as.numeric(month))))
-    )
+      year <- cells[[year_col]] |>
+        rvest::html_text2() |>
+        as.integer()
 
-    tbl <- data.table::data.table(
-      # year = rep(year, 2L),
-      # month = rep(month, 2L),
-      date = rep(date, 2L),
-      type = c("basica", "combinada"),
-      url = c(basica_url, combinada_url)
-    )
+      month <- cells[[month_col]] |>
+        rvest::html_text2() |>
+        as.integer()
 
-    return(tbl)
+      if (is.na(year) || is.na(month)) {
+        return(NULL)
+      }
+
+      basica_url <- cells[[basica_col]] |>
+        rvest::html_element("a") |>
+        rvest::html_attr("href")
+
+      combinada_url <- cells[[combinada_col]] |>
+        rvest::html_element("a") |>
+        rvest::html_attr("href")
+
+      tbl_out <- data.table::data.table(
+        date = rep(year * 100L + month, 2L),
+        type = c("basica", "combinada"),
+        url = c(basica_url, combinada_url)
+      )
+
+      return(tbl_out)
+    })
+
+    return(data.table::rbindlist(out, fill = TRUE))
   })
 
   files <- data.table::rbindlist(files, fill = TRUE)
 
   files <- files[
     !is.na(date) &
-    !is.na(url) &
-    nzchar(url)
+      !is.na(url) &
+      nzchar(url)
   ]
 
   files <- unique(files)
+
   return(files)
 } # nocov end
 
