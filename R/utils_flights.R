@@ -1,5 +1,134 @@
+
+# get_flights_files_available ----------------------------------------------------------------
+
+#' Retrieve flight files available from the ANAC website
+#'
+#' @return A data.table with columns `date`, `type`, and `url`.
+#' @keywords internal
+get_flights_files_available <- function() { # nocov start
+
+  url <- paste0(
+    "https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/",
+    "Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/",
+    "envio-de-informacoes"
+  )
+
+  resp <- try(
+    httr2::request(url) |>
+      httr2::req_user_agent(
+        "Mozilla/5.0 (compatible; flightsbr; +https://github.com/ipea/flightsbr)"
+      ) |>
+      httr2::req_headers(
+        Accept = paste0(
+          "text/html,application/xhtml+xml,application/xml;",
+          "q=0.9,*/*;q=0.8"
+        ),
+        `Accept-Language` = "pt-BR,pt;q=0.9,en;q=0.8"
+      ) |>
+      httr2::req_perform(),
+    silent = TRUE
+  )
+
+  if (inherits(resp, "try-error")) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
+
+  h <- httr2::resp_body_html(resp)
+
+  # rows <- rvest::html_elements(h, "tr")
+  tables <- rvest::html_elements(h, "table")
+
+  files <- lapply(tables, function(tbl) {
+    headers <- tbl |>
+      rvest::html_elements(xpath = "./thead/tr/th") |>
+      rvest::html_text2() |>
+      trimws() |>
+      janitor::make_clean_names()
+
+    required <- c("ano", "mes", "basica", "combinada")
+
+    if (!all(required %in% headers)) {
+      return(NULL)
+    }
+
+    year_col <- match("ano", headers)
+    month_col <- match("mes", headers)
+    basica_col <- match("basica", headers)
+    combinada_col <- match("combinada", headers)
+
+    rows <- tbl |>
+      rvest::html_elements(xpath = "./tbody/tr")
+
+    out <- lapply(rows, function(row) {
+      cells <- row |>
+        rvest::html_elements(xpath = "./td")
+
+      if (
+        length(cells) <
+          max(
+            year_col,
+            month_col,
+            basica_col,
+            combinada_col
+          )
+      ) {
+        return(NULL)
+      }
+
+      year <- cells[[year_col]] |>
+        rvest::html_text2() |>
+        as.integer()
+
+      month <- cells[[month_col]] |>
+        rvest::html_text2() |>
+        as.integer()
+
+      if (is.na(year) || is.na(month)) {
+        return(NULL)
+      }
+
+      basica_url <- cells[[basica_col]] |>
+        rvest::html_element("a") |>
+        rvest::html_attr("href")
+
+      combinada_url <- cells[[combinada_col]] |>
+        rvest::html_element("a") |>
+        rvest::html_attr("href")
+
+      tbl_out <- data.table::data.table(
+        date = rep(year * 100L + month, 2L),
+        type = c("basica", "combinada"),
+        url = c(basica_url, combinada_url)
+      )
+
+      return(tbl_out)
+    })
+
+    return(data.table::rbindlist(out, fill = TRUE))
+  })
+
+  files <- data.table::rbindlist(files, fill = TRUE)
+
+  files <- files[
+    !is.na(date) &
+      !is.na(url) &
+      nzchar(url)
+  ]
+
+  files <- unique(files)
+
+  return(files)
+} # nocov end
+
+
+# get_flight_dates_available -----------------------------------------------------------------
+
 #' Retrieve all dates available for flights data from ANAC website
 #'
+#' @param type String. Whether the data set should be of the type `basica`
+#'             (flight stage, the default) or `combinada` (On flight origin and
+#'             destination - OFOD).
 #' @return Numeric vector.
 #' @export
 #' @keywords internal
@@ -7,92 +136,35 @@
 #' # check dates
 #' a <- get_flight_dates_available()
 #'}}
-get_flight_dates_available <- function() { # nocov start
+get_flight_dates_available <- function(type = NULL) {
+  # nocov start
 
-  # read html table
-  url = 'https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/envio-de-informacoes'
-  h <- try(rvest::read_html(url), silent = TRUE)
+  if (!is.null(type)) {
+    requested_type <- match.arg(type, c("basica", "combinada"))
+  } else {
+    requested_type <- NULL
+  }
 
-  # check if internet connection worked
-  if (class(h)[1]=='try-error') {
-    message("Problem connecting to ANAC data server. Please try it again.")
+  files <- get_flights_files_available()
+
+  if (is.null(files)) {
     return(invisible(NULL))
   }
 
-  # filter elements of basica data
-  elements <- rvest::html_elements(h, "a")
-  basica_urls <- elements[ data.table::like(elements, '/basica') ]
-  basica_urls <- lapply(X=basica_urls, FUN=function(i){rvest::html_attr(i,"href")})
-
-  # get all dates available
-  all_dates <- substr(basica_urls, (nchar(basica_urls) + 1) -11, nchar(basica_urls)-4 )
-  all_dates <- gsub("[-]", "", all_dates)
-
-  # remove eventual letters
-  all_dates <- sub("a", "", all_dates, fixed = TRUE)
-  ## remove ALL eventual letters
-  # all_dates <- lapply(X = base::letters,
-  #                     FUN = function(x){
-  #                       all_datesf <- sub(x, "", all_dates, fixed = TRUE)
-  #                       return(all_datesf)}
-  #                     )
-  all_dates <- unique(all_dates)
-  all_dates <- as.numeric(all_dates)
-  return(all_dates)
-}  # nocov end
-
-
-
-
-#' Put together the url of flight data files
-#'
-#' @param type String. Whether the data set should be of the type `basica`
-#'             (flight stage, the default) or `combinada` (On flight origin and
-#'             destination - OFOD).
-#' @param date Numeric. Date of the data in the format `yyyymm`. Defaults to
-#'             `202001`. To download the data for all months in a year, the user
-#'             can pass a 4-digit year input `yyyy`. The parameter also accepts
-#'             a vector of dates such as `c(202001, 202006, 202012)`.
-#'
-#' @return A url string.
-#'
-#' @keywords internal
-#' @examples \dontrun{ if (interactive()) {
-#' # Generate urls
-#' a <- get_flights_url(type='basica', year=2000, month=11)
-#'}}
-get_flights_url <- function(type, date) { # nocov start
-
-  # old https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/envio-de-informacoes/microdados/basica2021-01.zip
-  # old https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/microdados/
-  # new https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/microdados/basica2021-01.zip
-
-  # set root url
-  url_root <- 'https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/envio-de-informacoes'
-
-  # date with format yyyymm
-  if (all(nchar(date)==6)) {
-    y <- substring(date, 1, 4)
-    m <- substring(date, 5, 6)
-    url_spec <- paste0('/', type,'/', y, '/',type, y, '-', m, '.zip')
-    file_urls <- paste0(url_root, url_spec)
-    #  file_names <- basename(file_urls)
+  if (!is.null(requested_type)) {
+    dates <- files[
+      type == requested_type,
+      sort(unique(date))
+    ]
+  } else {
+    dates <- unique(files$date)
   }
 
-  # date with format yyyy
-  if (all(nchar(date)==4)) {
-    all_dates <- generate_all_months(date)
-    y <- substring(all_dates, 1, 4)
-    m <- substring(all_dates, 5, 6)
-    url_spec <- paste0('/', type,'/', y, '/',type, y, '-', m, '.zip')
-    file_urls <- paste0(url_root, url_spec)
-    #  file_names <- basename(file_urls)
-  }
-
-  return(file_urls)
+  return(dates)
 } # nocov end
 
 
+# download_flights_data ----------------------------------------------------------------------
 
 #' Download and read ANAC flight data
 #'
@@ -197,4 +269,3 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
   return(dt)
 
 } # nocov end
-
