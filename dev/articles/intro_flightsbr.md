@@ -1,0 +1,121 @@
+# Introduction to flightsbr
+
+**flightsbr** is an R package to download flight and airport data from
+Brazil’s Civil Aviation Agency (ANAC). The package currently includes
+five main functions:
+
+1.  [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+2.  [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)
+3.  [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
+4.  [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
+5.  [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md)
+
+### 1) `read_flights()`:
+
+Flights data include detailed information on every international flight
+to and from Brazil, as well as domestic flights within the country. The
+data include flight-level information of airports of origin and
+destination, flight duration, aircraft type, payload, and the number of
+passengers, as well as several other variables. - [Data dictionary for
+flights](https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/descricao-de-variaveis).
+
+### 2) `read_airports()`:
+
+Airports data covers all airports and aerodromes registered in Brazil’s
+Civil Aviation Agency (ANAC). It includes detailed information on ICAO
+code, municipality, geographical coordinates, runway dimensions etc.
+
+- Data dictionary:
+  - [Public
+    airports](https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/aerodromos/lista-de-aerodromos-publicos-v2/70-lista-de-aerodromos-publicos-v2).
+  - [Private
+    airports](https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/aerodromos/lista-de-aerodromos-privados-v2).
+
+### 3) `read_aircraft()`:
+
+All aircraft registered in the Brazilian Aeronautical Registry (Registro
+Aeronáutico Brasileiro - RAB), organized by the Brazilian Civil Aviation
+Agency (ANAC). - [Data dictionary for aircraft
+data](https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/aeronaves/registro-aeronautico-brasileiro/5-registro-aeronautico-brasileiro).
+
+### 4) `read_airport_movements()`:
+
+The data covers all passenger, aircraft, cargo and mail movement from
+airports regulated by ANAC. - [Data dictionary for airport movements
+data](https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/operador-aeroportuario/dados-de-movimentacao-aeroportuaria/60-dados-de-movimentacao-aeroportuaria).
+
+### 5) `read_airfares()`:
+
+The data covers airfares of domestic and international flights.
+
+- Data dictionary:
+  - [domestic
+    airfares](https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/voos-e-operacoes-aereas/tarifas-aereas-domesticas/46-tarifas-aereas-domesticas).
+  - [international
+    airfares](https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/microdados-de-tarifas-aereas-comercializadas).
+
+## Basic usage
+
+Before using **flightsbr** please make sure that you have it installed
+on your computer. You can download the most stable version from CRAN.
+
+``` r
+
+install.packages("flightsbr")
+```
+
+Now we can load the library and start downloading data.
+
+``` r
+
+library(flightsbr)
+```
+
+#### Download flights data:
+
+``` r
+
+# in a given **month* of a given **year** (yyyymm)
+df_201506 <- read_flights(date = 201506, showProgress = FALSE)
+
+# in a given year (yyyy)
+df_2015 <- read_flights(date = 2015, showProgress = FALSE)
+```
+
+#### Download airports data:
+
+``` r
+
+airports_all <- flightsbr::read_airports(type = 'all', showProgress = FALSE)
+
+airports_prv <- flightsbr::read_airports(type = 'private', showProgress = FALSE)
+
+airports_pbl <- flightsbr::read_airports(type = 'public', showProgress = FALSE)
+```
+
+#### Download data of aircraft:
+
+``` r
+
+aircraft <- flightsbr::read_aircraft(date = 2024, showProgress = FALSE)
+
+head(aircraft)
+```
+
+#### Download data on airport movements:
+
+``` r
+
+airport_mov <- flightsbr::read_airport_movements(date = 201901)
+
+head(airport_mov)
+```
+
+#### Download data on data on air fares of domestic flights in Brazil:
+
+``` r
+
+airfares <- flightsbr::read_airfares(date = 202003, domestic = TRUE)
+
+head(airfares)
+```

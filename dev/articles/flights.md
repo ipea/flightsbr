@@ -1,0 +1,104 @@
+# Flights data
+
+The flight data in the **flightsbr** package is downloaded from Brazil’s
+Civil Aviation Agency (ANAC). The data includes detailed information on
+every international flight to and from Brazil, as well as domestic
+flights within the country. The data include flight-level information of
+airports of origin and destination, flight duration, aircraft type,
+payload, and the number of passengers, and several other variables.
+
+- Data dictionary: [a description of all variables included in the data
+  is available
+  here](https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/descricao-de-variaveis).
+
+Now we can load some libraries we’ll use in this vignette:
+
+``` r
+
+library(flightsbr)
+library(data.table)
+library(ggplot2)
+```
+
+Download data of all flights:
+
+``` r
+
+# in a given **month* of a given **year** (yyyymm)
+df_201506 <- read_flights(date = 201506)
+
+
+# from specific months
+df_various_months <- read_flights(date = c(202001, 202101, 202210))
+
+
+# in a given year (yyyy)
+df_2015 <- read_flights(date = 2015)
+
+
+# from specific years
+df_various_years <- read_flights(date = c(2019, 2021, 2022))
+```
+
+If you know already what data columns you need, you can pass a vector
+with their names to the `select` argument and
+[`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+will only load those columns. This will make the function a bit faster.
+
+``` r
+
+df_201506 <- read_flights(
+  date = 201506,
+  showProgress = FALSE,
+  select = c('id_empresa', 'nr_voo', 'dt_partida_real',
+             'sg_iata_origem' , 'sg_iata_destino')
+  )
+
+head(df_201506)
+```
+
+The package makes it easy to compare daily number of passengers across
+different years. In the example below we compare daily number of air
+passengers in Brazil in 2019 and 2020. This gives us a glimpse in the
+impact of COVID-19 on Brazilian aviation, similarly to study of [Bazzo,
+Braga and Pereira (2022)](https://doi.org/10.1016/j.enpol.2022.112906).
+
+``` r
+
+# download flights data
+df <- read_flights(
+  date = 2019:2022,
+  select = c('nr_passag_pagos', 'dt_partida_real'),
+  showProgress = TRUE
+  )
+
+# count daily passengers
+count_df <- df[, .(total_pass = sum(nr_passag_pagos, na.rm=TRUE)), 
+               by = dt_partida_real]
+
+# reformat date
+count_df <- count_df[ between(dt_partida_real, as.Date('2019-01-01'), as.Date('2022-12-31')) ]
+
+count_df[, date := as.IDate(dt_partida_real, format="%Y-%m-%d") ]
+count_df[, year := year(date) ]
+count_df[, date_plot := paste0("2030-", format(date, "%m-%d"))]
+count_df[, date_plot := as.Date(date_plot)]
+
+# plot
+fig <- ggplot(data = count_df) + 
+          geom_point(aes(x=date_plot, y=total_pass, color=factor(year)), alpha=.4, size=1) +
+          scale_y_log10(name="Number of Passengers", 
+                        labels = scales::unit_format(unit = ""), limit=c(1000,NA)) +
+          scale_x_date(date_breaks = "1 months", date_labels = "%b", name = 'Month') +
+          labs(subtitle ='Daily number of air passengers in Brazil', color = "Legend") +
+          theme_minimal() +
+          theme(panel.grid.minor = element_blank(),
+                axis.text = element_text(size = 7),
+                axis.title=element_text(size=9),
+                plot.background = element_rect(fill='white', colour='white'))
+
+
+fig
+```
+
+![](https://github.com/ipeaGIT/flightsbr/blob/main/inst/img/vig_output_flights.png?raw=true)
