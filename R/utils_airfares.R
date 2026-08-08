@@ -169,7 +169,7 @@ get_airfares_url <- function(dom,
 
 #' Download and read ANAC air fares data
 #'
-#' @param file_urls String. A url passed from \code{\link{get_flights_url}}.
+#' @param file_urls String. A url passed from above.
 #' @template showProgress
 #' @template select
 #' @template cache

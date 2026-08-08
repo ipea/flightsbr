@@ -168,7 +168,7 @@ get_flight_dates_available <- function(type = NULL) {
 
 #' Download and read ANAC flight data
 #'
-#' @param file_url String. A url passed from \code{\link{get_flights_url}}.
+#' @param file_url String. An ANAC url passed from above.
 #' @param showProgress Logical, passed from \code{\link{read_flights}}
 #' @param select A vector of column names or numbers to keep, passed from \code{\link{read_flights}}
 #' @param cache Logical, passed from \code{\link{read_flights}}
@@ -178,7 +178,7 @@ get_flight_dates_available <- function(type = NULL) {
 #' @keywords internal
 #' @examples \dontrun{ if (interactive()) {
 #' # Generate url
-#' file_url <- get_flights_url(type='basica', year=2000, month=11)
+#' file_url <- get_flights_files_available()$url[1]
 #'
 #' # download data
 #' a <- download_flights_data(file_url=file_url, showProgress=TRUE, select=NULL)

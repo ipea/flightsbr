@@ -38,9 +38,9 @@ aircraft <- read_aircraft(date = 202001,
 }}
 }
 \seealso{
-Other download flight data: 
-\code{\link{read_aircraft}()},
-\code{\link{read_flights}()}
+Other download flight data:
+\code{\link[=read_aircraft]{read_aircraft()}},
+\code{\link[=read_flights]{read_flights()}}
 }
 \concept{download flight data}
 \keyword{internal}

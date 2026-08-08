@@ -4,6 +4,7 @@
   * When the package tries to download multiples but fails with a few ones, the package now only try to download again the files that failed in the first attempt.
   
 
+  * The function `read_aircrafts()` now throws an error, as it has been deprecated in favor of `read_aircraft()` simply to fix a typo in the function name. The behavior and outputs are identical.
 
 
 # flightsbr v1.1.1

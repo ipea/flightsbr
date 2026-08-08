@@ -33,14 +33,15 @@ data is available at \url{https://www.gov.br/anac/pt-br/sistemas/rab}.
 \dontrun{ if (interactive()) {
 # Read aircraft data
 aircraft <- read_aircraft(date = 202001,
-                            showProgress = TRUE)
+                          showProgress = TRUE
+                          )
 
 
 }}
 }
 \seealso{
-Other download flight data: 
-\code{\link{read_aircrafts}()},
-\code{\link{read_flights}()}
+Other download flight data:
+\code{\link[=read_aircrafts]{read_aircrafts()}},
+\code{\link[=read_flights]{read_flights()}}
 }
 \concept{download flight data}
