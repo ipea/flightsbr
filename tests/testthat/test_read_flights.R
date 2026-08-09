@@ -6,9 +6,10 @@ testthat::skip_on_cran()
 
 
 # Reading the data -----------------------
-cols <- c('nr_ano_referencia' , 'nr_mes_referencia')
 
 test_that("read_flights", {
+
+  cols <- c('nr_ano_referencia' , 'nr_mes_referencia')
 
   # (default), one month, basica, progress
   test1 <- read_flights()

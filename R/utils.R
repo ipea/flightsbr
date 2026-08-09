@@ -87,57 +87,55 @@ generate_all_months <- function(date) {
 download_flightsbr_file <- function(file_url = parent.frame()$file_url,
                                     showProgress = parent.frame()$showProgress,
                                     dest_file = temp_local_file,
-                                    cache = cache){ # nocov start
+                                    cache = cache) { # nocov start
 
-  # address to temp file
-  dest_file <- fs::path(fs::path_temp(), basename(file_url))
+  dest_file <- fs::path(
+    fs::path_temp(),
+    basename(file_url)
+  )
 
-  # download data
-  downloaded_files <- curl::multi_download(
-    urls = file_url,
-    destfiles = dest_file,
-    resume = cache,
+  reqs <- lapply(file_url, \(url) {
+
+    httr2::request(url) |>
+      httr2::req_user_agent(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      ) |>
+      httr2::req_headers(
+        Accept = "application/zip, application/octet-stream, */*",
+        `Accept-Encoding` = "identity"
+      )
+  })
+
+  responses <- httr2::req_perform_parallel(
+    reqs,
+    paths = dest_file,
+    on_error = "continue",
     progress = showProgress
-    )
+  )
 
-  # return TRUE if everything worked
-  check_download <- all(downloaded_files$success)
-  if (isTRUE(check_download)) {
-    return(check_download)
-    }
+  success <- httr2::resps_ok(responses)
 
-  # check if file has NOT been downloaded, try a 2nd time
-  if (any(!downloaded_files$success | is.na(downloaded_files$success))) {
-
-    # update table to download only the files that failed in the 1st attempt
-    downloaded_files <- subset(
-      downloaded_files,
-      success == FALSE | is.na(success)
-      )
-
-    # download data: try a 2nd time
-    downloaded_files <- curl::multi_download(
-      urls = downloaded_files$url,
-      destfiles = downloaded_files$destfile,
-      resume = TRUE,
-      progress = showProgress
-      )
-
-    check_download <- all(downloaded_files$success)
-    if (isTRUE(check_download)) {
-      return(check_download)
-    }
-
-  # Halt function if download failed
-    if (any(!downloaded_files$success | is.na(downloaded_files$success))) {
-      message('Internet connection not working. Try again later.')
-      return(invisible(NULL))
-      }
+  if (all(success)) {
+    return(TRUE)
   }
 
-}  # nocov end
+  # retry failed downloads once
+  failed <- which(!success)
 
+  responses <- httr2::req_perform_parallel(
+    reqs[failed],
+    paths = dest_file[failed],
+    on_error = "continue",
+    progress = showProgress
+  )
 
+  if (all(httr2::resps_ok(responses))) {
+    return(TRUE)
+  }
+
+  message("Internet connection not working. Try again later.")
+  invisible(NULL)
+} # nocov end
 
 
 

@@ -252,7 +252,7 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
   }
 
   message('Unziping and reading data to memory.')
-  if(isTRUE(showProgress)){
+  if (isTRUE(showProgress)) {
     dt <- pbapply::pblapply(X=temp_local_file, FUN=unzip_and_fread,
                             select = select,
                             showProgress = showProgress)
