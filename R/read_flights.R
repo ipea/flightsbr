@@ -32,13 +32,15 @@
 #'}}
 read_flights <- function(
   date = NULL,
-  type = c("basica", "combinada"),
+  type = "basica",
   showProgress = TRUE,
   select = NULL,
   cache = TRUE
-) {
+  ){
+
   ### check inputs
-  requested_type <- match.arg(type)
+  requested_type <- match.arg(type, c("basica", "combinada"))
+
   if (!is.logical(showProgress)) {
     stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE."))
   }

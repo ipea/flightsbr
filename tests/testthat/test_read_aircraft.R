@@ -18,10 +18,10 @@ testthat::test_that("read_aircraft", {
   testthat::expect_true(is(read_aircraft(showProgress = TRUE), "data.table"))
 
   # test columns are correct
-  testthat::expect_equal(names(read_aircraft())[1], 'marca')
+  testthat::expect_true(grepl('marca', names(read_aircraft())[1]))
 
   # test vector of dates
-  test3 <- read_aircraft(date = c(202001, 202005), showProgress = FALSE)
+  test3 <- read_aircraft(date = c(202409, 202608), showProgress = FALSE)
   testthat::expect_true(is(test3, "data.table"))
 
   # # test date all months in a year

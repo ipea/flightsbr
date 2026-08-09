@@ -6,7 +6,7 @@
 \usage{
 read_flights(
   date = NULL,
-  type = c("basica", "combinada"),
+  type = "basica",
   showProgress = TRUE,
   select = NULL,
   cache = TRUE
