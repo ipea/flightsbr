@@ -66,10 +66,10 @@ generate_all_months <- function(date) {
 
 #' Download file from url
 #'
-#' @param file_url String. A url passed from \code{\link{get_flights_url}}.
-#' @param showProgress Logical, passed from \code{\link{read_flights}}
-#' @param dest_file String, passed from \code{\link{read_flights}}
-#' @param cache Logical, passed from \code{\link{read_flights}}
+#' @param file_url String. A url passed from above.
+#' @param showProgress Logical, passed from above.
+#' @param dest_file String, passed from above.
+#' @param cache Logical, passed from above.
 #'
 #' @return Silently saves downloaded file to temp dir.
 #'
