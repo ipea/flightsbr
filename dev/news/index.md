@@ -3,9 +3,60 @@
 ## flightsbr v1.2.0 DEV
 
 - Minor changes:
+
   - When the package tries to download multiples but fails with a few
     ones, the package now only try to download again the files that
     failed in the first attempt.
+  - The function
+    [`read_aircrafts()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircrafts.md)
+    now throws an error, as it has been deprecated in favor of
+    [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
+    simply to fix a typo in the function name. The behavior and outputs
+    are identical.
+  - [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md)
+    and
+    [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+    now cache the list of dates/files available from ANAC to a
+    session-scoped temp file, governed by the existing `cache`
+    parameter. This avoids re-scraping ANAC’s website on every single
+    call within the same R session.
+  - Files are now downloaded using
+    [`httr2::req_perform_parallel()`](https://httr2.r-lib.org/reference/req_perform_parallel.html),
+    replacing
+    [`curl::multi_download()`](https://jeroen.r-universe.dev/curl/reference/multi_download.html).
+
+- Bug fixes:
+
+  - Fixed error in reading data from ANAC website. Fixed
+    [\#52](https://github.com/ipea/flightsbr/issues/52) and
+    [\#51](https://github.com/ipea/flightsbr/issues/51).
+  - Fixed the `select` parameter in
+    [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md),
+    which was silently ignored and had no effect on the columns
+    returned. It now behaves the same way as `select` in
+    [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md).
+  - Fixed
+    [`get_airfares_dates_available()`](https://ipeagit.github.io/flightsbr/dev/reference/get_airfares_dates_available.md)
+    (used internally by
+    [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md))
+    to retry requests to ANAC that fail transiently (timeouts,
+    connection errors, HTTP 429/503) instead of silently dropping the
+    affected year and returning an incomplete list of available dates.
+  - Fixed
+    [`get_airfares_dates_available()`](https://ipeagit.github.io/flightsbr/dev/reference/get_airfares_dates_available.md)
+    and
+    [`latest_airfares_date()`](https://ipeagit.github.io/flightsbr/dev/reference/latest_airfares_date.md)
+    to fail cleanly with `NULL` when ANAC can’t be reached, instead of
+    occasionally producing a nonsensical “data available between Inf and
+    -Inf” error, or `-Inf` as a date.
+  - Replaced a brittle hardcoded filename-length check (`nchar == 55`)
+    used to filter valid international airfare files listed by ANAC with
+    an explicit filename-pattern check, and added the equivalent check
+    to the domestic airfare listing (which previously had no filter at
+    all). This guards against malformed, duplicate, or misplaced files
+    that ANAC occasionally publishes (e.g. typo’d names, files uploaded
+    to the wrong year, re-uploads with `(1)` appended) corrupting the
+    list of available dates.
 
 ## flightsbr v1.1.1
 
@@ -285,8 +336,7 @@ CRAN release: 2022-02-08
       Generate all months with `yyyymm` format in a year
     - [`latlon_to_numeric()`](https://ipeagit.github.io/flightsbr/dev/reference/latlon_to_numeric.md):
       Convert spatial coordinates of airports to lat lon
-    - [`get_flights_url()`](https://ipeagit.github.io/flightsbr/dev/reference/get_flights_url.md):
-      Put together the url of flight data files
+    - `get_flights_url()`: Put together the url of flight data files
     - [`get_flight_dates_available()`](https://ipeagit.github.io/flightsbr/dev/reference/get_flight_dates_available.md):
       Retrieve from ANAC website all dates available for flights data
     - [`download_flights_data()`](https://ipeagit.github.io/flightsbr/dev/reference/download_flights_data.md):

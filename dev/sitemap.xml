@@ -1,5 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://ipeagit.github.io/flightsbr/dev/AGENTS.html</loc></url>
+<url><loc>https://ipeagit.github.io/flightsbr/dev/CLAUDE.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/LICENSE-text.html</loc></url>
+<url><loc>https://ipeagit.github.io/flightsbr/dev/MEMORY.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/articles/airports.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/articles/flights.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/articles/index.html</loc></url>
@@ -24,7 +27,7 @@
 <url><loc>https://ipeagit.github.io/flightsbr/dev/reference/get_airport_movement_dates_available.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/reference/get_airport_movements_url.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/reference/get_flight_dates_available.html</loc></url>
-<url><loc>https://ipeagit.github.io/flightsbr/dev/reference/get_flights_url.html</loc></url>
+<url><loc>https://ipeagit.github.io/flightsbr/dev/reference/get_flights_files_available.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/reference/index.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/reference/latest_airfares_date.html</loc></url>
 <url><loc>https://ipeagit.github.io/flightsbr/dev/reference/latest_flights_date.html</loc></url>

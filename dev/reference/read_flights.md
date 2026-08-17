@@ -25,10 +25,10 @@ read_flights(
 
 - date:
 
-  Numeric. Date of the data in the format `yyyymm`. Defaults to
-  `202001`. To download the data for all months in a year, the user can
-  pass a 4-digit year input `yyyy`. The parameter also accepts a vector
-  of dates such as `c(202001, 202006, 202012)`.
+  Numeric. Date of the data in the format `yyyymm`. Defaults to the
+  latest available month. To download the data for all months in a year,
+  the user can pass a 4-digit year input `yyyy`. The parameter also
+  accepts a vector of dates such as `c(202001, 202006, 202012)`.
 
 - type:
 

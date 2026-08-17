@@ -16,8 +16,7 @@ download_aircraft_data(
 
 - file_url:
 
-  String. A url passed from
-  [`get_flights_url`](https://ipeagit.github.io/flightsbr/dev/reference/get_flights_url.md).
+  String. A url passed from above.
 
 - showProgress:
 

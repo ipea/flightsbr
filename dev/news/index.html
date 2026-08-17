@@ -45,8 +45,21 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.0" id="flightsbr-v120-dev">flightsbr v1.2.0 DEV<a class="anchor" aria-label="anchor" href="#flightsbr-v120-dev"></a></h2>
-<ul><li>Minor changes:
+<ul><li>
+<p>Minor changes:</p>
 <ul><li>When the package tries to download multiples but fails with a few ones, the package now only try to download again the files that failed in the first attempt.</li>
+<li>The function <code><a href="../reference/read_aircrafts.html">read_aircrafts()</a></code> now throws an error, as it has been deprecated in favor of <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> simply to fix a typo in the function name. The behavior and outputs are identical.</li>
+<li>
+<code><a href="../reference/read_airfares.html">read_airfares()</a></code> and <code><a href="../reference/read_flights.html">read_flights()</a></code> now cache the list of dates/files available from ANAC to a session-scoped temp file, governed by the existing <code>cache</code> parameter. This avoids re-scraping ANAC’s website on every single call within the same R session.</li>
+<li>Files are now downloaded using <code><a href="https://httr2.r-lib.org/reference/req_perform_parallel.html" class="external-link">httr2::req_perform_parallel()</a></code>, replacing <code><a href="https://jeroen.r-universe.dev/curl/reference/multi_download.html" class="external-link">curl::multi_download()</a></code>.</li>
+</ul></li>
+<li>
+<p>Bug fixes:</p>
+<ul><li>Fixed error in reading data from ANAC website. Fixed <a href="https://github.com/ipea/flightsbr/issues/52" class="external-link">#52</a> and <a href="https://github.com/ipea/flightsbr/issues/51" class="external-link">#51</a>.</li>
+<li>Fixed the <code>select</code> parameter in <code><a href="../reference/read_airfares.html">read_airfares()</a></code>, which was silently ignored and had no effect on the columns returned. It now behaves the same way as <code>select</code> in <code><a href="../reference/read_flights.html">read_flights()</a></code>.</li>
+<li>Fixed <code><a href="../reference/get_airfares_dates_available.html">get_airfares_dates_available()</a></code> (used internally by <code><a href="../reference/read_airfares.html">read_airfares()</a></code>) to retry requests to ANAC that fail transiently (timeouts, connection errors, HTTP 429/503) instead of silently dropping the affected year and returning an incomplete list of available dates.</li>
+<li>Fixed <code><a href="../reference/get_airfares_dates_available.html">get_airfares_dates_available()</a></code> and <code><a href="../reference/latest_airfares_date.html">latest_airfares_date()</a></code> to fail cleanly with <code>NULL</code> when ANAC can’t be reached, instead of occasionally producing a nonsensical “data available between Inf and -Inf” error, or <code>-Inf</code> as a date.</li>
+<li>Replaced a brittle hardcoded filename-length check (<code>nchar == 55</code>) used to filter valid international airfare files listed by ANAC with an explicit filename-pattern check, and added the equivalent check to the domestic airfare listing (which previously had no filter at all). This guards against malformed, duplicate, or misplaced files that ANAC occasionally publishes (e.g. typo’d names, files uploaded to the wrong year, re-uploads with <code>(1)</code> appended) corrupting the list of available dates.</li>
 </ul></li>
 </ul></div>
     <div class="section level2">
@@ -194,7 +207,7 @@
 <li>
 <code><a href="../reference/latlon_to_numeric.html">latlon_to_numeric()</a></code>: Convert spatial coordinates of airports to lat lon</li>
 <li>
-<code><a href="../reference/get_flights_url.html">get_flights_url()</a></code>: Put together the url of flight data files</li>
+<code>get_flights_url()</code>: Put together the url of flight data files</li>
 <li>
 <code><a href="../reference/get_flight_dates_available.html">get_flight_dates_available()</a></code>: Retrieve from ANAC website all dates available for flights data</li>
 <li>

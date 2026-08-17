@@ -49,7 +49,8 @@ Other download flight data:
 if (FALSE)  if (interactive()) {
 # Read aircraft data
 aircraft <- read_aircraft(date = 202001,
-                            showProgress = TRUE)
+                          showProgress = TRUE
+                          )
 
 
 } # \dontrun{}

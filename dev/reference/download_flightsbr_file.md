@@ -17,23 +17,19 @@ download_flightsbr_file(
 
 - file_url:
 
-  String. A url passed from
-  [`get_flights_url`](https://ipeagit.github.io/flightsbr/dev/reference/get_flights_url.md).
+  String. A url passed from above.
 
 - showProgress:
 
-  Logical, passed from
-  [`read_flights`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+  Logical, passed from above.
 
 - dest_file:
 
-  String, passed from
-  [`read_flights`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+  String, passed from above.
 
 - cache:
 
-  Logical, passed from
-  [`read_flights`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+  Logical, passed from above.
 
 ## Value
 

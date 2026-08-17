@@ -5,7 +5,7 @@ Retrieve all dates available for airfares data from ANAC website
 ## Usage
 
 ``` r
-get_airfares_dates_available(dom)
+get_airfares_dates_available(dom, cache = TRUE)
 ```
 
 ## Arguments
@@ -14,6 +14,12 @@ get_airfares_dates_available(dom)
 
   Logical. Defaults to `TRUE` download airfares of domestic flights. If
   `FALSE`, the function downloads airfares of international flights.
+
+- cache:
+
+  Logical. Whether the function should read cached data downloaded
+  previously. Defaults to `TRUE`. If `FALSE`, the function will always
+  download the data and overwrite cached data.
 
 ## Value
 

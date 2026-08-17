@@ -24,6 +24,11 @@ Useful links:
 **Maintainer**: Rafael H. M. Pereira <rafa.pereira.br@gmail.com>
 ([ORCID](https://orcid.org/0000-0003-2125-7465))
 
+Authors:
+
+- Rafael H. M. Pereira <rafa.pereira.br@gmail.com>
+  ([ORCID](https://orcid.org/0000-0003-2125-7465))
+
 Other contributors:
 
 - Ipea - Institute for Applied Economic Research \[copyright holder,

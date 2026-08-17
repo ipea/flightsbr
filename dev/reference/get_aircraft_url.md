@@ -25,6 +25,6 @@ A url string.
 ``` r
 if (FALSE)  if (interactive()) {
 # Generate url
-a <- get_flights_url(year=2000, month=11)
+a <- get_aircraft_url(202505)
 } # \dontrun{}
 ```

@@ -40,7 +40,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Download and read ANAC flight data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ipeaGIT/flightsbr/blob/main/R/utils_flightst.R" class="external-link"><code>R/utils_flightst.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ipeaGIT/flightsbr/blob/main/R/utils_flights.R" class="external-link"><code>R/utils_flights.R</code></a></small>
       <div class="d-none name"><code>download_flights_data.Rd</code></div>
     </div>
 
@@ -63,19 +63,19 @@
 
 
 <dl><dt id="arg-file-url">file_url<a class="anchor" aria-label="anchor" href="#arg-file-url"></a></dt>
-<dd><p>String. A url passed from <code><a href="get_flights_url.html">get_flights_url</a></code>.</p></dd>
+<dd><p>String. An ANAC url passed from above.</p></dd>
 
 
 <dt id="arg-showprogress">showProgress<a class="anchor" aria-label="anchor" href="#arg-showprogress"></a></dt>
-<dd><p>Logical, passed from <code><a href="read_flights.html">read_flights</a></code></p></dd>
+<dd><p>Logical, passed from above.</p></dd>
 
 
 <dt id="arg-select">select<a class="anchor" aria-label="anchor" href="#arg-select"></a></dt>
-<dd><p>A vector of column names or numbers to keep, passed from <code><a href="read_flights.html">read_flights</a></code></p></dd>
+<dd><p>A vector of column names or numbers to keep, passed from above.</p></dd>
 
 
 <dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
-<dd><p>Logical, passed from <code><a href="read_flights.html">read_flights</a></code></p></dd>
+<dd><p>Logical, passed from above.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -87,10 +87,15 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co"># Generate url</span></span></span>
-<span class="r-in"><span><span class="va">file_url</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_flights_url.html">get_flights_url</a></span><span class="op">(</span>type<span class="op">=</span><span class="st">'basica'</span>, year<span class="op">=</span><span class="fl">2000</span>, month<span class="op">=</span><span class="fl">11</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">file_url</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_flights_files_available.html">get_flights_files_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">url</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># download data</span></span></span>
-<span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">download_flights_data</span><span class="op">(</span>file_url<span class="op">=</span><span class="va">file_url</span>, showProgress<span class="op">=</span><span class="cn">TRUE</span>, select<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">download_flights_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  file_url<span class="op">=</span><span class="va">file_url</span>,</span></span>
+<span class="r-in"><span>  showProgress<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  select<span class="op">=</span><span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>  cache<span class="op">=</span><span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># \dontrun{}</span></span></span>
 </code></pre></div>
     </div>

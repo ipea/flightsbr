@@ -54,8 +54,7 @@ read_airfares(
 
 ## Value
 
-A `"data.table" "data.frame"` object. All columns are returned with
-`class` of type `"character"`.
+A `"data.table" "data.frame"` object.
 
 ## Examples
 
