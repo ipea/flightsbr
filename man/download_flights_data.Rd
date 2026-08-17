@@ -14,11 +14,11 @@ download_flights_data(
 \arguments{
 \item{file_url}{String. An ANAC url passed from above.}
 
-\item{showProgress}{Logical, passed from \code{\link{read_flights}}}
+\item{showProgress}{Logical, passed from above.}
 
-\item{select}{A vector of column names or numbers to keep, passed from \code{\link{read_flights}}}
+\item{select}{A vector of column names or numbers to keep, passed from above.}
 
-\item{cache}{Logical, passed from \code{\link{read_flights}}}
+\item{cache}{Logical, passed from above.}
 }
 \value{
 A \verb{"data.table" "data.frame"} object

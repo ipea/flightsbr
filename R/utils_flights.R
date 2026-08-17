@@ -169,9 +169,9 @@ get_flight_dates_available <- function(type = NULL) {
 #' Download and read ANAC flight data
 #'
 #' @param file_url String. An ANAC url passed from above.
-#' @param showProgress Logical, passed from \code{\link{read_flights}}
-#' @param select A vector of column names or numbers to keep, passed from \code{\link{read_flights}}
-#' @param cache Logical, passed from \code{\link{read_flights}}
+#' @param showProgress Logical, passed from above.
+#' @param select A vector of column names or numbers to keep, passed from above.
+#' @param cache Logical, passed from above.
 #'
 #' @return A `"data.table" "data.frame"` object
 #'
