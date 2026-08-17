@@ -20,7 +20,11 @@ get_airfares_dates_available <- function(dom) { # nocov start
     base_url <- "https://sas.anac.gov.br/sas/tarifainternacional/"
   }
 
-  # helper to read ANAC HTML pages
+  # helper to read ANAC HTML pages. ANAC's server intermittently drops
+  # individual requests when this function has to make many of them in a
+  # row (one per year subdirectory below), so each request gets a timeout
+  # and automatic retries for transient failures (both HTTP-level, e.g.
+  # 429/503, and low-level connection failures/timeouts).
   read_anac_html <- function(url) {
 
     resp <- try(
@@ -35,6 +39,8 @@ get_airfares_dates_available <- function(dom) { # nocov start
           ),
           `Accept-Language` = "pt-BR,pt;q=0.9,en;q=0.8"
         ) |>
+        httr2::req_timeout(30) |>
+        httr2::req_retry(max_tries = 4, retry_on_failure = TRUE) |>
         httr2::req_perform(),
       silent = TRUE
     )
@@ -87,13 +93,14 @@ get_airfares_dates_available <- function(dom) { # nocov start
   # get URLs of year subdirectories
   urls <- paste0(base_url, years)
 
-  # search for CSV/TXT files inside each year
+  # search for CSV/TXT files inside each year. returns NULL (as opposed to
+  # character(0)) when the request itself failed, so failures can be told
+  # apart from a year subdirectory that legitimately has no files
   recursive_search <- function(url) {
 
     h <- read_anac_html(url)
 
     if (is.null(h)) {
-      message("Problem connecting to ANAC data server. Please try it again.")
       return(NULL)
     }
 
@@ -112,12 +119,30 @@ get_airfares_dates_available <- function(dom) { # nocov start
     return(files)
   }
 
-  # get URLs of CSV/TXT files
-  csv_urls <- lapply(
-    urls,
-    recursive_search
-  ) |>
-    unlist()
+  # get URLs of CSV/TXT files, one request per year subdirectory
+  csv_urls_by_year <- lapply(urls, recursive_search)
+
+  # a handful of individual year requests can still fail even after the
+  # retries in read_anac_html() -- track them instead of silently dropping
+  # them, so we can tell "ANAC is down" apart from "this year has no data"
+  failed_years <- sum(vapply(csv_urls_by_year, is.null, logical(1)))
+
+  if (failed_years == length(urls)) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
+
+  if (failed_years > 0) {
+    message(sprintf(
+      paste0(
+        "Could not reach %d of %d year(s) on the ANAC data server; the ",
+        "list of available dates may be incomplete. Please try it again."
+      ),
+      failed_years, length(urls)
+    ))
+  }
+
+  csv_urls <- unlist(csv_urls_by_year)
 
   # get all dates available
   if (isTRUE(dom)) {
@@ -155,6 +180,13 @@ get_airfares_dates_available <- function(dom) { # nocov start
   all_dates <- all_dates[
     !is.na(all_dates)
   ]
+
+  # keep the contract strict: callers only need to check is.null() to
+  # detect failure, never an empty-but-non-null vector
+  if (length(all_dates) == 0) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
 
   return(all_dates)
 } # nocov end
