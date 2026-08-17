@@ -169,6 +169,21 @@ get_airfares_dates_available <- function(dom, cache = TRUE) { # nocov start
   # get all dates available
   if (isTRUE(dom)) {
 
+    # ANAC's domestic listings occasionally contain malformed, duplicate,
+    # or misplaced files (alternate naming like `yyyy-mm.csv`, re-uploads
+    # with `%20(1)` appended, stray .txt files, alternate-tariff variants
+    # like `tarifa_N_yyyymm.csv`). Keep only files that actually match the
+    # `yyyymm.csv` naming convention that get_airfares_url() builds URLs
+    # from, checked against the basename so it's unaffected by the length
+    # of the URL prefix.
+    csv_urls <- csv_urls[
+      grepl(
+        "^[0-9]{6}[.]csv$",
+        basename(csv_urls),
+        ignore.case = TRUE
+      )
+    ]
+
     all_dates <- substr(
       csv_urls,
       nchar(csv_urls) - 9L,
@@ -177,8 +192,18 @@ get_airfares_dates_available <- function(dom, cache = TRUE) { # nocov start
 
   } else {
 
+    # ANAC's international listings occasionally contain malformed or
+    # misplaced files (typo'd filenames, files uploaded to the wrong year,
+    # duplicate uploads with a double extension). Keep only files that
+    # actually match the expected `internacional_yyyy-mm.csv`/`.txt`
+    # naming convention -- checked against the basename so it's unaffected
+    # by the length of the URL prefix.
     csv_urls <- csv_urls[
-      nchar(csv_urls) == 55L
+      grepl(
+        "^internacional_[0-9]{4}-[0-9]{2}[.](csv|txt)$",
+        basename(csv_urls),
+        ignore.case = TRUE
+      )
     ]
 
     all_dates <- substr(
