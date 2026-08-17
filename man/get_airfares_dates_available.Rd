@@ -4,12 +4,16 @@
 \alias{get_airfares_dates_available}
 \title{Retrieve all dates available for airfares data from ANAC website}
 \usage{
-get_airfares_dates_available(dom)
+get_airfares_dates_available(dom, cache = TRUE)
 }
 \arguments{
 \item{dom}{Logical. Defaults to \code{TRUE} download airfares of domestic
 flights. If \code{FALSE}, the function downloads airfares of
 international flights.}
+
+\item{cache}{Logical. Whether the function should read cached data downloaded
+previously. Defaults to \code{TRUE}. If \code{FALSE}, the function will
+always download the data and overwrite cached data.}
 }
 \value{
 Numeric vector.

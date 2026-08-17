@@ -55,7 +55,7 @@ get_aircraft_dates_available <- function() { # nocov start
 #' @keywords internal
 #' @examples \dontrun{ if (interactive()) {
 #' # Generate url
-#' a <- get_flights_url(year=2000, month=11)
+#' a <- get_aircraft_url(202505)
 #'}}
 get_aircraft_url <- function(date = parent.frame()$date) { # nocov start
 
@@ -82,7 +82,7 @@ get_aircraft_url <- function(date = parent.frame()$date) { # nocov start
 
 #' Download and read ANAC aircraft data
 #'
-#' @param file_url String. A url passed from \code{\link{get_flights_url}}.
+#' @param file_url String. A url passed from above.
 #' @param showProgress Logical, passed from \code{\link{read_flights}}
 #' @param cache Logical, passed from \code{\link{read_flights}}
 #'

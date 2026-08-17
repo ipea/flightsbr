@@ -9,9 +9,10 @@
 #' description of all variables included in the data is available at \url{https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/Instrucoes-para-a-elaboracao-e-apresentacao-das-demonstracoes-contabeis/descricao-de-variaveis}.
 #'
 #' @param date Numeric. Date of the data in the format `yyyymm`. Defaults to
-#'             `202001`. To download the data for all months in a year, the user
-#'             can pass a 4-digit year input `yyyy`. The parameter also accepts
-#'             a vector of dates such as `c(202001, 202006, 202012)`.
+#'             the latest available month. To download the data for all months
+#'             in a year, the user can pass a 4-digit year input `yyyy`. The
+#'             parameter also accepts a vector of dates such as
+#'             `c(202001, 202006, 202012)`.
 #' @param type String. Whether the data set should be of the type `basica`
 #'             (flight stage, the default) or `combinada` (On flight origin and
 #'             destination - OFOD).
@@ -29,46 +30,60 @@
 #'
 #' f2015 <- read_flights(date = 2015)
 #'}}
-read_flights <- function(date = NULL,
-                         type = 'basica',
-                         showProgress = TRUE,
-                         select = NULL,
-                         cache = TRUE
-                         ){
+read_flights <- function(
+  date = NULL,
+  type = "basica",
+  showProgress = TRUE,
+  select = NULL,
+  cache = TRUE
+  ){
 
-### check inputs
-  if( ! type %in% c('basica', 'combinada') ){ stop(paste0("Argument 'type' must be either 'basica' or 'combinada'")) }
-  if( ! is.logical(showProgress) ){ stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE.")) }
-  if( ! is.logical(cache) ){ stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE.")) }
+  ### check inputs
+  requested_type <- match.arg(type, c("basica", "combinada"))
+
+  if (!is.logical(showProgress)) {
+    stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE."))
+  }
+  if (!is.logical(cache)) {
+    stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE."))
+  }
   check_input_date_format(date)
 
-### check date input
-  # get all dates available
-  all_dates <- get_flight_dates_available()
+  ### get files available
+  files <- get_flights_files_available(cache = cache)
+
+  if (is.null(files)) {
+    return(invisible(NULL))
+  }
+
+  # subset files: only required type
+  files <- files[type == requested_type]
+  all_dates <- files$date
+
+  ### check date input
+  if (is.null(date)) {
+    date <- max(all_dates)
+  }
+  check_date(date = date, all_dates)
+
+  # expand years to months
+  if (all(nchar(date) == 4L)) {
+    date <- generate_all_months(date)
+  }
+
+  # subset files: only required dates
+  requested_dates <- date
+  files <- files[date %in% requested_dates]
+
+  #### Download and read data
+  dt_list <- download_flights_data(files$url, showProgress, select, cache)
 
   # check if download failed
-  if (is.null(all_dates)) { return(invisible(NULL)) }
+  if (is.null(dt_list)) {
+    return(invisible(NULL))
+  }
 
-  # check dates
-  if (is.null(date)) { date <- max(all_dates) }
-  check_date(date=date, all_dates)
-
-
-#### Download and read data
-
-  # prepare url of online files
-  file_url <- get_flights_url(type=type, date=date)
-
-  # download and read data
-  dt_list <- download_flights_data(file_url,
-                                   showProgress,
-                                   select,
-                                   cache)
-
-  # check if download failed
-  if (is.null(dt)) { return(invisible(NULL)) }
-
-#### prep data
+  #### prep data
 
   # row bind data tables
   dt <- data.table::rbindlist(dt_list, fill = TRUE)
@@ -86,4 +101,3 @@ read_flights <- function(date = NULL,
 
   return(dt)
 }
-

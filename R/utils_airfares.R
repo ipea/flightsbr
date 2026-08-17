@@ -3,6 +3,7 @@
 #' @param dom Logical. Defaults to `TRUE` download airfares of domestic
 #'                 flights. If `FALSE`, the function downloads airfares of
 #'                 international flights.
+#' @template cache
 #'
 #' @return Numeric vector.
 #' @export
@@ -11,83 +12,312 @@
 #' # check dates
 #' a <- get_airfares_dates_available(domestic = TRUE)
 #'}}
-get_airfares_dates_available <- function(dom) { # nocov start
+get_airfares_dates_available <- function(dom, cache = TRUE) { # nocov start
 
-  # read html table
-  if( isTRUE(dom) ) { base_url = 'https://sas.anac.gov.br/sas/tarifadomestica/' }
-  if( isFALSE(dom)) { base_url = 'https://sas.anac.gov.br/sas/tarifainternacional/' }
+  # this function makes ~1 HTTP request per year subdirectory on ANAC's
+  # server (~25 requests). Cache the result to a session-scoped temp file
+  # so repeated calls within the same R session (e.g. several read_airfares()
+  # calls) don't repeatedly re-scrape the whole site
+  cache_file <- fs::path(
+    fs::path_temp(),
+    paste0(
+      "flightsbr_airfares_dates_",
+      if (isTRUE(dom)) "domestic" else "international",
+      ".rds"
+    )
+  )
 
-  h <- try(rvest::read_html(base_url), silent = TRUE)
+  if (isFALSE(cache) && file.exists(cache_file)) {
+    unlink(cache_file)
+  }
 
-  # check if internet connection worked
-  if (class(h)[1]=='try-error') {
+  if (isTRUE(cache) && file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  }
+
+  # base URL
+  if (isTRUE(dom)) {
+    base_url <- "https://sas.anac.gov.br/sas/tarifadomestica/"
+  } else {
+    base_url <- "https://sas.anac.gov.br/sas/tarifainternacional/"
+  }
+
+  # helper to read ANAC HTML pages. ANAC's server intermittently drops
+  # individual requests when this function has to make many of them in a
+  # row (one per year subdirectory below), so each request gets a timeout
+  # and automatic retries for transient failures (both HTTP-level, e.g.
+  # 429/503, and low-level connection failures/timeouts).
+  read_anac_html <- function(url) {
+
+    resp <- try(
+      httr2::request(url) |>
+        httr2::req_user_agent(
+          "Mozilla/5.0 (compatible; flightsbr; +https://github.com/ipea/flightsbr)"
+        ) |>
+        httr2::req_headers(
+          Accept = paste0(
+            "text/html,application/xhtml+xml,application/xml;",
+            "q=0.9,*/*;q=0.8"
+          ),
+          `Accept-Language` = "pt-BR,pt;q=0.9,en;q=0.8"
+        ) |>
+        httr2::req_timeout(30) |>
+        httr2::req_retry(max_tries = 4, retry_on_failure = TRUE) |>
+        httr2::req_perform(),
+      silent = TRUE
+    )
+
+    if (inherits(resp, "try-error")) {
+      return(NULL)
+    }
+
+    return(httr2::resp_body_html(resp))
+  }
+
+  # read main page
+  h <- read_anac_html(base_url)
+
+  if (is.null(h)) {
     message("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
-  # filter elements of basica data
-  elements <- rvest::html_elements(h, "a")
+  # get links
+  href <- h |>
+    rvest::html_elements("a") |>
+    rvest::html_attr("href")
 
-  if( isTRUE(dom) ) {
-    basica_urls <- elements[ data.table::like(elements, '/tarifadomestica/2') ]
+  # keep links to year subdirectories
+  if (isTRUE(dom)) {
+    basica_urls <- href[
+      grepl("/tarifadomestica/2", href, fixed = TRUE)
+    ]
+  } else {
+    basica_urls <- href[
+      grepl("/tarifainternacional/2", href, fixed = TRUE)
+    ]
   }
 
-  if( isFALSE(dom)) {
-    basica_urls <- elements[ data.table::like(elements, '/tarifainternacional/2') ]
-  }
+  # get years available
+  years <- gsub(
+    "[^\\d]+",
+    "",
+    basica_urls,
+    perl = TRUE
+  )
 
+  # remove missing/empty values
+  years <- years[
+    !is.na(years) &
+      nzchar(years)
+  ]
 
-  basica_urls <- lapply(X=basica_urls, FUN=function(i){rvest::html_attr(i,"href")})
-
-  # get all dates available
-  years <- gsub("[^\\d]+", "", basica_urls, perl=TRUE)
-
-  # get url of subdirectories
+  # get URLs of year subdirectories
   urls <- paste0(base_url, years)
 
-  # function to search .csv data in subdirectories
-  recursive_search <- function(i){ # i=urls[21]
+  # search for CSV/TXT files inside each year. returns NULL (as opposed to
+  # character(0)) when the request itself failed, so failures can be told
+  # apart from a year subdirectory that legitimately has no files
+  recursive_search <- function(url) {
 
-    # read html table
-    h2 <- try(rvest::read_html(i), silent = TRUE)
+    h <- read_anac_html(url)
 
-    if (class(h2)[1]=='try-error') {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))}
+    if (is.null(h)) {
+      return(NULL)
+    }
 
-    # get url of subdirectories
-    elements2 <- rvest::html_elements(h2, "a")
-    href2 <- rvest::html_attr(elements2, "href")
-    # files_all <- grep("../", href2, fixed = TRUE, value = TRUE, invert = TRUE)
-    files_csv <- href2[ data.table::like(href2, '.csv|.CSV|.txt')]
-    # temp_urls <- paste0(i, files_csv)
-    # return(temp_urls)
-    return(files_csv)
+    href <- h |>
+      rvest::html_elements("a") |>
+      rvest::html_attr("href")
+
+    files <- href[
+      grepl(
+        "\\.(csv|txt)$",
+        href,
+        ignore.case = TRUE
+      )
+    ]
+
+    return(files)
   }
 
-  # get urls of .csv files
-  csv_urls <- lapply(X=urls, FUN=recursive_search)
-  csv_urls <- unlist(csv_urls)
+  # get URLs of CSV/TXT files, one request per year subdirectory
+  csv_urls_by_year <- lapply(urls, recursive_search)
+
+  # a handful of individual year requests can still fail even after the
+  # retries in read_anac_html() -- track them instead of silently dropping
+  # them, so we can tell "ANAC is down" apart from "this year has no data"
+  failed_years <- sum(vapply(csv_urls_by_year, is.null, logical(1)))
+
+  if (failed_years == length(urls)) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
+
+  if (failed_years > 0) {
+    message(sprintf(
+      paste0(
+        "Could not reach %d of %d year(s) on the ANAC data server; the ",
+        "list of available dates may be incomplete. Please try it again."
+      ),
+      failed_years, length(urls)
+    ))
+  }
+
+  csv_urls <- unlist(csv_urls_by_year)
 
   # get all dates available
-  options(warn=-1) # suppress warnings
-  if( isTRUE(dom) ) {
-    all_dates <- substr(csv_urls , (nchar(csv_urls ) + 1) -10, nchar(csv_urls )-4 ) }
+  if (isTRUE(dom)) {
 
-  if( isFALSE(dom)) {
-    csv_urls <- csv_urls[ nchar(csv_urls)==55 ]
-    all_dates <- substr(csv_urls , (nchar(csv_urls ) + 1) -11, nchar(csv_urls )-4 )
-    all_dates <- gsub("[-]", "", all_dates)
+    # ANAC's domestic listings occasionally contain malformed, duplicate,
+    # or misplaced files (alternate naming like `yyyy-mm.csv`, re-uploads
+    # with `%20(1)` appended, stray .txt files, alternate-tariff variants
+    # like `tarifa_N_yyyymm.csv`). Keep only files that actually match the
+    # `yyyymm.csv` naming convention that get_airfares_url() builds URLs
+    # from, checked against the basename so it's unaffected by the length
+    # of the URL prefix.
+    csv_urls <- csv_urls[
+      grepl(
+        "^[0-9]{6}[.]csv$",
+        basename(csv_urls),
+        ignore.case = TRUE
+      )
+    ]
+
+    all_dates <- substr(
+      csv_urls,
+      nchar(csv_urls) - 9L,
+      nchar(csv_urls) - 4L
+    )
+
+  } else {
+
+    # ANAC's international listings occasionally contain malformed or
+    # misplaced files (typo'd filenames, files uploaded to the wrong year,
+    # duplicate uploads with a double extension). Keep only files that
+    # actually match the expected `internacional_yyyy-mm.csv`/`.txt`
+    # naming convention -- checked against the basename so it's unaffected
+    # by the length of the URL prefix.
+    csv_urls <- csv_urls[
+      grepl(
+        "^internacional_[0-9]{4}-[0-9]{2}[.](csv|txt)$",
+        basename(csv_urls),
+        ignore.case = TRUE
+      )
+    ]
+
+    all_dates <- substr(
+      csv_urls,
+      nchar(csv_urls) - 10L,
+      nchar(csv_urls) - 4L
+    )
+
+    all_dates <- gsub(
+      "-",
+      "",
+      all_dates,
+      fixed = TRUE
+    )
   }
 
-  all_dates <- as.numeric(all_dates)
-  all_dates <- all_dates[ ! is.na(all_dates)]
-  options(warn=0) # unsuppress warnings
+  all_dates <- suppressWarnings(
+    as.numeric(all_dates)
+  )
+
+  all_dates <- all_dates[
+    !is.na(all_dates)
+  ]
+
+  # keep the contract strict: callers only need to check is.null() to
+  # detect failure, never an empty-but-non-null vector
+  if (length(all_dates) == 0) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
+
+  saveRDS(all_dates, cache_file)
 
   return(all_dates)
 } # nocov end
 
 
+    # get_airfares_dates_available <- function(dom) { # nocov start
+    #
+    # # read html table
+    # if( isTRUE(dom) ) { base_url = 'https://sas.anac.gov.br/sas/tarifadomestica/' }
+    # if( isFALSE(dom)) { base_url = 'https://sas.anac.gov.br/sas/tarifainternacional/' }
+    #
+    # h <- try(rvest::read_html(base_url), silent = TRUE)
+    #
+    # # check if internet connection worked
+    # if (class(h)[1]=='try-error') {
+    #   message("Problem connecting to ANAC data server. Please try it again.")
+    #   return(invisible(NULL))
+    # }
+    #
+    # # filter elements of basica data
+    # elements <- rvest::html_elements(h, "a")
+    #
+    # if( isTRUE(dom) ) {
+    #   basica_urls <- elements[ data.table::like(elements, '/tarifadomestica/2') ]
+    # }
+    #
+    # if( isFALSE(dom)) {
+    #   basica_urls <- elements[ data.table::like(elements, '/tarifainternacional/2') ]
+    # }
+    #
+    #
+    # basica_urls <- lapply(X=basica_urls, FUN=function(i){rvest::html_attr(i,"href")})
+    #
+    # # get all dates available
+    # years <- gsub("[^\\d]+", "", basica_urls, perl=TRUE)
+    #
+    # # get url of subdirectories
+    # urls <- paste0(base_url, years)
+    #
+    # # function to search .csv data in subdirectories
+    # recursive_search <- function(i){ # i=urls[21]
+    #
+    #   # read html table
+    #   h2 <- try(rvest::read_html(i), silent = TRUE)
+    #
+    #   if (class(h2)[1]=='try-error') {
+    #     message("Problem connecting to ANAC data server. Please try it again.")
+    #     return(invisible(NULL))}
+    #
+    #   # get url of subdirectories
+    #   elements2 <- rvest::html_elements(h2, "a")
+    #   href2 <- rvest::html_attr(elements2, "href")
+    #   # files_all <- grep("../", href2, fixed = TRUE, value = TRUE, invert = TRUE)
+    #   files_csv <- href2[ data.table::like(href2, '.csv|.CSV|.txt')]
+    #   # temp_urls <- paste0(i, files_csv)
+    #   # return(temp_urls)
+    #   return(files_csv)
+    # }
+    #
+    # # get urls of .csv files
+    # csv_urls <- lapply(X=urls, FUN=recursive_search)
+    # csv_urls <- unlist(csv_urls)
+    #
+    # # get all dates available
+    # options(warn=-1) # suppress warnings
+    # if( isTRUE(dom) ) {
+    #   all_dates <- substr(csv_urls , (nchar(csv_urls ) + 1) -10, nchar(csv_urls )-4 ) }
+    #
+    # if( isFALSE(dom)) {
+    #   csv_urls <- csv_urls[ nchar(csv_urls)==55 ]
+    #   all_dates <- substr(csv_urls , (nchar(csv_urls ) + 1) -11, nchar(csv_urls )-4 )
+    #   all_dates <- gsub("[-]", "", all_dates)
+    # }
+    #
+    # all_dates <- as.numeric(all_dates)
+    # all_dates <- all_dates[ ! is.na(all_dates)]
+    # options(warn=0) # unsuppress warnings
+    #
+    # return(all_dates)
+    # } # nocov end
+    #
+    #
 
 #' Put together the url of airfare data files
 #'
@@ -169,7 +399,7 @@ get_airfares_url <- function(dom,
 
 #' Download and read ANAC air fares data
 #'
-#' @param file_urls String. A url passed from \code{\link{get_flights_url}}.
+#' @param file_urls String. A url passed from above.
 #' @template showProgress
 #' @template select
 #' @template cache
@@ -228,6 +458,7 @@ download_airfares_data <- function(file_urls = parent.frame()$file_urls,
 
                             # read
                             temp_x <- data.table::fread(x,
+                                                        select = select,
                                                         showProgress = showProgress,
                                                         encoding = 'Latin-1',
                                                         colClasses = 'character',

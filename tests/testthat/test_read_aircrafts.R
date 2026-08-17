@@ -5,26 +5,22 @@ skip_if(Sys.getenv("TEST_ONE") != "")
 testthat::skip_on_cran()
 
 
-# Reading the data -----------------------
+# ERRORS and messages  -----------------------
 
 testthat::test_that("read_aircrafts", {
 
-  test1 <- read_aircrafts(showProgress = FALSE)
+  testthat::expect_error(
+    read_aircrafts(showProgress = FALSE)
+    )
 
-  # (default), one month, basica, progress
-  testthat::expect_true(is(test1, "data.table") | is.null(test1))
-  testthat::expect_true(nrow(test1) > 0)
+  testthat::expect_error(
+    read_aircrafts(showProgress = TRUE)
+    )
 
-  testthat::expect_true(is(read_aircrafts(showProgress = TRUE), "data.table"))
-  testthat::expect_equal(names(read_aircrafts())[1], 'marca')
+  testthat::expect_error(
+    read_aircrafts(date = c(202001, 202005))
+  )
 
-  # test vector of dates
-  test3 <- read_aircrafts(date = c(202001, 202005), showProgress = FALSE)
-  testthat::expect_true(is(test3, "data.table") | is.null(test3))
-
-  # # test date all months in a year
-  # test2 <- read_aircrafts(date = 2020, showProgress = FALSE)
-  # testthat::expect_true(is(test2, "data.table") | is.null(test2))
 })
 
 
@@ -52,17 +48,4 @@ testthat::test_that("read_aircrafts", {
   testthat::expect_error(read_aircrafts(cache=3))
 
 })
-
-# # mock test
-# testthat::test_that("internet problem: throws informative message", {
-#
-#   testthat::local_mocked_bindings(
-#     download_flightsbr_file = function(...) NULL
-#   )
-#
-#   testthat::expect_message( read_aircrafts() )
-#   testthat::expect_null( read_aircrafts() )
-# })
-
-
 

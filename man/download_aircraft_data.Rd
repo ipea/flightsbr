@@ -11,7 +11,7 @@ download_aircraft_data(
 )
 }
 \arguments{
-\item{file_url}{String. A url passed from \code{\link{get_flights_url}}.}
+\item{file_url}{String. A url passed from above.}
 
 \item{showProgress}{Logical, passed from \code{\link{read_flights}}}
 

@@ -12,7 +12,7 @@ download_airfares_data(
 )
 }
 \arguments{
-\item{file_urls}{String. A url passed from \code{\link{get_flights_url}}.}
+\item{file_urls}{String. A url passed from above.}
 
 \item{showProgress}{Logical. Defaults to \code{TRUE} display progress.}
 

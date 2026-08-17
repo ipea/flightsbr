@@ -9,3 +9,6 @@
 ^\.github$
 ^doc$
 Thumbs.db
+^\.claude$
+^quality_reports$
+^templates$

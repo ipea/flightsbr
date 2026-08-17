@@ -39,6 +39,9 @@ latest_airfares_date <- function(dom=TRUE){ # nocov start
   # get all dates available
   all_dates <- get_airfares_dates_available(dom)
 
+  # check if download failed
+  if (is.null(all_dates)) { return(invisible(NULL)) }
+
   # find latest date
   latest_date <- max(all_dates)
   return(latest_date)

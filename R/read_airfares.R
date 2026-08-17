@@ -16,8 +16,7 @@
 #' @template select
 #' @template cache
 
-#' @return A `"data.table" "data.frame"` object. All columns are returned with
-#'         `class` of type `"character"`.
+#' @return A `"data.table" "data.frame"` object.
 #' @export
 #' @family download air fares data
 #' @examples \dontrun{ if (interactive()) {
@@ -26,42 +25,55 @@
 #'
 #' af_2015 <- read_airfares(date = 2015, domestic = TRUE)
 #'}}
-read_airfares <- function(date = NULL,
-                          domestic = TRUE,
-                          showProgress = TRUE,
-                          select = NULL,
-                          cache = TRUE
-                          ){
-
-
+read_airfares <- function(
+  date = NULL,
+  domestic = TRUE,
+  showProgress = TRUE,
+  select = NULL,
+  cache = TRUE
+) {
   ### check inputs
-  if( ! is.logical(domestic) ){ stop(paste0("Argument 'domestic' must be either 'TRUE' or 'FALSE.")) }
-  if( ! is.logical(showProgress) ){ stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE.")) }
-  if( ! is.logical(cache) ){ stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE.")) }
+  if (!is.logical(domestic)) {
+    stop(paste0("Argument 'domestic' must be either 'TRUE' or 'FALSE'."))
+  }
+  if (!is.logical(showProgress)) {
+    stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE'."))
+  }
+  if (!is.logical(cache)) {
+    stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE'."))
+  }
   check_input_date_format(date)
 
   ### check date input
   # get all dates available
-  all_dates <- get_airfares_dates_available(dom = domestic)
-
+  all_dates <- get_airfares_dates_available(dom = domestic, cache = cache)
 
   # check if download failed
-  if (is.null(all_dates)) { return(invisible(NULL)) }
+  if (is.null(all_dates)) {
+    return(invisible(NULL))
+  }
 
   # check dates
-  if (is.null(date)) { date <- max(all_dates) }
-  check_date(date=date, all_dates)
+  if (is.null(date)) {
+    date <- max(all_dates)
+  }
+  check_date(date = date, all_dates)
 
   # prepare address of online data
   file_urls <- get_airfares_url(dom = domestic, date)
 
   # download and read data
-  dt <- download_airfares_data(file_urls = file_urls,
-                               showProgress = showProgress,
-                               cache = cache)
+  dt <- download_airfares_data(
+    file_urls = file_urls,
+    showProgress = showProgress,
+    select = select,
+    cache = cache
+  )
 
   # check if download failed
-  if (is.null(dt)) { return(invisible(NULL)) }
+  if (is.null(dt)) {
+    return(invisible(NULL))
+  }
 
   # clean names
   nnn <- names(dt)
@@ -72,8 +84,7 @@ read_airfares <- function(date = NULL,
   )
 
   # convert columns to numeric
-  convert_to_numeric(dt, type='airfare')
+  convert_to_numeric(dt, type = 'airfare')
 
   return(dt)
 }
-

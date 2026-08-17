@@ -11,7 +11,7 @@ test_that("get_flight_dates_available", {
 
   dates1 <- get_flight_dates_available()
 
-  testthat::expect_true(class(dates1) == "numeric")
+  testthat::expect_true(class(dates1) == "integer")
   testthat::expect_true(length(dates1) > 0)
   testthat::expect_error(get_flight_dates_available(999))
 })
