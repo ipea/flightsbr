@@ -4,12 +4,16 @@
 \alias{get_flight_dates_available}
 \title{Retrieve all dates available for flights data from ANAC website}
 \usage{
-get_flight_dates_available(type = NULL)
+get_flight_dates_available(type = NULL, cache = TRUE)
 }
 \arguments{
 \item{type}{String. Whether the data set should be of the type \code{basica}
 (flight stage, the default) or \code{combinada} (On flight origin and
 destination - OFOD).}
+
+\item{cache}{Logical. Whether the function should read cached data downloaded
+previously. Defaults to \code{TRUE}. If \code{FALSE}, the function will
+always download the data and overwrite cached data.}
 }
 \value{
 Numeric vector.

@@ -46,7 +46,7 @@ read_airfares <- function(
 
   ### check date input
   # get all dates available
-  all_dates <- get_airfares_dates_available(dom = domestic)
+  all_dates <- get_airfares_dates_available(dom = domestic, cache = cache)
 
   # check if download failed
   if (is.null(all_dates)) {

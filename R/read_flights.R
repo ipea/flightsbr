@@ -50,7 +50,7 @@ read_flights <- function(
   check_input_date_format(date)
 
   ### get files available
-  files <- get_flights_files_available()
+  files <- get_flights_files_available(cache = cache)
 
   if (is.null(files)) {
     return(invisible(NULL))

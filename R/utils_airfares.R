@@ -3,6 +3,7 @@
 #' @param dom Logical. Defaults to `TRUE` download airfares of domestic
 #'                 flights. If `FALSE`, the function downloads airfares of
 #'                 international flights.
+#' @template cache
 #'
 #' @return Numeric vector.
 #' @export
@@ -11,7 +12,28 @@
 #' # check dates
 #' a <- get_airfares_dates_available(domestic = TRUE)
 #'}}
-get_airfares_dates_available <- function(dom) { # nocov start
+get_airfares_dates_available <- function(dom, cache = TRUE) { # nocov start
+
+  # this function makes ~1 HTTP request per year subdirectory on ANAC's
+  # server (~25 requests). Cache the result to a session-scoped temp file
+  # so repeated calls within the same R session (e.g. several read_airfares()
+  # calls) don't repeatedly re-scrape the whole site
+  cache_file <- fs::path(
+    fs::path_temp(),
+    paste0(
+      "flightsbr_airfares_dates_",
+      if (isTRUE(dom)) "domestic" else "international",
+      ".rds"
+    )
+  )
+
+  if (isFALSE(cache) && file.exists(cache_file)) {
+    unlink(cache_file)
+  }
+
+  if (isTRUE(cache) && file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  }
 
   # base URL
   if (isTRUE(dom)) {
@@ -187,6 +209,8 @@ get_airfares_dates_available <- function(dom) { # nocov start
     message("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
+
+  saveRDS(all_dates, cache_file)
 
   return(all_dates)
 } # nocov end

@@ -34,8 +34,7 @@ previously. Defaults to \code{TRUE}. If \code{FALSE}, the function will
 always download the data and overwrite cached data.}
 }
 \value{
-A \verb{"data.table" "data.frame"} object. All columns are returned with
-\code{class} of type \code{"character"}.
+A \verb{"data.table" "data.frame"} object.
 }
 \description{
 Download data on air fares of domestic and international flights in Brazil.

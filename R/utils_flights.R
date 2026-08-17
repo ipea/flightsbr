@@ -3,9 +3,23 @@
 
 #' Retrieve flight files available from the ANAC website
 #'
+#' @template cache
 #' @return A data.table with columns `date`, `type`, and `url`.
 #' @keywords internal
-get_flights_files_available <- function() { # nocov start
+get_flights_files_available <- function(cache = TRUE) { # nocov start
+
+  # cache the scraped file listing to a session-scoped temp file so
+  # repeated calls within the same R session (e.g. several read_flights()
+  # calls) don't repeatedly re-scrape the ANAC page
+  cache_file <- fs::path(fs::path_temp(), "flightsbr_flights_files.rds")
+
+  if (isFALSE(cache) && file.exists(cache_file)) {
+    unlink(cache_file)
+  }
+
+  if (isTRUE(cache) && file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  }
 
   url <- paste0(
     "https://www.gov.br/anac/pt-br/assuntos/regulados/empresas-aereas/",
@@ -118,6 +132,11 @@ get_flights_files_available <- function() { # nocov start
 
   files <- unique(files)
 
+  # don't cache an empty/partial result -- let the next call retry the scrape
+  if (nrow(files) > 0) {
+    saveRDS(files, cache_file)
+  }
+
   return(files)
 } # nocov end
 
@@ -129,6 +148,7 @@ get_flights_files_available <- function() { # nocov start
 #' @param type String. Whether the data set should be of the type `basica`
 #'             (flight stage, the default) or `combinada` (On flight origin and
 #'             destination - OFOD).
+#' @template cache
 #' @return Numeric vector.
 #' @export
 #' @keywords internal
@@ -136,7 +156,7 @@ get_flights_files_available <- function() { # nocov start
 #' # check dates
 #' a <- get_flight_dates_available()
 #'}}
-get_flight_dates_available <- function(type = NULL) {
+get_flight_dates_available <- function(type = NULL, cache = TRUE) {
   # nocov start
 
   if (!is.null(type)) {
@@ -145,7 +165,7 @@ get_flight_dates_available <- function(type = NULL) {
     requested_type <- NULL
   }
 
-  files <- get_flights_files_available()
+  files <- get_flights_files_available(cache = cache)
 
   if (is.null(files)) {
     return(invisible(NULL))
