@@ -21,7 +21,6 @@ Depends:
     R (>= 2.10)
 Imports:
       archive,
-      curl (>= 5.0.0),
       data.table (>= 1.14.0),
       fs,
       httr2,
