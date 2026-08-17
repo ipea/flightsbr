@@ -32,7 +32,12 @@ Download and read ANAC flight data
 file_url <- get_flights_files_available()$url[1]
 
 # download data
-a <- download_flights_data(file_url=file_url, showProgress=TRUE, select=NULL)
+a <- download_flights_data(
+  file_url=file_url,
+  showProgress=TRUE,
+  select=NULL,
+  cache=TRUE
+  )
 }}
 }
 \keyword{internal}

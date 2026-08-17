@@ -181,7 +181,12 @@ get_flight_dates_available <- function(type = NULL) {
 #' file_url <- get_flights_files_available()$url[1]
 #'
 #' # download data
-#' a <- download_flights_data(file_url=file_url, showProgress=TRUE, select=NULL)
+#' a <- download_flights_data(
+#'   file_url=file_url,
+#'   showProgress=TRUE,
+#'   select=NULL,
+#'   cache=TRUE
+#'   )
 #'}}
 download_flights_data <- function(file_url = parent.frame()$file_url,
                                   showProgress = parent.frame()$showProgress,
