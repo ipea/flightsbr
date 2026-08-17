@@ -377,6 +377,7 @@ download_airfares_data <- function(file_urls = parent.frame()$file_urls,
 
                             # read
                             temp_x <- data.table::fread(x,
+                                                        select = select,
                                                         showProgress = showProgress,
                                                         encoding = 'Latin-1',
                                                         colClasses = 'character',

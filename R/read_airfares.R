@@ -58,6 +58,7 @@ read_airfares <- function(date = NULL,
   # download and read data
   dt <- download_airfares_data(file_urls = file_urls,
                                showProgress = showProgress,
+                               select = select,
                                cache = cache)
 
   # check if download failed
