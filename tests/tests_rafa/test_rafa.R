@@ -358,3 +358,34 @@ beepr::beep()
 
 
 
+replace
+    temp_dt <- data.table::fread(fs::path(temp_local_dir, file_name),
+                                 select = select,
+                                 showProgress = showProgress,
+                                 colClasses = 'character',
+                                 sep = ';',
+                                 encoding = 'Latin-1')
+
+
+
+with
+
+
+duckplyr::read_csv_duckdb(
+  c(path_csv1, path_csv2),
+  options = list(
+    delim = ";",
+    encoding = "latin-1",
+    all_varchar = TRUE,
+    union_by_name = TRUE
+  ))
+
+
+# planos para o pacote
+- adicionar pasta de cache entre secoes
+  - checar se arquivo online eh mais recente que o local
+- usar duckplyr para ler e retornar lazy duckdb
+ - funcao de unzip aplica para todas url e retorna caminho para os file paths
+
+
+
