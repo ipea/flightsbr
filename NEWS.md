@@ -15,6 +15,10 @@
   * Fixed `get_airfares_dates_available()` and `latest_airfares_date()` to fail cleanly with `NULL` when ANAC can't be reached, instead of occasionally producing a nonsensical "data available between Inf and -Inf" error, or `-Inf` as a date.
   * Replaced a brittle hardcoded filename-length check (`nchar == 55`) used to filter valid international airfare files listed by ANAC with an explicit filename-pattern check, and added the equivalent check to the domestic airfare listing (which previously had no filter at all). This guards against malformed, duplicate, or misplaced files that ANAC occasionally publishes (e.g. typo'd names, files uploaded to the wrong year, re-uploads with `(1)` appended) corrupting the list of available dates.
 
+* New contributors
+
+  * Arthur Bazolli
+
 
 # flightsbr v1.1.1
 
@@ -25,7 +29,7 @@
 
 * Major changes:
   * The default of all `read_` functions now is to download data from the latest date available.
-  * The function `read_aircrafts()` is now deprecated in favor of `read_aircraft()` simply to fix a typo in the function name. The behavior and outputs are identical. Closes [#45](https://github.com/ipeaGIT/flightsbr/issues/45)
+  * The function `read_aircrafts()` is now deprecated in favor of `read_aircraft()` simply to fix a typo in the function name. The behavior and outputs are identical. Closes [#45](https://github.com/ipea/flightsbr/issues/45)
 
 * CRAN policy:
   * updaed DESCRIPTION file removing 'NeedsCompilation'
@@ -34,12 +38,12 @@
 
 * Breaking changes:
   * The names of all columns in the data outputs are now cleanned with {janitor}
-  * Function `read_airports()` now downloads v2 version of public airports data. Closes [#41](https://github.com/ipeaGIT/flightsbr/issues/41)
+  * Function `read_airports()` now downloads v2 version of public airports data. Closes [#41](https://github.com/ipea/flightsbr/issues/41)
 
 * Major changes:
-  * Function `read_airfares()` is working again. Closes [#30](https://github.com/ipeaGIT/flightsbr/issues/30). The prices of air tickets are now returned as numeric.
-  * Function `read_flights()` with fixed decimal values in numeric columns. Closes [#43](https://github.com/ipeaGIT/flightsbr/issues/43)
-  * Function `read_airports()` with fixed numeric values for `"altitude"` column. Closes [#42](https://github.com/ipeaGIT/flightsbr/issues/42)
+  * Function `read_airfares()` is working again. Closes [#30](https://github.com/ipea/flightsbr/issues/30). The prices of air tickets are now returned as numeric.
+  * Function `read_flights()` with fixed decimal values in numeric columns. Closes [#43](https://github.com/ipea/flightsbr/issues/43)
+  * Function `read_airports()` with fixed numeric values for `"altitude"` column. Closes [#42](https://github.com/ipea/flightsbr/issues/42)
     
 * Minor changes:
   * Internally check of the consistency of date inputs. The date input must be consistent in either a 6-digit format `yyyymm` OR a 4-digit format `yyyy`.
@@ -85,7 +89,7 @@
 # flightsbr v0.3.0
 
 * Major changes:
-  * Function read_airfares() is temporarily  unavailable. See issue [#30](https://github.com/ipeaGIT/flightsbr/issues/30) 
+  * Function read_airfares() is temporarily  unavailable. See issue [#30](https://github.com/ipea/flightsbr/issues/30) 
 
 * Minor changes:
   * Function `read_flights()` now accepts a vector of dates. Closed #29.
@@ -109,11 +113,11 @@
 
 * Major changes:
   * Update urls to new location where flights data is stored. This makes `read_flights()` work again.
-  * New function `read_airfares()` to read data on airfares of domestic and international flights [Closed #22](https://github.com/ipeaGIT/flightsbr/issues/22).
+  * New function `read_airfares()` to read data on airfares of domestic and international flights [Closed #22](https://github.com/ipea/flightsbr/issues/22).
 
 * Minor changes:
-  * The data downloaded in `read_flights()` and `read_airport_movements()` are now cached in temp dir. Closed [#20](https://github.com/ipeaGIT/flightsbr/issues/21).
-  * All columns are now returned with class `character`. This fixes a bug in the `read_airport_movements()` function. Closed [#20](https://github.com/ipeaGIT/flightsbr/issues/20).
+  * The data downloaded in `read_flights()` and `read_airport_movements()` are now cached in temp dir. Closed [#20](https://github.com/ipea/flightsbr/issues/21).
+  * All columns are now returned with class `character`. This fixes a bug in the `read_airport_movements()` function. Closed [#20](https://github.com/ipea/flightsbr/issues/20).
 
 
 
@@ -127,8 +131,8 @@
 # flightsbr v0.1.1
 
 * Bug fixes:
-  * functions `read_flights()` and `read_airport_movements()` no longer have side effects on objects named `month` and `year` on the global environment. The `split_date()` support function was removed from the package. [Closed #17](https://github.com/ipeaGIT/flightsbr/issues/17).
-  * `read_` functions now try to download for a 2nd time if the 1st attempt failed. This will help overcome a small issue with the instability of ANAC data links. [Closed #18](https://github.com/ipeaGIT/flightsbr/issues/18).
+  * functions `read_flights()` and `read_airport_movements()` no longer have side effects on objects named `month` and `year` on the global environment. The `split_date()` support function was removed from the package. [Closed #17](https://github.com/ipea/flightsbr/issues/17).
+  * `read_` functions now try to download for a 2nd time if the 1st attempt failed. This will help overcome a small issue with the instability of ANAC data links. [Closed #18](https://github.com/ipea/flightsbr/issues/18).
   * Using a simpler / slightly faster version of `latlon_to_numeric()` with suppressed warnings.
   * Update package citation, adding OSF preprint DOI.
 
@@ -136,12 +140,12 @@
 # flightsbr v0.1.0
 
 * Major changes:
-  * New function `read_aircraft()` to read data on all aircraft registered in the Brazilian Aeronautical Registry (Registro Aeronáutico Brasileiro - RAB) [Closed #14](https://github.com/ipeaGIT/flightsbr/issues/14).
-  * New function `read_airports()` to read data on all public and private airports. [Closed #4](https://github.com/ipeaGIT/flightsbr/issues/4) and [Closed #9](https://github.com/ipeaGIT/flightsbr/issues/9).
-  * New function `latest_flights_date()` to check the date of the latest flight data available. [Closed #16](https://github.com/ipeaGIT/flightsbr/issues/16).
-  * New function `read_airport_movements()` to download data on airport movements. [Closed #15](https://github.com/ipeaGIT/flightsbr/issues/15).
-  * Function `read_flights()` now takes `date` input in the format `yyyymm` or `yyyy`. When the date input is a 4-digit number, the function now downloads data of all months in that year. [Closed #1](https://github.com/ipeaGIT/flightsbr/issues/1).
-  * Function `read_flights()` now automatically detects and checks the latest flights data available. [Closed #13](https://github.com/ipeaGIT/flightsbr/issues/13).
+  * New function `read_aircraft()` to read data on all aircraft registered in the Brazilian Aeronautical Registry (Registro Aeronáutico Brasileiro - RAB) [Closed #14](https://github.com/ipea/flightsbr/issues/14).
+  * New function `read_airports()` to read data on all public and private airports. [Closed #4](https://github.com/ipea/flightsbr/issues/4) and [Closed #9](https://github.com/ipea/flightsbr/issues/9).
+  * New function `latest_flights_date()` to check the date of the latest flight data available. [Closed #16](https://github.com/ipea/flightsbr/issues/16).
+  * New function `read_airport_movements()` to download data on airport movements. [Closed #15](https://github.com/ipea/flightsbr/issues/15).
+  * Function `read_flights()` now takes `date` input in the format `yyyymm` or `yyyy`. When the date input is a 4-digit number, the function now downloads data of all months in that year. [Closed #1](https://github.com/ipea/flightsbr/issues/1).
+  * Function `read_flights()` now automatically detects and checks the latest flights data available. [Closed #13](https://github.com/ipea/flightsbr/issues/13).
   * new internal support functions:
     * `split_date()`: Split a date from yyyymmm to year yyyy and month mm
     * `check_date()`: Check whether date input is acceptable
@@ -157,9 +161,9 @@
 
 * Minor changes:
   * new parameter `select` in `read_flights()`, allowing the user to specify the columns that should be read.
-  * new tests of `read_flights()`. Coverage of 95.24%. [Closed #5](https://github.com/ipeaGIT/flightsbr/issues/5).
-  * New checks on `date` input. [Closed #2](https://github.com/ipeaGIT/flightsbr/issues/2).
-  * Functions now should fail gracefully in case of problems with internet connection. [Closed #7](https://github.com/ipeaGIT/flightsbr/issues/7).
+  * new tests of `read_flights()`. Coverage of 95.24%. [Closed #5](https://github.com/ipea/flightsbr/issues/5).
+  * New checks on `date` input. [Closed #2](https://github.com/ipea/flightsbr/issues/2).
+  * Functions now should fail gracefully in case of problems with internet connection. [Closed #7](https://github.com/ipea/flightsbr/issues/7).
 
 
 

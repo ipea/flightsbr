@@ -8,7 +8,7 @@
 #'
 #' @section Usage:
 #' Please check the vignettes and data documentation on the
-#' [website](https://ipeagit.github.io/flightsbr/).
+#' [website](https://ipea.github.io/flightsbr/).
 #'
 #' @docType package
 #' @name flightsbr
