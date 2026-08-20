@@ -5,13 +5,15 @@
 - **Rafael H. M. Pereira**. Author, maintainer.
   [](https://orcid.org/0000-0003-2125-7465)
 
+- **Arthur Bazolli**. Contributor.
+
 - **Ipea - Institute for Applied Economic Research**. Copyright holder,
   funder.
 
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/ipeaGIT/flightsbr/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/ipea/flightsbr/blob/main/inst/CITATION)
 
 Pereira, R.H.M. (2022). flightsbr: Download Flight and Airport Data from
 Brazil. R package (Version 0.2.0). OSF Preprints.

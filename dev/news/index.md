@@ -1,6 +1,6 @@
 # Changelog
 
-## flightsbr v1.2.0 DEV
+## flightsbr v1.2.0
 
 - Minor changes:
 
@@ -58,6 +58,10 @@
     to the wrong year, re-uploads with `(1)` appended) corrupting the
     list of available dates.
 
+- New contributors
+
+  - Arthur Bazolli
+
 ## flightsbr v1.1.1
 
 CRAN release: 2025-07-24
@@ -80,7 +84,7 @@ CRAN release: 2025-05-19
     [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
     simply to fix a typo in the function name. The behavior and outputs
     are identical. Closes
-    [\#45](https://github.com/ipeaGIT/flightsbr/issues/45)
+    [\#45](https://github.com/ipea/flightsbr/issues/45)
 - CRAN policy:
   - updaed DESCRIPTION file removing ‘NeedsCompilation’
 
@@ -94,21 +98,21 @@ CRAN release: 2024-10-22
   - Function
     [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)
     now downloads v2 version of public airports data. Closes
-    [\#41](https://github.com/ipeaGIT/flightsbr/issues/41)
+    [\#41](https://github.com/ipea/flightsbr/issues/41)
 - Major changes:
   - Function
     [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md)
     is working again. Closes
-    [\#30](https://github.com/ipeaGIT/flightsbr/issues/30). The prices
-    of air tickets are now returned as numeric.
+    [\#30](https://github.com/ipea/flightsbr/issues/30). The prices of
+    air tickets are now returned as numeric.
   - Function
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
     with fixed decimal values in numeric columns. Closes
-    [\#43](https://github.com/ipeaGIT/flightsbr/issues/43)
+    [\#43](https://github.com/ipea/flightsbr/issues/43)
   - Function
     [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)
     with fixed numeric values for `"altitude"` column. Closes
-    [\#42](https://github.com/ipeaGIT/flightsbr/issues/42)
+    [\#42](https://github.com/ipea/flightsbr/issues/42)
 - Minor changes:
   - Internally check of the consistency of date inputs. The date input
     must be consistent in either a 6-digit format `yyyymm` OR a 4-digit
@@ -159,7 +163,7 @@ CRAN release: 2024-04-23
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
     function now uses `fread(encoding = 'Latin-1')` internally to avoid
     issues with encoding. Closed
-    [\#35](https://github.com/ipeaGIT/flightsbr/issues/35).
+    [\#35](https://github.com/ipea/flightsbr/issues/35).
   - The function
     [`get_airport_movement_dates_available()`](https://ipeagit.github.io/flightsbr/dev/reference/get_airport_movement_dates_available.md)
     does not throw warnings of `NA` values anymore.
@@ -179,23 +183,22 @@ CRAN release: 2023-12-04
     [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
     now have a new parameter `cache`, which indicates whether the
     function should read cached data downloaded previously. Defaults to
-    `TRUE`. Closed
-    [\#31](https://github.com/ipeaGIT/flightsbr/issues/31).
+    `TRUE`. Closed [\#31](https://github.com/ipea/flightsbr/issues/31).
   - The function
     [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
     now has a `date` parameter, which allows one to download the data on
     aircraft registered at ANAC at particular years/months. Closed
-    [\#33](https://github.com/ipeaGIT/flightsbr/issues/33).
+    [\#33](https://github.com/ipea/flightsbr/issues/33).
 - Minor changes:
   - All functions now return numeric columns with `numeric` class.
-    Closed [\#32](https://github.com/ipeaGIT/flightsbr/issues/32).
+    Closed [\#32](https://github.com/ipea/flightsbr/issues/32).
 - Bug fixes:
   - Fixed bug when unzipping files for
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
     function in Unix systems. Closed
-    [\#31](https://github.com/ipeaGIT/flightsbr/issues/31).
+    [\#31](https://github.com/ipea/flightsbr/issues/31).
   - Updated link to private airports data changed by ANAC. Closed
-    [\#34](https://github.com/ipeaGIT/flightsbr/issues/34).
+    [\#34](https://github.com/ipea/flightsbr/issues/34).
 
 ## flightsbr v0.3.0
 
@@ -203,20 +206,20 @@ CRAN release: 2023-06-29
 
 - Major changes:
   - Function read_airfares() is temporarily unavailable. See issue
-    [\#30](https://github.com/ipeaGIT/flightsbr/issues/30)
+    [\#30](https://github.com/ipea/flightsbr/issues/30)
 - Minor changes:
   - Function
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
     now accepts a vector of dates. Closed
-    [\#29](https://github.com/ipeaGIT/flightsbr/issues/29).
+    [\#29](https://github.com/ipea/flightsbr/issues/29).
 - Bug fixes:
   - Fixed broken link for data dictionary for airport movement data
   - Fixed code to rbindlist air fares from multiple years. Closed
-    [\#26](https://github.com/ipeaGIT/flightsbr/issues/26).
+    [\#26](https://github.com/ipea/flightsbr/issues/26).
   - Fixed code to read a few dates that were not caught in
     [`get_airfares_dates_available()`](https://ipeagit.github.io/flightsbr/dev/reference/get_airfares_dates_available.md)
     because of “.CSV” in ANAC url. Closed
-    [\#27](https://github.com/ipeaGIT/flightsbr/issues/27).
+    [\#27](https://github.com/ipea/flightsbr/issues/27).
   - Fixed code to use
     [`get_airport_movement_dates_available()`](https://ipeagit.github.io/flightsbr/dev/reference/get_airport_movement_dates_available.md)
 
@@ -241,20 +244,20 @@ CRAN release: 2022-05-05
   - New function
     [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md)
     to read data on airfares of domestic and international flights
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/22)
-    [\#22](https://github.com/ipeaGIT/flightsbr/issues/22).
+    [Closed](https://github.com/ipea/flightsbr/issues/22)
+    [\#22](https://github.com/ipea/flightsbr/issues/22).
 - Minor changes:
   - The data downloaded in
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
     and
     [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
     are now cached in temp dir. Closed
-    [\#20](https://github.com/ipeaGIT/flightsbr/issues/21).
+    [\#20](https://github.com/ipea/flightsbr/issues/21).
   - All columns are now returned with class `character`. This fixes a
     bug in the
     [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
     function. Closed
-    [\#20](https://github.com/ipeaGIT/flightsbr/issues/20).
+    [\#20](https://github.com/ipea/flightsbr/issues/20).
 
 ## flightsbr v0.1.2
 
@@ -275,13 +278,13 @@ CRAN release: 2022-03-06
     no longer have side effects on objects named `month` and `year` on
     the global environment. The `split_date()` support function was
     removed from the package.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/17)
-    [\#17](https://github.com/ipeaGIT/flightsbr/issues/17).
+    [Closed](https://github.com/ipea/flightsbr/issues/17)
+    [\#17](https://github.com/ipea/flightsbr/issues/17).
   - `read_` functions now try to download for a 2nd time if the 1st
     attempt failed. This will help overcome a small issue with the
     instability of ANAC data links.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/18)
-    [\#18](https://github.com/ipeaGIT/flightsbr/issues/18).
+    [Closed](https://github.com/ipea/flightsbr/issues/18)
+    [\#18](https://github.com/ipea/flightsbr/issues/18).
   - Using a simpler / slightly faster version of
     [`latlon_to_numeric()`](https://ipeagit.github.io/flightsbr/dev/reference/latlon_to_numeric.md)
     with suppressed warnings.
@@ -296,37 +299,37 @@ CRAN release: 2022-02-08
     [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
     to read data on all aircraft registered in the Brazilian
     Aeronautical Registry (Registro Aeronáutico Brasileiro - RAB)
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/14)
-    [\#14](https://github.com/ipeaGIT/flightsbr/issues/14).
+    [Closed](https://github.com/ipea/flightsbr/issues/14)
+    [\#14](https://github.com/ipea/flightsbr/issues/14).
   - New function
     [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)
     to read data on all public and private airports.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/4)
-    [\#4](https://github.com/ipeaGIT/flightsbr/issues/4) and
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/9)
-    [\#9](https://github.com/ipeaGIT/flightsbr/issues/9).
+    [Closed](https://github.com/ipea/flightsbr/issues/4)
+    [\#4](https://github.com/ipea/flightsbr/issues/4) and
+    [Closed](https://github.com/ipea/flightsbr/issues/9)
+    [\#9](https://github.com/ipea/flightsbr/issues/9).
   - New function
     [`latest_flights_date()`](https://ipeagit.github.io/flightsbr/dev/reference/latest_flights_date.md)
     to check the date of the latest flight data available.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/16)
-    [\#16](https://github.com/ipeaGIT/flightsbr/issues/16).
+    [Closed](https://github.com/ipea/flightsbr/issues/16)
+    [\#16](https://github.com/ipea/flightsbr/issues/16).
   - New function
     [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
     to download data on airport movements.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/15)
-    [\#15](https://github.com/ipeaGIT/flightsbr/issues/15).
+    [Closed](https://github.com/ipea/flightsbr/issues/15)
+    [\#15](https://github.com/ipea/flightsbr/issues/15).
   - Function
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
     now takes `date` input in the format `yyyymm` or `yyyy`. When the
     date input is a 4-digit number, the function now downloads data of
     all months in that year.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/1)
-    [\#1](https://github.com/ipeaGIT/flightsbr/issues/1).
+    [Closed](https://github.com/ipea/flightsbr/issues/1)
+    [\#1](https://github.com/ipea/flightsbr/issues/1).
   - Function
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
     now automatically detects and checks the latest flights data
-    available. [Closed](https://github.com/ipeaGIT/flightsbr/issues/13)
-    [\#13](https://github.com/ipeaGIT/flightsbr/issues/13).
+    available. [Closed](https://github.com/ipea/flightsbr/issues/13)
+    [\#13](https://github.com/ipea/flightsbr/issues/13).
   - new internal support functions:
     - `split_date()`: Split a date from yyyymmm to year yyyy and month
       mm
@@ -357,15 +360,15 @@ CRAN release: 2022-02-08
   - new tests of
     [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md).
     Coverage of 95.24%.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/5)
-    [\#5](https://github.com/ipeaGIT/flightsbr/issues/5).
+    [Closed](https://github.com/ipea/flightsbr/issues/5)
+    [\#5](https://github.com/ipea/flightsbr/issues/5).
   - New checks on `date` input.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/2)
-    [\#2](https://github.com/ipeaGIT/flightsbr/issues/2).
+    [Closed](https://github.com/ipea/flightsbr/issues/2)
+    [\#2](https://github.com/ipea/flightsbr/issues/2).
   - Functions now should fail gracefully in case of problems with
     internet connection.
-    [Closed](https://github.com/ipeaGIT/flightsbr/issues/7)
-    [\#7](https://github.com/ipeaGIT/flightsbr/issues/7).
+    [Closed](https://github.com/ipea/flightsbr/issues/7)
+    [\#7](https://github.com/ipea/flightsbr/issues/7).
 
 ## flightsbr v0.0.1
 

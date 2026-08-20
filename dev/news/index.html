@@ -25,7 +25,7 @@
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/ipeaGIT/flightsbr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/ipea/flightsbr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch"><li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
@@ -40,11 +40,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/ipeaGIT/flightsbr/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/ipea/flightsbr/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.2.0" id="flightsbr-v120-dev">flightsbr v1.2.0 DEV<a class="anchor" aria-label="anchor" href="#flightsbr-v120-dev"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.2.0" id="flightsbr-v120">flightsbr v1.2.0<a class="anchor" aria-label="anchor" href="#flightsbr-v120"></a></h2>
 <ul><li>
 <p>Minor changes:</p>
 <ul><li>When the package tries to download multiples but fails with a few ones, the package now only try to download again the files that failed in the first attempt.</li>
@@ -61,6 +61,10 @@
 <li>Fixed <code><a href="../reference/get_airfares_dates_available.html">get_airfares_dates_available()</a></code> and <code><a href="../reference/latest_airfares_date.html">latest_airfares_date()</a></code> to fail cleanly with <code>NULL</code> when ANAC can’t be reached, instead of occasionally producing a nonsensical “data available between Inf and -Inf” error, or <code>-Inf</code> as a date.</li>
 <li>Replaced a brittle hardcoded filename-length check (<code>nchar == 55</code>) used to filter valid international airfare files listed by ANAC with an explicit filename-pattern check, and added the equivalent check to the domestic airfare listing (which previously had no filter at all). This guards against malformed, duplicate, or misplaced files that ANAC occasionally publishes (e.g. typo’d names, files uploaded to the wrong year, re-uploads with <code>(1)</code> appended) corrupting the list of available dates.</li>
 </ul></li>
+<li>
+<p>New contributors</p>
+<ul><li>Arthur Bazolli</li>
+</ul></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.1" id="flightsbr-v111">flightsbr v1.1.1<a class="anchor" aria-label="anchor" href="#flightsbr-v111"></a></h2><p class="text-muted">CRAN release: 2025-07-24</p>
@@ -70,7 +74,7 @@
 <h2 class="pkg-version" data-toc-text="1.1.0" id="flightsbr-v110">flightsbr v1.1.0<a class="anchor" aria-label="anchor" href="#flightsbr-v110"></a></h2><p class="text-muted">CRAN release: 2025-05-19</p>
 <ul><li>Major changes:
 <ul><li>The default of all <code>read_</code> functions now is to download data from the latest date available.</li>
-<li>The function <code><a href="../reference/read_aircrafts.html">read_aircrafts()</a></code> is now deprecated in favor of <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> simply to fix a typo in the function name. The behavior and outputs are identical. Closes <a href="https://github.com/ipeaGIT/flightsbr/issues/45" class="external-link">#45</a>
+<li>The function <code><a href="../reference/read_aircrafts.html">read_aircrafts()</a></code> is now deprecated in favor of <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> simply to fix a typo in the function name. The behavior and outputs are identical. Closes <a href="https://github.com/ipea/flightsbr/issues/45" class="external-link">#45</a>
 </li>
 </ul></li>
 <li>CRAN policy:
@@ -81,14 +85,14 @@
 <h2 class="pkg-version" data-toc-text="1.0.0" id="flightsbr-v100">flightsbr v1.0.0<a class="anchor" aria-label="anchor" href="#flightsbr-v100"></a></h2><p class="text-muted">CRAN release: 2024-10-22</p>
 <ul><li>Breaking changes:
 <ul><li>The names of all columns in the data outputs are now cleanned with {janitor}</li>
-<li>Function <code><a href="../reference/read_airports.html">read_airports()</a></code> now downloads v2 version of public airports data. Closes <a href="https://github.com/ipeaGIT/flightsbr/issues/41" class="external-link">#41</a>
+<li>Function <code><a href="../reference/read_airports.html">read_airports()</a></code> now downloads v2 version of public airports data. Closes <a href="https://github.com/ipea/flightsbr/issues/41" class="external-link">#41</a>
 </li>
 </ul></li>
 <li>Major changes:
-<ul><li>Function <code><a href="../reference/read_airfares.html">read_airfares()</a></code> is working again. Closes <a href="https://github.com/ipeaGIT/flightsbr/issues/30" class="external-link">#30</a>. The prices of air tickets are now returned as numeric.</li>
-<li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> with fixed decimal values in numeric columns. Closes <a href="https://github.com/ipeaGIT/flightsbr/issues/43" class="external-link">#43</a>
+<ul><li>Function <code><a href="../reference/read_airfares.html">read_airfares()</a></code> is working again. Closes <a href="https://github.com/ipea/flightsbr/issues/30" class="external-link">#30</a>. The prices of air tickets are now returned as numeric.</li>
+<li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> with fixed decimal values in numeric columns. Closes <a href="https://github.com/ipea/flightsbr/issues/43" class="external-link">#43</a>
 </li>
-<li>Function <code><a href="../reference/read_airports.html">read_airports()</a></code> with fixed numeric values for <code>"altitude"</code> column. Closes <a href="https://github.com/ipeaGIT/flightsbr/issues/42" class="external-link">#42</a>
+<li>Function <code><a href="../reference/read_airports.html">read_airports()</a></code> with fixed numeric values for <code>"altitude"</code> column. Closes <a href="https://github.com/ipea/flightsbr/issues/42" class="external-link">#42</a>
 </li>
 </ul></li>
 <li>Minor changes:
@@ -118,7 +122,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.1" id="flightsbr-v041">flightsbr v0.4.1<a class="anchor" aria-label="anchor" href="#flightsbr-v041"></a></h2><p class="text-muted">CRAN release: 2024-04-23</p>
 <ul><li>Minor changes:
-<ul><li>The <code><a href="../reference/read_flights.html">read_flights()</a></code> function now uses <code>fread(encoding = 'Latin-1')</code> internally to avoid issues with encoding. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/35" class="external-link">#35</a>.</li>
+<ul><li>The <code><a href="../reference/read_flights.html">read_flights()</a></code> function now uses <code>fread(encoding = 'Latin-1')</code> internally to avoid issues with encoding. Closed <a href="https://github.com/ipea/flightsbr/issues/35" class="external-link">#35</a>.</li>
 <li>The function <code><a href="../reference/get_airport_movement_dates_available.html">get_airport_movement_dates_available()</a></code> does not throw warnings of <code>NA</code> values anymore.</li>
 <li>The <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> function now used <code>fread(skip = 1)</code> internally to read column names correctly.</li>
 </ul></li>
@@ -126,30 +130,30 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="flightsbr-v040">flightsbr v0.4.0<a class="anchor" aria-label="anchor" href="#flightsbr-v040"></a></h2><p class="text-muted">CRAN release: 2023-12-04</p>
 <ul><li>Major changes:
-<ul><li>The functions <code><a href="../reference/read_flights.html">read_flights()</a></code> and <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> now have a new parameter <code>cache</code>, which indicates whether the function should read cached data downloaded previously. Defaults to <code>TRUE</code>. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/31" class="external-link">#31</a>.</li>
-<li>The function <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> now has a <code>date</code> parameter, which allows one to download the data on aircraft registered at ANAC at particular years/months. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/33" class="external-link">#33</a>.</li>
+<ul><li>The functions <code><a href="../reference/read_flights.html">read_flights()</a></code> and <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> now have a new parameter <code>cache</code>, which indicates whether the function should read cached data downloaded previously. Defaults to <code>TRUE</code>. Closed <a href="https://github.com/ipea/flightsbr/issues/31" class="external-link">#31</a>.</li>
+<li>The function <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> now has a <code>date</code> parameter, which allows one to download the data on aircraft registered at ANAC at particular years/months. Closed <a href="https://github.com/ipea/flightsbr/issues/33" class="external-link">#33</a>.</li>
 </ul></li>
 <li>Minor changes:
-<ul><li>All functions now return numeric columns with <code>numeric</code> class. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/32" class="external-link">#32</a>.</li>
+<ul><li>All functions now return numeric columns with <code>numeric</code> class. Closed <a href="https://github.com/ipea/flightsbr/issues/32" class="external-link">#32</a>.</li>
 </ul></li>
 <li>Bug fixes:
-<ul><li>Fixed bug when unzipping files for <code><a href="../reference/read_flights.html">read_flights()</a></code> function in Unix systems. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/31" class="external-link">#31</a>.</li>
-<li>Updated link to private airports data changed by ANAC. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/34" class="external-link">#34</a>.</li>
+<ul><li>Fixed bug when unzipping files for <code><a href="../reference/read_flights.html">read_flights()</a></code> function in Unix systems. Closed <a href="https://github.com/ipea/flightsbr/issues/31" class="external-link">#31</a>.</li>
+<li>Updated link to private airports data changed by ANAC. Closed <a href="https://github.com/ipea/flightsbr/issues/34" class="external-link">#34</a>.</li>
 </ul></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="flightsbr-v030">flightsbr v0.3.0<a class="anchor" aria-label="anchor" href="#flightsbr-v030"></a></h2><p class="text-muted">CRAN release: 2023-06-29</p>
 <ul><li>Major changes:
-<ul><li>Function read_airfares() is temporarily unavailable. See issue <a href="https://github.com/ipeaGIT/flightsbr/issues/30" class="external-link">#30</a>
+<ul><li>Function read_airfares() is temporarily unavailable. See issue <a href="https://github.com/ipea/flightsbr/issues/30" class="external-link">#30</a>
 </li>
 </ul></li>
 <li>Minor changes:
-<ul><li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> now accepts a vector of dates. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/29" class="external-link">#29</a>.</li>
+<ul><li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> now accepts a vector of dates. Closed <a href="https://github.com/ipea/flightsbr/issues/29" class="external-link">#29</a>.</li>
 </ul></li>
 <li>Bug fixes:
 <ul><li>Fixed broken link for data dictionary for airport movement data</li>
-<li>Fixed code to rbindlist air fares from multiple years. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/26" class="external-link">#26</a>.</li>
-<li>Fixed code to read a few dates that were not caught in <code><a href="../reference/get_airfares_dates_available.html">get_airfares_dates_available()</a></code> because of “.CSV” in ANAC url. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/27" class="external-link">#27</a>.</li>
+<li>Fixed code to rbindlist air fares from multiple years. Closed <a href="https://github.com/ipea/flightsbr/issues/26" class="external-link">#26</a>.</li>
+<li>Fixed code to read a few dates that were not caught in <code><a href="../reference/get_airfares_dates_available.html">get_airfares_dates_available()</a></code> because of “.CSV” in ANAC url. Closed <a href="https://github.com/ipea/flightsbr/issues/27" class="external-link">#27</a>.</li>
 <li>Fixed code to use <code><a href="../reference/get_airport_movement_dates_available.html">get_airport_movement_dates_available()</a></code>
 </li>
 </ul></li>
@@ -165,11 +169,11 @@
 <h2 class="pkg-version" data-toc-text="0.2.0" id="flightsbr-v020">flightsbr v0.2.0<a class="anchor" aria-label="anchor" href="#flightsbr-v020"></a></h2><p class="text-muted">CRAN release: 2022-05-05</p>
 <ul><li>Major changes:
 <ul><li>Update urls to new location where flights data is stored. This makes <code><a href="../reference/read_flights.html">read_flights()</a></code> work again.</li>
-<li>New function <code><a href="../reference/read_airfares.html">read_airfares()</a></code> to read data on airfares of domestic and international flights <a href="https://github.com/ipeaGIT/flightsbr/issues/22" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/22" class="external-link">#22</a>.</li>
+<li>New function <code><a href="../reference/read_airfares.html">read_airfares()</a></code> to read data on airfares of domestic and international flights <a href="https://github.com/ipea/flightsbr/issues/22" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/22" class="external-link">#22</a>.</li>
 </ul></li>
 <li>Minor changes:
-<ul><li>The data downloaded in <code><a href="../reference/read_flights.html">read_flights()</a></code> and <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> are now cached in temp dir. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/21" class="external-link">#20</a>.</li>
-<li>All columns are now returned with class <code>character</code>. This fixes a bug in the <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> function. Closed <a href="https://github.com/ipeaGIT/flightsbr/issues/20" class="external-link">#20</a>.</li>
+<ul><li>The data downloaded in <code><a href="../reference/read_flights.html">read_flights()</a></code> and <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> are now cached in temp dir. Closed <a href="https://github.com/ipea/flightsbr/issues/21" class="external-link">#20</a>.</li>
+<li>All columns are now returned with class <code>character</code>. This fixes a bug in the <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> function. Closed <a href="https://github.com/ipea/flightsbr/issues/20" class="external-link">#20</a>.</li>
 </ul></li>
 </ul></div>
     <div class="section level2">
@@ -181,9 +185,9 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="flightsbr-v011">flightsbr v0.1.1<a class="anchor" aria-label="anchor" href="#flightsbr-v011"></a></h2><p class="text-muted">CRAN release: 2022-03-06</p>
 <ul><li>Bug fixes:
-<ul><li>functions <code><a href="../reference/read_flights.html">read_flights()</a></code> and <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> no longer have side effects on objects named <code>month</code> and <code>year</code> on the global environment. The <code>split_date()</code> support function was removed from the package. <a href="https://github.com/ipeaGIT/flightsbr/issues/17" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/17" class="external-link">#17</a>.</li>
+<ul><li>functions <code><a href="../reference/read_flights.html">read_flights()</a></code> and <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> no longer have side effects on objects named <code>month</code> and <code>year</code> on the global environment. The <code>split_date()</code> support function was removed from the package. <a href="https://github.com/ipea/flightsbr/issues/17" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/17" class="external-link">#17</a>.</li>
 <li>
-<code>read_</code> functions now try to download for a 2nd time if the 1st attempt failed. This will help overcome a small issue with the instability of ANAC data links. <a href="https://github.com/ipeaGIT/flightsbr/issues/18" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/18" class="external-link">#18</a>.</li>
+<code>read_</code> functions now try to download for a 2nd time if the 1st attempt failed. This will help overcome a small issue with the instability of ANAC data links. <a href="https://github.com/ipea/flightsbr/issues/18" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/18" class="external-link">#18</a>.</li>
 <li>Using a simpler / slightly faster version of <code><a href="../reference/latlon_to_numeric.html">latlon_to_numeric()</a></code> with suppressed warnings.</li>
 <li>Update package citation, adding OSF preprint DOI.</li>
 </ul></li>
@@ -191,12 +195,12 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="flightsbr-v010">flightsbr v0.1.0<a class="anchor" aria-label="anchor" href="#flightsbr-v010"></a></h2><p class="text-muted">CRAN release: 2022-02-08</p>
 <ul><li>Major changes:
-<ul><li>New function <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> to read data on all aircraft registered in the Brazilian Aeronautical Registry (Registro Aeronáutico Brasileiro - RAB) <a href="https://github.com/ipeaGIT/flightsbr/issues/14" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/14" class="external-link">#14</a>.</li>
-<li>New function <code><a href="../reference/read_airports.html">read_airports()</a></code> to read data on all public and private airports. <a href="https://github.com/ipeaGIT/flightsbr/issues/4" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/4" class="external-link">#4</a> and <a href="https://github.com/ipeaGIT/flightsbr/issues/9" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/9" class="external-link">#9</a>.</li>
-<li>New function <code><a href="../reference/latest_flights_date.html">latest_flights_date()</a></code> to check the date of the latest flight data available. <a href="https://github.com/ipeaGIT/flightsbr/issues/16" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/16" class="external-link">#16</a>.</li>
-<li>New function <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> to download data on airport movements. <a href="https://github.com/ipeaGIT/flightsbr/issues/15" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/15" class="external-link">#15</a>.</li>
-<li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> now takes <code>date</code> input in the format <code>yyyymm</code> or <code>yyyy</code>. When the date input is a 4-digit number, the function now downloads data of all months in that year. <a href="https://github.com/ipeaGIT/flightsbr/issues/1" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/1" class="external-link">#1</a>.</li>
-<li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> now automatically detects and checks the latest flights data available. <a href="https://github.com/ipeaGIT/flightsbr/issues/13" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/13" class="external-link">#13</a>.</li>
+<ul><li>New function <code><a href="../reference/read_aircraft.html">read_aircraft()</a></code> to read data on all aircraft registered in the Brazilian Aeronautical Registry (Registro Aeronáutico Brasileiro - RAB) <a href="https://github.com/ipea/flightsbr/issues/14" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/14" class="external-link">#14</a>.</li>
+<li>New function <code><a href="../reference/read_airports.html">read_airports()</a></code> to read data on all public and private airports. <a href="https://github.com/ipea/flightsbr/issues/4" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/4" class="external-link">#4</a> and <a href="https://github.com/ipea/flightsbr/issues/9" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/9" class="external-link">#9</a>.</li>
+<li>New function <code><a href="../reference/latest_flights_date.html">latest_flights_date()</a></code> to check the date of the latest flight data available. <a href="https://github.com/ipea/flightsbr/issues/16" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/16" class="external-link">#16</a>.</li>
+<li>New function <code><a href="../reference/read_airport_movements.html">read_airport_movements()</a></code> to download data on airport movements. <a href="https://github.com/ipea/flightsbr/issues/15" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/15" class="external-link">#15</a>.</li>
+<li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> now takes <code>date</code> input in the format <code>yyyymm</code> or <code>yyyy</code>. When the date input is a 4-digit number, the function now downloads data of all months in that year. <a href="https://github.com/ipea/flightsbr/issues/1" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/1" class="external-link">#1</a>.</li>
+<li>Function <code><a href="../reference/read_flights.html">read_flights()</a></code> now automatically detects and checks the latest flights data available. <a href="https://github.com/ipea/flightsbr/issues/13" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/13" class="external-link">#13</a>.</li>
 <li>new internal support functions:
 <ul><li>
 <code>split_date()</code>: Split a date from yyyymmm to year yyyy and month mm</li>
@@ -223,9 +227,9 @@
 </ul></li>
 <li>Minor changes:
 <ul><li>new parameter <code>select</code> in <code><a href="../reference/read_flights.html">read_flights()</a></code>, allowing the user to specify the columns that should be read.</li>
-<li>new tests of <code><a href="../reference/read_flights.html">read_flights()</a></code>. Coverage of 95.24%. <a href="https://github.com/ipeaGIT/flightsbr/issues/5" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/5" class="external-link">#5</a>.</li>
-<li>New checks on <code>date</code> input. <a href="https://github.com/ipeaGIT/flightsbr/issues/2" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/2" class="external-link">#2</a>.</li>
-<li>Functions now should fail gracefully in case of problems with internet connection. <a href="https://github.com/ipeaGIT/flightsbr/issues/7" class="external-link">Closed </a><a href="https://github.com/ipeaGIT/flightsbr/issues/7" class="external-link">#7</a>.</li>
+<li>new tests of <code><a href="../reference/read_flights.html">read_flights()</a></code>. Coverage of 95.24%. <a href="https://github.com/ipea/flightsbr/issues/5" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/5" class="external-link">#5</a>.</li>
+<li>New checks on <code>date</code> input. <a href="https://github.com/ipea/flightsbr/issues/2" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/2" class="external-link">#2</a>.</li>
+<li>Functions now should fail gracefully in case of problems with internet connection. <a href="https://github.com/ipea/flightsbr/issues/7" class="external-link">Closed </a><a href="https://github.com/ipea/flightsbr/issues/7" class="external-link">#7</a>.</li>
 </ul></li>
 </ul></div>
     <div class="section level2">

@@ -9,15 +9,17 @@ from Brazil, as well as domestic flights within the country.
 ## Usage
 
 Please check the vignettes and data documentation on the
-[website](https://ipeagit.github.io/flightsbr/).
+[website](https://ipea.github.io/flightsbr/).
 
 ## See also
 
 Useful links:
 
-- <https://github.com/ipeaGIT/flightsbr>
+- <https://github.com/ipea/flightsbr>
 
-- Report bugs at <https://github.com/ipeaGIT/flightsbr/issues>
+- <https://ipea.github.io/flightsbr/>
+
+- Report bugs at <https://github.com/ipea/flightsbr/issues>
 
 ## Author
 
@@ -30,6 +32,8 @@ Authors:
   ([ORCID](https://orcid.org/0000-0003-2125-7465))
 
 Other contributors:
+
+- Arthur Bazolli <baz.arthur@gmail.com> \[contributor\]
 
 - Ipea - Institute for Applied Economic Research \[copyright holder,
   funder\]

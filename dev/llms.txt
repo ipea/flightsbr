@@ -4,11 +4,11 @@
 status](https://www.r-pkg.org/badges/version/flightsbr)](https://CRAN.R-project.org/package=flightsbr)
 [![CRAN/METACRAN Total
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/flightsbr?color=yellow)](https://CRAN.R-project.org/package=flightsbr)
-[![R-CMD-check](https://github.com/ipeaGIT/flightsbr/workflows/R-CMD-check/badge.svg)](https://github.com/ipeaGIT/flightsbr/actions)
+[![R-CMD-check](https://github.com/ipea/flightsbr/workflows/R-CMD-check/badge.svg)](https://github.com/ipea/flightsbr/actions)
 [![Lifecycle:
 active](https://img.shields.io/badge/lifecycle-active-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![Codecov test
-coverage](https://codecov.io/gh/ipeaGIT/flightsbr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ipeaGIT/flightsbr?branch=main)
+coverage](https://codecov.io/gh/ipea/flightsbr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ipea/flightsbr?branch=main)
 [![DOI](https://img.shields.io/badge/DOI-10.31219%2Fosf.io%2Fjdv7u-blue)](https://doi.org/10.31219/osf.io/jdv7u)
 
 **flightsbr** is an R package designed to facilitate the download of
@@ -27,13 +27,13 @@ and domestic flights within the country.
 
 # or use the development version with latest features
   utils::remove.packages('flightsbr')
-  remotes::install_github("ipeaGIT/flightsbr")
+  remotes::install_github("ipea/flightsbr")
 ```
 
 ## Basic usage
 
 The package currently includes [five main
-functions](https://ipeagit.github.io/flightsbr/reference/index.html):
+functions](https://ipea.github.io/flightsbr/reference/index.html):
 
 1.  [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
 2.  [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)

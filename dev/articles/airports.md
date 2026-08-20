@@ -62,4 +62,4 @@ ggplot() +
   coord_equal()
 ```
 
-![](https://github.com/ipeaGIT/flightsbr/blob/main/inst/img/vig_output_airports.png?raw=true)
+![](https://github.com/ipea/flightsbr/blob/main/inst/img/vig_output_airports.png?raw=true)

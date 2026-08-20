@@ -101,4 +101,4 @@ fig <- ggplot(data = count_df) +
 fig
 ```
 
-![](https://github.com/ipeaGIT/flightsbr/blob/main/inst/img/vig_output_flights.png?raw=true)
+![](https://github.com/ipea/flightsbr/blob/main/inst/img/vig_output_flights.png?raw=true)
