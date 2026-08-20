@@ -1,5 +1,10 @@
-── R CMD check results ─────────────────────────────────────────────────────────── flightsbr 1.2.0 ────
-Duration: 9m 21s
+── R CMD check results ──────────────────────────────────────────────────── flightsbr 1.2.0 ────
+Duration: 8m 27.4s
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
+- Fixed URL
+- Added claude files to .Rbuildignore
 
 0 errors ✔ | 0 warnings ✔ | 0 notes ✔
 
