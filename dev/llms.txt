@@ -87,8 +87,7 @@ data, which include more info related to weather conditions, air traffic
 management etc. The advantage of **flightsbt** is that it’s the easiest
 and fastest way to download flight and airport Data from Brazil in `R`.
 
-- [AVSTATS-Brasil](https://www.nectar.ita.br/avstats/), by the team at
-  ITA
+- [AVSTATS-Brasil](https://nectar-ita.blogspot.com/), by the team at ITA
 - [Integrated Dataset of Brazilian
   Flights](https://ieee-dataport.org/documents/brazilian-flights-dataset),
   by the team at CEFET-RJ.
