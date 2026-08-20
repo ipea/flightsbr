@@ -14,8 +14,12 @@ export(read_airfares)
 export(read_airport_movements)
 export(read_airports)
 export(read_flights)
-importFrom(data.table,"%like%")
-importFrom(data.table,":=")
-importFrom(data.table,.SD)
-importFrom(utils,globalVariables)
-importFrom(utils,unzip)
+importFrom(data.table,
+  "%like%",
+  ":=",
+  .SD
+)
+importFrom(utils,
+  globalVariables,
+  unzip
+)

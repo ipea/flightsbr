@@ -22,6 +22,7 @@ Please check the vignettes and data documentation on the
 Useful links:
 \itemize{
   \item \url{https://github.com/ipea/flightsbr}
+  \item \url{https://ipea.github.io/flightsbr/}
   \item Report bugs at \url{https://github.com/ipea/flightsbr/issues}
 }
 

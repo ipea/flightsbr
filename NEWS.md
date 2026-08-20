@@ -1,4 +1,4 @@
-# flightsbr v1.2.0 DEV
+# flightsbr v1.2.0
 
 * Minor changes:
 
