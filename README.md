@@ -4,7 +4,7 @@
    status](https://www.r-pkg.org/badges/version/flightsbr)](https://CRAN.R-project.org/package=flightsbr)
 [![CRAN/METACRAN Total
    downloads](https://cranlogs.r-pkg.org/badges/grand-total/flightsbr?color=yellow)](https://CRAN.R-project.org/package=flightsbr)
-[![R-CMD-check](https://github.com/ipea/flightsbr/workflows/R-CMD-check/badge.svg)](https://github.com/ipea/flightsbr/actions)
+[![R-CMD-check](https://github.com/ipea/flightsbr/workflows/check/badge.svg)](https://github.com/ipea/flightsbr/actions)
 [![Lifecycle:
      active](https://img.shields.io/badge/lifecycle-active-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![Codecov test
