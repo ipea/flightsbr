@@ -1,3 +1,8 @@
+# NOTE (2026-11): the current logo.png is rendered from the hand-written vector
+# source man/figures/logo.svg (emblem traced from flat.png), not from this
+# script. Edit logo.svg and re-render it to a 691x800 PNG instead of re-running
+# sticker() below, which would bring back the jagged raster emblem.
+
 library(hexSticker) # https://github.com/GuangchuangYu/hexSticker
 library(ggplot2)
 library(flightsbr)
@@ -24,7 +29,7 @@ sticker(img,
         s_x=1.05, s_y=.8, s_width=.55,  # image size and position
         h_fill="#006890", h_color="#006890", h_size = 2, # hexagon
         dpi=400, # resolution
-        url = 'https://github.com/ipeaGIT/flightsbr',
+        url = 'https://github.com/ipea/flightsbr',
         u_size=1.2, u_x = 1.1, u_family='Montserrat', u_color = 'gray90', # url
         filename="man/figures/logo.png")  # output name
 
@@ -44,7 +49,7 @@ sticker(img,
         s_x=1.05, s_y=.94, s_width=0.69,  # image size and position
         h_fill="white", h_color="#006890", h_size = 2, # hexagon
         dpi=400, # resolution
-        url = 'https://github.com/ipeaGIT/flightsbr',
+        url = 'https://github.com/ipea/flightsbr',
         u_size=4, u_family='Montserrat', u_color = '#003E56', # url
         filename="man/figures/logo_globe.png")  # output name
 
@@ -60,7 +65,7 @@ sticker(img,
         s_x=1.05, s_y=.8, s_width=.55,  # image size and position
         h_fill="#006890", h_color="#006890", h_size = 2, # hexagon
         dpi=400, # resolution
-        url = 'https://github.com/ipeaGIT/flightsbr',
+        url = 'https://github.com/ipea/flightsbr',
         u_size=1.2, u_x = 1.1, u_family='Montserrat', u_color = 'gray90', # url
         filename="man/figures/logo.svg")  # output name
 
