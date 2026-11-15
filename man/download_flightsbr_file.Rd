@@ -7,7 +7,7 @@
 download_flightsbr_file(
   file_url = parent.frame()$file_url,
   showProgress = parent.frame()$showProgress,
-  dest_file = temp_local_file,
+  dest_file = fs::path(fs::path_temp(), basename(file_url)),
   cache = cache
 )
 }
@@ -16,7 +16,8 @@ download_flightsbr_file(
 
 \item{showProgress}{Logical, passed from above.}
 
-\item{dest_file}{String, passed from above.}
+\item{dest_file}{String. Local path(s) where the file(s) are saved, one per
+\code{file_url}. Defaults to the temp dir plus \code{basename(file_url)}.}
 
 \item{cache}{Logical, passed from above.}
 }
