@@ -44,6 +44,13 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="flightsbr-development-version">flightsbr (development version)<a class="anchor" aria-label="anchor" href="#flightsbr-development-version"></a></h2>
+<ul><li>
+<p>Bug fixes:</p>
+<ul><li>Fixed <code><a href="../reference/read_flights.html">read_flights()</a></code> failing to download any data. ANAC’s website now lists flight files with relative links that lead to an HTML page instead of the zip file. The package now builds the direct download link (<code>https://www.gov.br/.../&lt;file&gt;.zip/@@download/file</code>), saves each month under its own file name, and checks that each downloaded file is really a zip archive, with a clear message when ANAC returns a web page instead.</li>
+</ul></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.0" id="flightsbr-v120">flightsbr v1.2.0<a class="anchor" aria-label="anchor" href="#flightsbr-v120"></a></h2><p class="text-muted">CRAN release: 2026-08-21</p>
 <ul><li>
 <p>Minor changes:</p>

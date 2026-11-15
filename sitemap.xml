@@ -12,6 +12,7 @@
 <url><loc>https://ipea.github.io/flightsbr/index.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/news/index.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/altitude_to_numeric.html</loc></url>
+<url><loc>https://ipea.github.io/flightsbr/reference/anac_file_name.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/check_date.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/check_input_date_format.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/download_aircraft_data.html</loc></url>
@@ -30,9 +31,11 @@
 <url><loc>https://ipea.github.io/flightsbr/reference/get_flight_dates_available.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/get_flights_files_available.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/index.html</loc></url>
+<url><loc>https://ipea.github.io/flightsbr/reference/is_zip_file.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/latest_airfares_date.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/latest_flights_date.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/latlon_to_numeric.html</loc></url>
+<url><loc>https://ipea.github.io/flightsbr/reference/normalize_anac_url.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/read_aircraft.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/read_aircrafts.html</loc></url>
 <url><loc>https://ipea.github.io/flightsbr/reference/read_airfares.html</loc></url>

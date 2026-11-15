@@ -1,5 +1,19 @@
 # Changelog
 
+## flightsbr (development version)
+
+- Bug fixes:
+
+  - Fixed
+    [`read_flights()`](https://ipea.github.io/flightsbr/reference/read_flights.md)
+    failing to download any data. ANAC’s website now lists flight files
+    with relative links that lead to an HTML page instead of the zip
+    file. The package now builds the direct download link
+    (`https://www.gov.br/.../<file>.zip/@@download/file`), saves each
+    month under its own file name, and checks that each downloaded file
+    is really a zip archive, with a clear message when ANAC returns a
+    web page instead.
+
 ## flightsbr v1.2.0
 
 CRAN release: 2026-08-21

@@ -53,7 +53,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">download_flightsbr_file</span><span class="op">(</span></span>
 <span>  file_url <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">file_url</span>,</span>
 <span>  showProgress <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">showProgress</span>,</span>
-<span>  dest_file <span class="op">=</span> <span class="va">temp_local_file</span>,</span>
+<span>  dest_file <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">path_temp</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">file_url</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  cache <span class="op">=</span> <span class="va">cache</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -71,7 +71,8 @@
 
 
 <dt id="arg-dest-file">dest_file<a class="anchor" aria-label="anchor" href="#arg-dest-file"></a></dt>
-<dd><p>String, passed from above.</p></dd>
+<dd><p>String. Local path(s) where the file(s) are saved, one per
+<code>file_url</code>. Defaults to the temp dir plus <code>basename(file_url)</code>.</p></dd>
 
 
 <dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
