@@ -60,8 +60,8 @@ A `"data.table" "data.frame"` object. All columns are returned with
 ## See also
 
 Other download flight data:
-[`read_aircraft()`](https://ipeagit.github.io/flightsbr/reference/read_aircraft.md),
-[`read_aircrafts()`](https://ipeagit.github.io/flightsbr/reference/read_aircrafts.md)
+[`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md),
+[`read_aircrafts()`](https://ipea.github.io/flightsbr/reference/read_aircrafts.md)
 
 ## Examples
 

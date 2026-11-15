@@ -41,7 +41,7 @@ airports_pbl <- flightsbr::read_airports(
 You will notice that the data sets on private and public airports have
 different columns. This can make row binding these data.frames a bit
 tricky. For now, the function
-[`read_airports()`](https://ipeagit.github.io/flightsbr/reference/read_airports.md)
+[`read_airports()`](https://ipea.github.io/flightsbr/reference/read_airports.md)
 can return a data.frame with both types of airports and only a few
 columns if the user set `type = "all"`. The geographical coordinates are
 provided in `EPSG Projection 4326 - WGS 84`.

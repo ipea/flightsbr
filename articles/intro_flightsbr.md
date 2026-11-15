@@ -4,11 +4,11 @@
 Brazil’s Civil Aviation Agency (ANAC). The package currently includes
 five main functions:
 
-1.  [`read_flights()`](https://ipeagit.github.io/flightsbr/reference/read_flights.md)
-2.  [`read_airports()`](https://ipeagit.github.io/flightsbr/reference/read_airports.md)
-3.  [`read_aircraft()`](https://ipeagit.github.io/flightsbr/reference/read_aircraft.md)
-4.  [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/reference/read_airport_movements.md)
-5.  [`read_airfares()`](https://ipeagit.github.io/flightsbr/reference/read_airfares.md)
+1.  [`read_flights()`](https://ipea.github.io/flightsbr/reference/read_flights.md)
+2.  [`read_airports()`](https://ipea.github.io/flightsbr/reference/read_airports.md)
+3.  [`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md)
+4.  [`read_airport_movements()`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md)
+5.  [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md)
 
 ### 1) `read_flights()`:
 

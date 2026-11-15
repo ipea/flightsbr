@@ -3,7 +3,7 @@
 **Project:** flightsbr — R package to download flight and airport data
 from Brazil’s Civil Aviation Agency (ANAC) **Maintainer:** Rafael H. M.
 Pereira (Ipea — Institute for Applied Economic Research) **Repo:**
-<https://github.com/ipeaGIT/flightsbr> · **Branch:** main
+<https://github.com/ipea/flightsbr> · **Branch:** main
 
 ------------------------------------------------------------------------
 
@@ -16,16 +16,16 @@ Pereira (Ipea — Institute for Applied Economic Research) **Repo:**
   in `R/` and run `devtools::document()`
 - **The release gate is `R CMD check --as-cran`** — 0 errors, 0
   warnings, every remaining note justified in `cran-comments.md`. Run
-  via [`/r-package-check`](https://github.com/ipeaGIT/flightsbr) before
-  any release or merge that touches `R/`, `tests/`, or `DESCRIPTION`
+  via [`/r-package-check`](https://github.com/ipea/flightsbr) before any
+  release or merge that touches `R/`, `tests/`, or `DESCRIPTION`
 - **\[LEARN\] tags** — when corrected, or when a non-obvious approach is
   confirmed, save `[LEARN:category] wrong → right` to
-  [MEMORY.md](https://ipeagit.github.io/flightsbr/MEMORY.md)
+  [MEMORY.md](https://ipea.github.io/flightsbr/MEMORY.md)
 
 Cross-session context lives in
-[MEMORY.md](https://ipeagit.github.io/flightsbr/MEMORY.md); plans,
-specs, and session logs are in
-[quality_reports/](https://ipeagit.github.io/flightsbr/quality_reports/).
+[MEMORY.md](https://ipea.github.io/flightsbr/MEMORY.md); plans, specs,
+and session logs are in
+[quality_reports/](https://ipea.github.io/flightsbr/quality_reports/).
 Workflow rules, skills, and agents are configured globally at `~/.Codex`
 (shared with the geobr / geobr-r-package projects) and apply here via
 path-scoping — see “Skills Quick Reference” below for what’s actually
@@ -93,11 +93,10 @@ NOTE, then `devtools::release()` (maintainer-only, not automated).
 | Exported function coverage (`covr`) | No exported function at 0% |
 | roxygen docs | Every exported function: `@param` (all args), `@return`, runnable `@examples` |
 
-Run via [`/r-package-check`](https://github.com/ipeaGIT/flightsbr)
-before merging changes to `R/`, `tests/`, or `DESCRIPTION`. Full
-standard:
-[`r-package-conventions.md`](https://github.com/ipeaGIT/flightsbr)
-(global rule, path-scoped to `R/**/*.R`, `tests/**/*.R`, `man/**/*.Rd`,
+Run via [`/r-package-check`](https://github.com/ipea/flightsbr) before
+merging changes to `R/`, `tests/`, or `DESCRIPTION`. Full standard:
+[`r-package-conventions.md`](https://github.com/ipea/flightsbr) (global
+rule, path-scoped to `R/**/*.R`, `tests/**/*.R`, `man/**/*.Rd`,
 `DESCRIPTION`, `NAMESPACE`, `NEWS.md`).
 
 **Note on `/commit`:** the global `/commit` skill’s Step 0
@@ -130,12 +129,12 @@ of this data, but isn’t part of the day-to-day loop):
 
 | Function | Purpose | Notes |
 |----|----|----|
-| [`read_flights()`](https://ipeagit.github.io/flightsbr/reference/read_flights.md) | Download national/international flight data (origin/destination, duration, aircraft, payload, passengers) | Data dictionary linked in roxygen `@description` |
-| [`read_airports()`](https://ipeagit.github.io/flightsbr/reference/read_airports.md) | Download all airports/aerodromes registered with ANAC | `type = "all"/"public"/"private"` — public/private return more columns |
-| [`read_aircraft()`](https://ipeagit.github.io/flightsbr/reference/read_aircraft.md) | Download the Brazilian Aeronautical Registry (RAB) | Current function — [`read_aircrafts()`](https://ipeagit.github.io/flightsbr/reference/read_aircrafts.md) (plural) is hard-deprecated, use singular |
-| [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/reference/read_airport_movements.md) | Download airport passenger/aircraft/cargo/mail movement data | Available from Jan 2019 onwards only |
-| [`read_airfares()`](https://ipeagit.github.io/flightsbr/reference/read_airfares.md) | Download domestic and international airfare data | `domestic = TRUE/FALSE` switches data source |
-| [`latest_flights_date()`](https://ipeagit.github.io/flightsbr/reference/latest_flights_date.md) | Check the most recent `yyyymm` date with flight data available | Support function |
+| [`read_flights()`](https://ipea.github.io/flightsbr/reference/read_flights.md) | Download national/international flight data (origin/destination, duration, aircraft, payload, passengers) | Data dictionary linked in roxygen `@description` |
+| [`read_airports()`](https://ipea.github.io/flightsbr/reference/read_airports.md) | Download all airports/aerodromes registered with ANAC | `type = "all"/"public"/"private"` — public/private return more columns |
+| [`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md) | Download the Brazilian Aeronautical Registry (RAB) | Current function — [`read_aircrafts()`](https://ipea.github.io/flightsbr/reference/read_aircrafts.md) (plural) is hard-deprecated, use singular |
+| [`read_airport_movements()`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md) | Download airport passenger/aircraft/cargo/mail movement data | Available from Jan 2019 onwards only |
+| [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md) | Download domestic and international airfare data | `domestic = TRUE/FALSE` switches data source |
+| [`latest_flights_date()`](https://ipea.github.io/flightsbr/reference/latest_flights_date.md) | Check the most recent `yyyymm` date with flight data available | Support function |
 
 All functions share `date`, `showProgress`, and `cache` roxygen
 `@template`s (in `man-roxygen/` or inline) — check existing templates
@@ -148,13 +147,13 @@ before adding a new parameter with the same shape.
 - All data is sourced from ANAC’s open-data portals — URLs are
   documented per-function in the roxygen `@description` blocks in `R/`,
   not duplicated here (avoid drift between two copies of the same URL).
-- [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/reference/read_airport_movements.md)
+- [`read_airport_movements()`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md)
   and
-  [`read_airfares()`](https://ipeagit.github.io/flightsbr/reference/read_airfares.md)/[`read_flights()`](https://ipeagit.github.io/flightsbr/reference/read_flights.md)
+  [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md)/[`read_flights()`](https://ipea.github.io/flightsbr/reference/read_flights.md)
   (`date`-parameterized functions) depend on ANAC publishing cadence —
   “latest available month” logic lives in `utils_*.R` per data type +
-  [`latest_flights_date()`](https://ipeagit.github.io/flightsbr/reference/latest_flights_date.md).
+  [`latest_flights_date()`](https://ipea.github.io/flightsbr/reference/latest_flights_date.md).
 - Record ANAC-specific quirks (encoding, schema changes, broken URLs,
   rate limits) as `[LEARN:anac]` entries in
-  [MEMORY.md](https://ipeagit.github.io/flightsbr/MEMORY.md) as they’re
+  [MEMORY.md](https://ipea.github.io/flightsbr/MEMORY.md) as they’re
   discovered, rather than re-deriving them each session.

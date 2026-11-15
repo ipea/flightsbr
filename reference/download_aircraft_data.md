@@ -21,12 +21,12 @@ download_aircraft_data(
 - showProgress:
 
   Logical, passed from
-  [`read_flights`](https://ipeagit.github.io/flightsbr/reference/read_flights.md)
+  [`read_flights`](https://ipea.github.io/flightsbr/reference/read_flights.md)
 
 - cache:
 
   Logical, passed from
-  [`read_flights`](https://ipeagit.github.io/flightsbr/reference/read_flights.md)
+  [`read_flights`](https://ipea.github.io/flightsbr/reference/read_flights.md)
 
 ## Value
 

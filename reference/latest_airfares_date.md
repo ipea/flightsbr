@@ -22,7 +22,7 @@ A numeric date in the format `yyyymm`.
 ## See also
 
 Other support function:
-[`latest_flights_date()`](https://ipeagit.github.io/flightsbr/reference/latest_flights_date.md)
+[`latest_flights_date()`](https://ipea.github.io/flightsbr/reference/latest_flights_date.md)
 
 ## Examples
 

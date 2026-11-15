@@ -17,17 +17,17 @@ download_airport_movement_data(
 - file_url:
 
   String. A url passed from
-  [`read_airport_movements`](https://ipeagit.github.io/flightsbr/reference/read_airport_movements.md).
+  [`read_airport_movements`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md).
 
 - showProgress:
 
   Logical, passed from
-  [`read_airport_movements`](https://ipeagit.github.io/flightsbr/reference/read_airport_movements.md)
+  [`read_airport_movements`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md)
 
 - cache:
 
   Logical, passed from
-  [`read_airport_movements`](https://ipeagit.github.io/flightsbr/reference/read_airport_movements.md)
+  [`read_airport_movements`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md)
 
 ## Value
 
