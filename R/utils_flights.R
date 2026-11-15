@@ -130,6 +130,11 @@ get_flights_files_available <- function(cache = TRUE) { # nocov start
       nzchar(url)
   ]
 
+  # ANAC lists relative hrefs that point to an HTML landing page; turn them
+  # into absolute urls that point to the zip file itself
+  page_url <- url
+  files[, url := normalize_anac_url(url, base = page_url)]
+
   files <- unique(files)
 
   # don't cache an empty/partial result -- let the next call retry the scrape
@@ -139,6 +144,73 @@ get_flights_files_available <- function(cache = TRUE) { # nocov start
 
   return(files)
 } # nocov end
+
+
+# normalize_anac_url --------------------------------------------------------------------------
+
+#' Turn an ANAC (gov.br) file href into a direct download url
+#'
+#' The flight file listing on gov.br links to each zip file through a relative
+#' href (e.g. `/anac/.../basica2020-04.zip`) that serves an HTML landing page.
+#' The zip file itself is served at `<href>/@@download/file`.
+#'
+#' @param href Character vector of hrefs, relative or absolute, with or
+#'        without the `/@@download/file` suffix.
+#' @param base String. Url of the page the hrefs were scraped from, used to
+#'        resolve relative hrefs.
+#'
+#' @return A character vector of absolute urls ending in `/@@download/file`.
+#' @keywords internal
+normalize_anac_url <- function(href, base) {
+
+  # resolve relative hrefs against the page url; absolute ones are kept as is
+  url <- rvest::url_absolute(href, base)
+
+  url <- ifelse(
+    grepl("/@@download/file$", url),
+    url,
+    paste0(sub("/+$", "", url), "/@@download/file")
+  )
+
+  return(url)
+}
+
+
+# anac_file_name ------------------------------------------------------------------------------
+
+#' Get the name of the file behind an ANAC download url
+#'
+#' @param file_url Character vector of urls, possibly ending in
+#'        `/@@download/file`.
+#'
+#' @return A character vector of file names (e.g. `"basica2020-04.zip"`).
+#' @keywords internal
+anac_file_name <- function(file_url) {
+  basename(sub("/@@download/file$", "", file_url))
+}
+
+
+# is_zip_file ---------------------------------------------------------------------------------
+
+#' Check whether local files are zip archives
+#'
+#' Reads the first two bytes of each file and checks for the zip signature
+#' `PK`. ANAC sometimes returns an HTML page with HTTP status 200 instead of
+#' the requested zip file.
+#'
+#' @param path Character vector of local file paths.
+#'
+#' @return A logical vector, `FALSE` for files that are missing, empty, or not
+#'         zip archives.
+#' @keywords internal
+is_zip_file <- function(path) {
+  vapply(path, function(p) {
+    if (!file.exists(p) || isTRUE(file.info(p)$size < 4)) {
+      return(FALSE)
+    }
+    identical(readBin(p, what = "raw", n = 2L), charToRaw("PK"))
+  }, logical(1), USE.NAMES = FALSE)
+}
 
 
 # get_flight_dates_available -----------------------------------------------------------------
@@ -213,31 +285,45 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
                                   select = parent.frame()$select,
                                   cache = parent.frame()$cache){ # nocov start
 
-  # create temp local file
-  file_name <- basename(file_url)
+  # create temp local file. The name comes from the url without its
+  # '/@@download/file' suffix, otherwise every month would be saved as 'file'
+  file_name <- anac_file_name(file_url)
   temp_local_file <- fs::path(fs::path_temp(), file_name)
 
   # use cached files or not
-  if (any(cache==FALSE & file.exists(temp_local_file))) {
-    unlink(temp_local_file, recursive = T)
+  if (isFALSE(cache)) {
+    unlink(temp_local_file[file.exists(temp_local_file)])
   }
 
-  # has the file been downloaded already? If not, download it
-  if (any(cache==FALSE |
-          !file.exists(temp_local_file) |
-          file.info(temp_local_file)$size == 0)) {
+  # download files that are missing or that are not valid zip files (e.g. an
+  # HTML page saved by an earlier failed download)
+  to_download <- !is_zip_file(temp_local_file)
+
+  if (any(to_download)) {
 
     # download data
     check_download <- download_flightsbr_file(
-      file_url=file_url,
-      showProgress=showProgress,
-      dest_file = temp_local_file,
+      file_url = file_url[to_download],
+      showProgress = showProgress,
+      dest_file = temp_local_file[to_download],
       cache = cache)
 
-  # check if internet connection worked
-  if (is.null(check_download)) {
-    message("Problem connecting to ANAC data server. Please try it again.")
-    return(invisible(NULL))
+    # check if internet connection worked
+    if (is.null(check_download)) {
+      message("Problem connecting to ANAC data server. Please try it again.")
+      return(invisible(NULL))
+    }
+
+    # ANAC can answer with an HTML page (HTTP 200) instead of the zip file
+    not_zip <- !is_zip_file(temp_local_file)
+    if (any(not_zip)) {
+      unlink(temp_local_file[not_zip])
+      message(
+        "ANAC returned a web page instead of the data file for: ",
+        paste(file_name[not_zip], collapse = ", "),
+        ". Please try it again later."
+      )
+      return(invisible(NULL))
     }
   }
 

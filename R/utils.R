@@ -68,7 +68,8 @@ generate_all_months <- function(date) {
 #'
 #' @param file_url String. A url passed from above.
 #' @param showProgress Logical, passed from above.
-#' @param dest_file String, passed from above.
+#' @param dest_file String. Local path(s) where the file(s) are saved, one per
+#'        `file_url`. Defaults to the temp dir plus `basename(file_url)`.
 #' @param cache Logical, passed from above.
 #'
 #' @return Silently saves downloaded file to temp dir.
@@ -86,13 +87,12 @@ generate_all_months <- function(date) {
 #'}}
 download_flightsbr_file <- function(file_url = parent.frame()$file_url,
                                     showProgress = parent.frame()$showProgress,
-                                    dest_file = temp_local_file,
+                                    dest_file = fs::path(fs::path_temp(), basename(file_url)),
                                     cache = cache) { # nocov start
 
-  dest_file <- fs::path(
-    fs::path_temp(),
-    basename(file_url)
-  )
+  if (length(dest_file) != length(file_url)) {
+    stop("'dest_file' must have the same length as 'file_url'.")
+  }
 
   reqs <- lapply(file_url, \(url) {
 
