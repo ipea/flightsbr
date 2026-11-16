@@ -20,8 +20,11 @@ previously. Defaults to \code{TRUE}. If \code{FALSE}, the function will
 always download the data and overwrite cached data.}
 }
 \value{
-A \verb{"data.table" "data.frame"} object. All columns are returned with
-\code{class} of type \code{"character"}.
+A \verb{"data.table" "data.frame"} object. Columns of counts and
+measures are numeric; codes and identifiers (e.g. flight numbers,
+serial numbers, airport codes) are character, keeping leading
+zeros. A column with some values that are not numbers stays
+character, with a message.
 }
 \description{
 Download data of all aircraft registered in the Brazilian Aeronautical
@@ -32,7 +35,7 @@ data is available at \url{https://www.gov.br/anac/pt-br/sistemas/rab}.
 \examples{
 \dontrun{ if (interactive()) {
 # Read aircraft data
-aircraft <- read_aircraft(date = 202001,
+aircraft <- read_aircraft(date = 202409,
                           showProgress = TRUE
                           )
 

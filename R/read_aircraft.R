@@ -11,8 +11,11 @@
 #' @template showProgress
 #' @template cache
 #'
-#' @return A `"data.table" "data.frame"` object. All columns are returned with
-#'         `class` of type `"character"`.
+#' @return A `"data.table" "data.frame"` object. Columns of counts and
+#'         measures are numeric; codes and identifiers (e.g. flight numbers,
+#'         serial numbers, airport codes) are character, keeping leading
+#'         zeros. A column with some values that are not numbers stays
+#'         character, with a message.
 #' @export
 #' @family download flight data
 #' @examples \dontrun{ if (interactive()) {

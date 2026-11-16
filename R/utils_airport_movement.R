@@ -32,12 +32,12 @@ get_airport_movement_dates_available <- function() { # nocov start
   # function to search .csv data in subdirectories
   recursive_search <- function(i){ # i=urls[2]
 
-    # read html table
+    # read html table. NULL means the folder could not be read
     h2 <- try(rvest::read_html(i), silent = TRUE)
 
     if (class(h2)[1]=='try-error') {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))}
+      return(NULL)
+      }
 
     # get url of subdirectories
     elements2 <- rvest::html_elements(h2, "a")
@@ -50,6 +50,22 @@ get_airport_movement_dates_available <- function() { # nocov start
 
   # get urls of .csv files
   csv_urls <- lapply(X=urls, FUN=recursive_search)
+
+  failed <- vapply(csv_urls, is.null, logical(1))
+  if (all(failed)) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
+  if (any(failed)) {
+    message(sprintf(
+      paste0(
+        "Could not reach %d of %d year(s) on the ANAC data server; the ",
+        "list of available dates may be incomplete. Please try it again."
+      ),
+      sum(failed), length(failed)
+    ))
+  }
+
   csv_urls <- unlist(csv_urls)
   # return(csv_urls) # if one wants to return the csv url
   csv_urls <- gsub('.csv.csv', '.csv', csv_urls, fixed = TRUE)

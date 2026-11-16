@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{download_flightsbr_file}
 \alias{download_flightsbr_file}
-\title{Download file from url}
+\title{Download files from urls, reusing cached copies}
 \usage{
 download_flightsbr_file(
   file_url = parent.frame()$file_url,
@@ -19,13 +19,19 @@ download_flightsbr_file(
 \item{dest_file}{String. Local path(s) where the file(s) are saved, one per
 \code{file_url}. Defaults to the temp dir plus \code{basename(file_url)}.}
 
-\item{cache}{Logical, passed from above.}
+\item{cache}{Logical, passed from above. If \code{FALSE}, existing files at
+\code{dest_file} are deleted and downloaded again.}
 }
 \value{
-Silently saves downloaded file to temp dir.
+\code{TRUE} (invisibly) if every file is available locally, otherwise
+\code{NULL} (invisibly) with a message.
 }
 \description{
-Download file from url
+Downloads each file to a temporary \code{.part} file and only moves it to
+\code{dest_file} once the download succeeded and the content is not an HTML
+page. A failed or blocked request therefore never leaves a file at
+\code{dest_file}, so later calls with \code{cache = TRUE} cannot read an error page as
+data.
 }
 \examples{
 \dontrun{ if (interactive()) {

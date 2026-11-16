@@ -124,6 +124,12 @@ get_flights_files_available <- function(cache = TRUE) { # nocov start
 
   files <- data.table::rbindlist(files, fill = TRUE)
 
+  # no table with the expected columns, e.g. ANAC served a maintenance page
+  if (nrow(files) == 0 || !all(c("date", "type", "url") %in% names(files))) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
+
   files <- files[
     !is.na(date) &
       !is.na(url) &
