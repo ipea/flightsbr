@@ -1,7 +1,26 @@
 # flightsbr (development version)
 
+* Breaking changes:
+
+  * `read_airfares()` now returns the same column names for every period, using the names of ANAC's current files: `nr_ano_referencia`, `nr_mes_referencia`, `sg_empresa_icao`, `sg_icao_origem`, `sg_icao_destino`, `nr_tarifa`, `nr_assentos`, and for international flights also `sg_icao_retorno`, `cd_classe_ida` and `cd_classe_volta`. Older names such as `ano`, `tarifa` or `valor_tarifa` are no longer returned, but are still accepted by `select`.
+  * Identifier columns are no longer converted to numbers, so they keep their leading zeros: `nr_voo` and `nr_chave` (`read_flights()`), `nr_voo_numero` (`read_airport_movements()`), and `nr_serie` and `nr_cert_matricula` (`read_aircraft()`).
+  * More generally, a column named like a number (`nr_*`, `qt_*`, ...) is converted to numeric only if all its values are numbers. Otherwise it stays character, with a message when only a few values are the problem (e.g. `nr_preco_venda` in recent RAB files). The type of such a column can therefore differ between requests for different months.
+  * `read_aircraft()`: the registration mark column is always called `marcas` (it was `marca` in files before 2026), and empty cells and the text `"null"` are returned as `NA`.
+
 * Bug fixes:
 
+  * Fixed `read_airport_movements()` returning `NA` for every airport, airline and aircraft code: the codes in `nr_*` columns were converted to numbers.
+  * Fixed `read_aircraft()` returning `NA` for many serial numbers and almost all sale prices, which use Brazilian number formatting (`"1.500.000,00"`).
+  * Fixed failed downloads being cached: ANAC answers missing files and blocked requests with an HTML page, which was saved and later read as data with `cache = TRUE`. Files are now downloaded to a temporary file and only kept when the download succeeded and is not a web page. Downloads are retried and run at most four at a time.
+  * Fixed `read_airfares()` splitting fares and other columns into separate, half-empty columns when the requested months use different ANAC headers. Files with an unknown header now fail with an error.
+  * Fixed `read_airfares()` failing for months that ANAC re-uploaded under another name (e.g. May 2026, `202605 (1).csv`). Download links now come from ANAC's listing.
+  * Fixed `read_aircraft()`, `read_airport_movements()` and `read_airfares()` with a year (`date = yyyy`) failing whenever any month of that year is not available on ANAC. They now read the available months and list the missing ones in a message.
+  * Fixed `read_airports()` returning `NA` coordinates for about 29% of private airports (seconds written with a decimal comma), and altitude `0` for airports whose altitude is missing (`",0"`). `latgeopoint` and `longeopoint` are now numeric.
+  * Fixed the JSON owner and operator columns of recent RAB files (`proprietarios`, `operadores`) not being valid JSON. `read_aircraft()` warns when the requested months use different RAB layouts.
+  * Fixed a page without the flight file table being cached as a bogus listing, which broke `read_flights()` for the rest of the session. `latest_flights_date()` returns `NULL` instead of `-Inf` when ANAC can't be reached.
+  * `read_airfares()` rejects `domestic = NA` and vectors of length > 1.
+  * Large text files extracted from the flight zip files are deleted after being read.
+  * Functions no longer change the number of threads used by `data.table`.
   * Fixed `read_flights()` failing to download any data. ANAC's website now lists flight files with relative links that lead to an HTML page instead of the zip file. The package now builds the direct download link (`https://www.gov.br/.../<file>.zip/@@download/file`), saves each month under its own file name, and checks that each downloaded file is really a zip archive, with a clear message when ANAC returns a web page instead.
 
 
