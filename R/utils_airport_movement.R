@@ -85,21 +85,10 @@ get_airport_movements_url <- function(date = parent.frame()$date) { # nocov star
   url_root <- 'https://sistemas.anac.gov.br/dadosabertos/Operador%20Aeroportu%C3%A1rio/Dados%20de%20Movimenta%C3%A7%C3%A3o%20Aeroportu%C3%A1rias/'
 
 
-  # date with format yyyymm
-  if (all(nchar(date)==6)) {
-    year <- substring(date,1,4)
-    file_name <- paste0(year, '/', 'Movimentacoes_Aeroportuarias_', date, '.csv')
-    file_urls <- paste0(url_root, file_name)
-  }
-
-
-  # date with format yyyy
-  if (all(nchar(date)==4)) {
-    all_dates <- generate_all_months(date)
-    year <- substring(all_dates,1,4)
-    file_name <- paste0(year, '/', 'Movimentacoes_Aeroportuarias_', all_dates, '.csv')
-    file_urls <- paste0(url_root, file_name)
-  }
+  # date with format yyyymm (years are expanded by available_months())
+  year <- substring(date,1,4)
+  file_name <- paste0(year, '/', 'Movimentacoes_Aeroportuarias_', date, '.csv')
+  file_urls <- paste0(url_root, file_name)
 
   return(file_urls)
 } # nocov end

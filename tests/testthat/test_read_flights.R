@@ -15,7 +15,9 @@ test_that("read_flights", {
   test1 <- read_flights()
   testthat::expect_true(is(test1, "data.table"))
   testthat::expect_true(nrow(test1) >0 )
-  testthat::expect_equal( class(test1$nr_voo), 'numeric')
+  # flight numbers are identifiers and keep their leading zeros
+  testthat::expect_equal( class(test1$nr_voo), 'character')
+  testthat::expect_equal( class(test1$nr_passag_pagos), 'numeric')
 
   # one month, combinada, no progress bar
   test2 <- read_flights(date=202401, type='combinada', showProgress = FALSE)

@@ -61,20 +61,10 @@ get_aircraft_url <- function(date = parent.frame()$date) { # nocov start
 
   url_root <- 'https://sistemas.anac.gov.br/dadosabertos/Aeronaves/RAB/Historico_RAB/'
 
-  # date with format yyyymm
-  if (all(nchar(date)==6)) {
-    years <- substring(date,1,4)
-    months <- substring(date,5,6)
-    file_urls <- paste0(url_root, years, '-', months, '.csv')
-  }
-
-  # date with format yyyy
-  if (all(nchar(date)==4)) {
-    all_dates <- generate_all_months(date)
-    years <- substring(all_dates,1,4)
-    months <- substring(all_dates,5,6)
-    file_urls <- paste0(url_root, years, '-', months, '.csv')
-    }
+  # date with format yyyymm (years are expanded by available_months())
+  years <- substring(date,1,4)
+  months <- substring(date,5,6)
+  file_urls <- paste0(url_root, years, '-', months, '.csv')
 
   return(file_urls)
 } # nocov end

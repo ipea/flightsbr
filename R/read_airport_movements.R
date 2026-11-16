@@ -43,6 +43,9 @@ read_airport_movements <- function(date = NULL,
   if (is.null(date)) { date <- max(all_dates) }
   check_date(date=date, all_dates)
 
+  # expand years to the months available on ANAC
+  date <- available_months(date, all_dates)
+
 
   #### Download and read data
 

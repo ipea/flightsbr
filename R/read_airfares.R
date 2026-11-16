@@ -84,7 +84,7 @@ read_airfares <- function(
   )
 
   # convert columns to numeric
-  convert_to_numeric(dt, type = 'airfare')
+  convert_to_numeric(dt)
 
   return(dt)
 }

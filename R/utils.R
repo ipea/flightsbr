@@ -62,6 +62,37 @@ generate_all_months <- function(date) {
 }
 
 
+#' Expand requested years into the months available on ANAC
+#'
+#' @param date Numeric. Requested dates, either all `yyyymm` or all `yyyy`
+#'        (already checked with [check_date()]).
+#' @param all_dates Numeric vector of `yyyymm` dates available on ANAC.
+#'
+#' @return Numeric vector of `yyyymm` dates. `yyyymm` input is returned
+#'         unchanged; `yyyy` input is expanded to the months of those years
+#'         that are available, with a message listing the missing months.
+#' @keywords internal
+available_months <- function(date, all_dates) {
+
+  if (!all(nchar(date) == 4)) {
+    return(date)
+  }
+
+  requested <- generate_all_months(date)
+  available <- requested[requested %in% all_dates]
+  missing <- setdiff(requested, available)
+
+  if (length(missing) > 0) {
+    message(
+      "Data for these months is not available on ANAC and was skipped: ",
+      paste(missing, collapse = ", ")
+    )
+  }
+
+  return(available)
+}
+
+
 
 
 #' Download files from urls, reusing cached copies
@@ -242,12 +273,16 @@ starts_like_html <- function(path) {
 
 #' Convert latitude and longitude columns to numeric
 #'
-#' @param df A data.frame internal to the `read_airport()` function.
+#' Coordinates are written in degrees, minutes and seconds (e.g.
+#' `30\u00b050'39,8"S`). Some files use a decimal comma in the seconds, which
+#' `parzer` can't read, so commas are replaced with dots first.
 #'
-#' @return A `"data.table" "data.frame"` object
+#' @param df A data.table internal to the `read_airports()` function.
+#'
+#' @return A `"data.table" "data.frame"` object, modified by reference.
 #'
 #' @keywords internal
-latlon_to_numeric <- function(df){ # nocov start
+latlon_to_numeric <- function(df){
 
   # check if df has lat lon colnames
   if(!'latitude' %in% names(df)){ stop("Column 'latitude' is missing from original ANAC data.") }
@@ -256,89 +291,136 @@ latlon_to_numeric <- function(df){ # nocov start
   # ref
   # https://semba-blog.netlify.app/02/25/2020/geographical-coordinates-conversion-made-easy-with-parzer-package-in-r/
 
-  # supress warning
-  defaultW <- getOption("warn")
-  options(warn = -1)
-
-  # # fix string
-  # df[, latitude := gsub("[\u00c2]", "", latitude) ]
-  # df[, longitude := gsub("[\u00c2]", "", longitude) ]
-
-  # convert to numeric
-  df[, latitude := parzer::parse_lat(latitude) ]
-  df[, longitude := parzer::parse_lon(longitude) ]
-
-  # duckplyr
-  # df <- df |>
-  #   mutate(latitude = parzer::parse_lat(latitude),
-  #          longitude = parzer::parse_lon(longitude)
-  #          )
-
-
-  # restore warnings
-  options(warn = defaultW)
+  suppressWarnings({
+    df[, latitude := parzer::parse_lat(gsub(",", ".", latitude, fixed = TRUE)) ]
+    df[, longitude := parzer::parse_lon(gsub(",", ".", longitude, fixed = TRUE)) ]
+  })
 
   return(df)
-} # nocov end
+}
 
 
 #' Convert altitude column to numeric
 #'
-#' @param df A data.frame internal to the `read_airport()` function.
+#' Altitudes are written like `"512,3 m"`. A value with no digit before the
+#' decimal comma (`",0"`) is how ANAC marks a missing altitude, so it becomes
+#' `NA`.
 #'
-#' @return A `"data.table" "data.frame"` object
+#' @param df A data.table internal to the `read_airports()` function.
+#'
+#' @return A `"data.table" "data.frame"` object, modified by reference.
 #'
 #' @keywords internal
-altitude_to_numeric <- function(df){ # nocov start
+altitude_to_numeric <- function(df){
 
-  # check if df has lat lon colnames
   if(!'altitude' %in% names(df)){ stop("Column 'altitude' is missing from original ANAC data.") }
 
-  # supress warning
-  defaultW <- getOption("warn")
-  options(warn = -1)
+  alt <- trimws(gsub(" m", "", df$altitude, fixed = TRUE))
+  alt[grepl("^,", alt)] <- NA
+  alt <- suppressWarnings(as.numeric(gsub(",", ".", alt, fixed = TRUE)))
 
-  # fix string
-  df[, altitude := gsub(" m", "", altitude) ]
-  df[, altitude := gsub(",", ".", altitude) ]
-
-  # convert to numeric
-  df[, altitude := as.numeric(altitude) ]
-
-  # restore warnings
-  options(warn = defaultW)
+  df[, altitude := alt ]
 
   return(df)
-} # nocov end
+}
 
 
-
-
+#' Convert numeric-like columns to numeric
+#'
+#' Candidate columns are those named like `nr_*`, `qt_*`, `comprimento_*`,
+#' `largura_*`, `latgeopoint` and `longeopoint`, except identifiers that must
+#' keep their leading zeros (e.g. flight numbers and serial numbers). A
+#' candidate column is converted only if every non-missing value can be read
+#' as a number. Otherwise it is left as character, so codes such as airport
+#' or airline identifiers are never turned into `NA`. A message lists the
+#' columns that were left as character because of a few stray values.
+#'
+#' Values with a decimal comma (`"1.500.000,00"`) have their thousands dots
+#' removed; values without a comma are read as they are (`"360.0"`).
+#'
+#' @param dt A data.table with clean (lower case) column names. Modified by
+#'        reference.
+#'
+#' @return `TRUE`, invisibly.
 #' @keywords internal
-convert_to_numeric <- function(dt, type='standard') { # nocov start
+convert_to_numeric <- function(dt) {
 
-  # detect if there are any columns that should be numeric
-  numeric_cols <- names(dt)[names(dt) %like% 'NR_|nr_|qt_|comprimento_|largura_']
-  numeric_cols <- numeric_cols[numeric_cols != 'nr_singular']
+  candidates <- grep(
+    "^(nr|qt|comprimento|largura)_|^(lat|lon)geopoint$",
+    names(dt),
+    value = TRUE
+  )
+  candidates <- setdiff(candidates, id_columns)
+  candidates <- candidates[vapply(dt[, candidates, with = FALSE], is.character, logical(1))]
 
-  if (type =='airfare') {
-    airfare_num_cols <- c('ano', 'mes', 'tarifa_n', 'tarifa', 'assentos')
-    airfare_num_cols <- airfare_num_cols[airfare_num_cols %in% names(dt)]
-    numeric_cols <- c(numeric_cols, airfare_num_cols)
+  kept_as_character <- character(0)
+
+  for (col in candidates) {
+
+    x <- dt[[col]]
+    x[trimws(x) %in% na_tokens] <- NA_character_
+
+    # maximum takeoff weight is an integer number of kg, sometimes written
+    # with units or thousands separators ("5 490", "5670kg", "2.850")
+    if (col == "nr_pmd") {
+      x <- gsub("[^0-9]", "", x)
+      x[!nzchar(x)] <- NA_character_
     }
 
+    num <- parse_number_br(x)
 
-  if (length(numeric_cols)==0) { return(invisible(TRUE)) }
+    bad <- is.na(num) & !is.na(x)
+    if (any(bad)) {
+      # only report columns that are mostly numbers with a few stray values;
+      # columns of codes (e.g. airport codes) are text and stay character
+      # silently
+      if (mean(bad[!is.na(x)]) > 0.1) {
+        next
+      }
+      kept_as_character <- c(
+        kept_as_character,
+        sprintf("%s (%d values such as %s)",
+                col, sum(bad),
+                paste0('"', utils::head(unique(x[bad]), 2), '"', collapse = ", "))
+      )
+      next
+    }
 
-  # replace , with . for numbers
-  dt[,(numeric_cols):= lapply(.SD, FUN = function(x){gsub(',','.',x)}), .SDcols = numeric_cols]
-  # to numeric
-  suppressWarnings(
-    dt[,(numeric_cols):= lapply(.SD, as.numeric), .SDcols = numeric_cols]
+    data.table::set(dt, j = col, value = num)
+  }
+
+  if (length(kept_as_character) > 0) {
+    message(
+      "These columns were kept as character because some values are not ",
+      "numbers: ", paste(kept_as_character, collapse = "; ")
     )
+  }
 
   return(invisible(TRUE))
-} # nocov end
+}
+
+
+#' Parse numbers written in Brazilian or international format
+#'
+#' @param x Character vector.
+#'
+#' @return Numeric vector. Values with a decimal comma have their thousands
+#'         dots removed first; values without a comma are parsed as they are.
+#' @keywords internal
+parse_number_br <- function(x) {
+  x <- trimws(x)
+  has_comma <- grepl(",", x, fixed = TRUE)
+  x[has_comma] <- sub(",", ".", gsub(".", "", x[has_comma], fixed = TRUE), fixed = TRUE)
+  suppressWarnings(as.numeric(x))
+}
+
+
+# columns named like numbers that are identifiers and must stay character
+id_columns <- c("nr_voo", "nr_voo_numero", "nr_chave", "nr_singular",
+                "nr_serie", "nr_cert_matricula")
+
+# values ANAC uses for missing data
+na_tokens <- c("", "null", "NULL", "NA", "N/A", "-", "XXXX", "....")
 
 
 
