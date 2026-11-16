@@ -17,7 +17,7 @@
 #' @family download flight data
 #' @examples \dontrun{ if (interactive()) {
 #' # Read aircraft data
-#' aircraft <- read_aircraft(date = 202001,
+#' aircraft <- read_aircraft(date = 202409,
 #'                           showProgress = TRUE
 #'                           )
 #'

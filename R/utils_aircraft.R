@@ -81,10 +81,10 @@ get_aircraft_url <- function(date = parent.frame()$date) { # nocov start
 #' @keywords internal
 #' @examples \dontrun{ if (interactive()) {
 #' # Generate url
-#' file_url <- get_airfares_url(dom = TRUE, year=2002, month=11)
+#' file_url <- get_aircraft_url(date = 202409)
 #'
 #' # download data
-#' a <- download_airfares_data(file_url=file_url, showProgress=TRUE, select=NULL)
+#' a <- download_aircraft_data(file_url = file_url, showProgress = TRUE, cache = TRUE)
 #'}}
 download_aircraft_data <- function(file_url = parent.frame()$file_url,
                                     showProgress = parent.frame()$showProgress,
@@ -102,43 +102,69 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
                                             cache = cache)
   if (is.null(check_download)) { return(invisible(NULL)) }
 
-
-
-
   # read files stored locally
-  dt <- pbapply::pblapply(X=temp_local_file,
-                          FUN = function(x){
+  dt <- pbapply::pblapply(X = temp_local_file,
+                          FUN = read_aircraft_file,
+                          showProgress = showProgress)
 
-                            # read
-                            temp_x <- data.table::fread(x,
-                                showProgress = showProgress,
-                                encoding = 'UTF-8',
-                                colClasses = 'character',
-                                skip = 1,
-                                sep = ';')
+  # ANAC changed the RAB layout in 2026: warn when months with different
+  # layouts are combined
+  layouts <- unique(lapply(dt, names))
+  if (length(layouts) > 1) {
+    all_cols <- unique(unlist(layouts))
+    partial <- all_cols[!vapply(all_cols, \(col) all(vapply(dt, \(x) col %in% names(x), logical(1))), logical(1))]
+    warning(
+      "The requested months use different RAB file layouts. These columns ",
+      "only exist in some months and are NA in the others: ",
+      paste(janitor::make_clean_names(partial), collapse = ", "),
+      call. = FALSE
+    )
+  }
 
-                            # add date of reference
-                            xdate <- fs::path_ext_remove(basename(x))
-                            xdate <- gsub('-', '', xdate)
-                            temp_x[, reference_date := xdate]
-                            })
-
-
-          # # isso aqui funciona
-          # dt <- duckplyr::read_csv_duckdb(
-          #   path = temp_local_file,
-          #   options = list(
-          #     delim = ";",
-          #     # types = list("VARCHAR"),
-          #     all_varchar = TRUE,
-          #     encoding = 'UTF-8'
-          #     , skip = 1
-          #   )
-          # )
-
-
-  dt <- data.table::rbindlist(dt, fill = TRUE)
-
+  dt <- data.table::rbindlist(dt, use.names = TRUE, fill = TRUE)
 
   return(dt)
 } # nocov end
+
+
+#' Read one RAB file
+#'
+#' Reads a monthly RAB file and makes the layouts ANAC has used comparable:
+#' the registration mark column is always `MARCAS` (it was `MARCA` until early
+#' 2026), empty cells and the text `"null"` become `NA`, and quotes escaped as
+#' `""` inside a field (used in the JSON owner and operator columns) are
+#' un-escaped.
+#'
+#' @param path String. Local file path. The file name must be `yyyy-mm.csv`.
+#' @template showProgress
+#'
+#' @return A data.table with raw (upper case) column names and a
+#'         `reference_date` column.
+#' @keywords internal
+read_aircraft_file <- function(path, showProgress = FALSE) {
+
+  dt <- data.table::fread(path,
+                          showProgress = showProgress,
+                          encoding = 'UTF-8',
+                          colClasses = 'character',
+                          skip = 1,
+                          sep = ';')
+
+  data.table::setnames(dt, "MARCA", "MARCAS", skip_absent = TRUE)
+
+  # fread keeps "" (an escaped quote) as two characters, and its na.strings
+  # argument does not apply to quoted fields, so fix both here
+  for (col in names(dt)) {
+    x <- dt[[col]]
+    x[x %in% c("", "null")] <- NA_character_
+    has_escaped_quote <- !is.na(x) & grepl('""', x, fixed = TRUE)
+    x[has_escaped_quote] <- gsub('""', '"', x[has_escaped_quote], fixed = TRUE)
+    data.table::set(dt, j = col, value = x)
+  }
+
+  # add date of reference
+  xdate <- gsub('-', '', fs::path_ext_remove(basename(path)))
+  dt[, reference_date := xdate]
+
+  return(dt)
+}

@@ -21,7 +21,12 @@ testthat::test_that("read_aircraft", {
   testthat::expect_true(grepl('marca', names(read_aircraft())[1]))
 
   # test vector of dates
-  test3 <- read_aircraft(date = c(202409, 202608), showProgress = FALSE)
+  # months with different RAB layouts: warns and binds by name
+  testthat::expect_warning(
+    test3 <- read_aircraft(date = c(202409, 202608), showProgress = FALSE),
+    'different RAB file layouts'
+  )
+  testthat::expect_false(anyNA(test3$marcas))
   testthat::expect_true(is(test3, "data.table"))
 
   # # test date all months in a year
