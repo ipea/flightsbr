@@ -3,7 +3,7 @@
 #' @description
 #' Download airport movements data from Brazil’s Civil Aviation Agency (ANAC).
 #' The data covers all passenger, aircraft, cargo and mail movement data from
-#' airports regulated by ANAC. Data only available from Jan 2019 onwards. A
+#' airports regulated by ANAC. Data only available from March 2019 onwards. A
 #' description of all variables included in the data is available at
 #' \url{https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/operador-aeroportuario/dados-de-movimentacao-aeroportuaria/60-dados-de-movimentacao-aeroportuaria}.
 #'
@@ -12,8 +12,11 @@
 #' @template showProgress
 #' @template cache
 #'
-#' @return A `"data.table" "data.frame"` object. All columns are returned with
-#'         `class` of type `"character"`.
+#' @return A `"data.table" "data.frame"` object. Columns of counts and
+#'         measures are numeric; codes and identifiers (e.g. flight numbers,
+#'         serial numbers, airport codes) are character, keeping leading
+#'         zeros. A column with some values that are not numbers stays
+#'         character, with a message.
 #' @export
 #' @family download airport movement data
 #' @examples \dontrun{ if (interactive()) {
@@ -42,6 +45,9 @@ read_airport_movements <- function(date = NULL,
   # check dates
   if (is.null(date)) { date <- max(all_dates) }
   check_date(date=date, all_dates)
+
+  # expand years to the months available on ANAC
+  date <- available_months(date, all_dates)
 
 
   #### Download and read data

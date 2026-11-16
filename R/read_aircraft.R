@@ -11,13 +11,16 @@
 #' @template showProgress
 #' @template cache
 #'
-#' @return A `"data.table" "data.frame"` object. All columns are returned with
-#'         `class` of type `"character"`.
+#' @return A `"data.table" "data.frame"` object. Columns of counts and
+#'         measures are numeric; codes and identifiers (e.g. flight numbers,
+#'         serial numbers, airport codes) are character, keeping leading
+#'         zeros. A column with some values that are not numbers stays
+#'         character, with a message.
 #' @export
 #' @family download flight data
 #' @examples \dontrun{ if (interactive()) {
 #' # Read aircraft data
-#' aircraft <- read_aircraft(date = 202001,
+#' aircraft <- read_aircraft(date = 202409,
 #'                           showProgress = TRUE
 #'                           )
 #'
@@ -43,6 +46,9 @@ read_aircraft <- function(date = NULL,
   # check dates
   if (is.null(date)) { date <- max(all_dates) }
   check_date(date=date, all_dates)
+
+  # expand years to the months available on ANAC
+  date <- available_months(date, all_dates)
 
   # get url of files
   file_urls <- get_aircraft_url(date)

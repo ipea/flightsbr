@@ -32,12 +32,12 @@ get_airport_movement_dates_available <- function() { # nocov start
   # function to search .csv data in subdirectories
   recursive_search <- function(i){ # i=urls[2]
 
-    # read html table
+    # read html table. NULL means the folder could not be read
     h2 <- try(rvest::read_html(i), silent = TRUE)
 
     if (class(h2)[1]=='try-error') {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))}
+      return(NULL)
+      }
 
     # get url of subdirectories
     elements2 <- rvest::html_elements(h2, "a")
@@ -50,6 +50,22 @@ get_airport_movement_dates_available <- function() { # nocov start
 
   # get urls of .csv files
   csv_urls <- lapply(X=urls, FUN=recursive_search)
+
+  failed <- vapply(csv_urls, is.null, logical(1))
+  if (all(failed)) {
+    message("Problem connecting to ANAC data server. Please try it again.")
+    return(invisible(NULL))
+  }
+  if (any(failed)) {
+    message(sprintf(
+      paste0(
+        "Could not reach %d of %d year(s) on the ANAC data server; the ",
+        "list of available dates may be incomplete. Please try it again."
+      ),
+      sum(failed), length(failed)
+    ))
+  }
+
   csv_urls <- unlist(csv_urls)
   # return(csv_urls) # if one wants to return the csv url
   csv_urls <- gsub('.csv.csv', '.csv', csv_urls, fixed = TRUE)
@@ -85,21 +101,10 @@ get_airport_movements_url <- function(date = parent.frame()$date) { # nocov star
   url_root <- 'https://sistemas.anac.gov.br/dadosabertos/Operador%20Aeroportu%C3%A1rio/Dados%20de%20Movimenta%C3%A7%C3%A3o%20Aeroportu%C3%A1rias/'
 
 
-  # date with format yyyymm
-  if (all(nchar(date)==6)) {
-    year <- substring(date,1,4)
-    file_name <- paste0(year, '/', 'Movimentacoes_Aeroportuarias_', date, '.csv')
-    file_urls <- paste0(url_root, file_name)
-  }
-
-
-  # date with format yyyy
-  if (all(nchar(date)==4)) {
-    all_dates <- generate_all_months(date)
-    year <- substring(all_dates,1,4)
-    file_name <- paste0(year, '/', 'Movimentacoes_Aeroportuarias_', all_dates, '.csv')
-    file_urls <- paste0(url_root, file_name)
-  }
+  # date with format yyyymm (years are expanded by available_months())
+  year <- substring(date,1,4)
+  file_name <- paste0(year, '/', 'Movimentacoes_Aeroportuarias_', date, '.csv')
+  file_urls <- paste0(url_root, file_name)
 
   return(file_urls)
 } # nocov end
@@ -130,37 +135,17 @@ download_airport_movement_data <- function(file_url = parent.frame()$file_url,
   file_name <- basename(file_url)
   temp_local_file <- fs::path(fs::path_temp(), file_name)
 
-  # use cached files or not
-  if (any(cache==FALSE & file.exists(temp_local_file))) {
-    unlink(temp_local_file, recursive = T)
-  }
-
-  # has the file been downloaded already? If not, download it
-  if (any(cache==FALSE |
-          !file.exists(temp_local_file) |
-          file.info(temp_local_file)$size == 0)) {
-
-    # download data
-    check_download <- download_flightsbr_file(
-      file_url=file_url,
-      showProgress=showProgress,
-      dest_file = temp_local_file,
-      cache = cache)
-
-    # check if internet connection worked
-    if (is.null(check_download)) {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))
-    }
-  }
+  # download files that are not cached yet
+  check_download <- download_flightsbr_file(file_url = file_url,
+                                            showProgress = showProgress,
+                                            dest_file = temp_local_file,
+                                            cache = cache)
+  if (is.null(check_download)) { return(invisible(NULL)) }
 
 
 
 
 
-  ### set threads for fread
-  orig_threads <- data.table::getDTthreads()
-  data.table::setDTthreads(percent = 100)
 
   # # assign column classes
   # dt_classes <- list(IDate=c('DT_PREVISTO', 'DT_CALCO', 'DT_TOQUE'),
@@ -177,8 +162,6 @@ download_airport_movement_data <- function(file_url = parent.frame()$file_url,
 
 
 
-  # return to original threads
-  data.table::setDTthreads(orig_threads)
 
   return(dt)
 } # nocov end

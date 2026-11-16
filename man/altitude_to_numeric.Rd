@@ -7,12 +7,14 @@
 altitude_to_numeric(df)
 }
 \arguments{
-\item{df}{A data.frame internal to the \code{read_airport()} function.}
+\item{df}{A data.table internal to the \code{read_airports()} function.}
 }
 \value{
-A \verb{"data.table" "data.frame"} object
+A \verb{"data.table" "data.frame"} object, modified by reference.
 }
 \description{
-Convert altitude column to numeric
+Altitudes are written like \code{"512,3 m"}. A value with no digit before the
+decimal comma (\code{",0"}) is how ANAC marks a missing altitude, so it becomes
+\code{NA}.
 }
 \keyword{internal}

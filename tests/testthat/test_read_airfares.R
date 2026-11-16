@@ -29,13 +29,13 @@ testthat::test_that("read_airfares", {
   testthat::expect_true(nrow(test4) >0 )
 
   # check content
-  testthat::expect_equal( as.character(min(test3$ano)), as.character("2004") )
+  testthat::expect_equal( as.character(min(test3$nr_ano_referencia)), as.character("2004") )
   testthat::expect_equal( as.character(min(test4$nr_ano_referencia)), as.character("2025") )
 
   # multiple months in a year
   test5 <- read_airfares(date=200401:200402, select='TARIFA', showProgress = TRUE)
   testthat::expect_true(is(test5, "data.table") | is.null(test5))
-  testthat::expect_equal(names(test5), 'tarifa')
+  testthat::expect_equal(names(test5), 'nr_tarifa')
 
   test6 <- read_airfares(date=201101:201102,
                          domestic = FALSE,
@@ -43,11 +43,17 @@ testthat::test_that("read_airfares", {
                          select='VALOR_TARIFA'
                          )
   testthat::expect_true(is(test6, "data.table"))
-  testthat::expect_equal(names(test6), 'valor_tarifa')
+  testthat::expect_equal(names(test6), 'nr_tarifa')
 
   # test vector of dates
   test7 <- read_airfares(date = c(200401, 200402), showProgress = FALSE)
   testthat::expect_true(is(test7, "data.table"))
+
+  # months with different ANAC headers bind into the same columns
+  test8 <- read_airfares(date = c(202304, 202305), showProgress = FALSE)
+  testthat::expect_true(all(c('nr_tarifa', 'nr_assentos') %in% names(test8)))
+  testthat::expect_false(anyNA(test8$nr_tarifa))
+  testthat::expect_type(test8$nr_tarifa, 'double')
 
 
 })
@@ -76,6 +82,8 @@ testthat::test_that("read_airfares", {
   testthat::expect_error(read_airfares(showProgress='banana'))
   testthat::expect_warning(read_airfares(select='banana'))
   testthat::expect_error(read_airfares(cache='banana'))
+  testthat::expect_error(read_airfares(domestic=NA))
+  testthat::expect_error(read_airfares(domestic=c(TRUE, FALSE)))
 })
 
 # # mock test

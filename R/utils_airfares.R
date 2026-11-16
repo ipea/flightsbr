@@ -10,18 +10,40 @@
 #' @keywords internal
 #' @examples \dontrun{ if (interactive()) {
 #' # check dates
-#' a <- get_airfares_dates_available(domestic = TRUE)
+#' a <- get_airfares_dates_available(dom = TRUE)
 #'}}
 get_airfares_dates_available <- function(dom, cache = TRUE) { # nocov start
 
-  # this function makes ~1 HTTP request per year subdirectory on ANAC's
-  # server (~25 requests). Cache the result to a session-scoped temp file
-  # so repeated calls within the same R session (e.g. several read_airfares()
-  # calls) don't repeatedly re-scrape the whole site
+  files <- get_airfares_files_available(dom = dom, cache = cache)
+
+  if (is.null(files)) {
+    return(invisible(NULL))
+  }
+
+  return(sort(unique(as.numeric(files$date))))
+} # nocov end
+
+
+#' Retrieve the airfare files available on the ANAC website
+#'
+#' Scrapes ANAC's directory listing (one request per year folder) and keeps
+#' one file per month. The result is cached for the R session. If some year
+#' folders could not be read, the result has an attribute `failed_years` with
+#' those years.
+#'
+#' @inheritParams get_airfares_dates_available
+#'
+#' @return A data.table with columns `date` (numeric, `yyyymm`) and `url`, or
+#'         `NULL` if ANAC could not be reached.
+#' @keywords internal
+get_airfares_files_available <- function(dom, cache = TRUE) { # nocov start
+
+  # one HTTP request per year folder (~25), so cache the listing for the
+  # session
   cache_file <- fs::path(
     fs::path_temp(),
     paste0(
-      "flightsbr_airfares_dates_",
+      "flightsbr_airfares_files_",
       if (isTRUE(dom)) "domestic" else "international",
       ".rds"
     )
@@ -35,454 +57,335 @@ get_airfares_dates_available <- function(dom, cache = TRUE) { # nocov start
     return(readRDS(cache_file))
   }
 
-  # base URL
-  if (isTRUE(dom)) {
-    base_url <- "https://sas.anac.gov.br/sas/tarifadomestica/"
+  base_url <- if (isTRUE(dom)) {
+    "https://sas.anac.gov.br/sas/tarifadomestica/"
   } else {
-    base_url <- "https://sas.anac.gov.br/sas/tarifainternacional/"
-  }
-
-  # helper to read ANAC HTML pages. ANAC's server intermittently drops
-  # individual requests when this function has to make many of them in a
-  # row (one per year subdirectory below), so each request gets a timeout
-  # and automatic retries for transient failures (both HTTP-level, e.g.
-  # 429/503, and low-level connection failures/timeouts).
-  read_anac_html <- function(url) {
-
-    resp <- try(
-      httr2::request(url) |>
-        httr2::req_user_agent(
-          "Mozilla/5.0 (compatible; flightsbr; +https://github.com/ipea/flightsbr)"
-        ) |>
-        httr2::req_headers(
-          Accept = paste0(
-            "text/html,application/xhtml+xml,application/xml;",
-            "q=0.9,*/*;q=0.8"
-          ),
-          `Accept-Language` = "pt-BR,pt;q=0.9,en;q=0.8"
-        ) |>
-        httr2::req_timeout(30) |>
-        httr2::req_retry(max_tries = 4, retry_on_failure = TRUE) |>
-        httr2::req_perform(),
-      silent = TRUE
-    )
-
-    if (inherits(resp, "try-error")) {
-      return(NULL)
-    }
-
-    return(httr2::resp_body_html(resp))
+    "https://sas.anac.gov.br/sas/tarifainternacional/"
   }
 
   # read main page
-  h <- read_anac_html(base_url)
+  href <- read_anac_listing(base_url)
 
-  if (is.null(h)) {
+  if (is.null(href)) {
     message("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
-  # get links
-  href <- h |>
-    rvest::html_elements("a") |>
-    rvest::html_attr("href")
+  # links to year folders
+  folder <- if (isTRUE(dom)) "/tarifadomestica/" else "/tarifainternacional/"
+  years <- unique(sub(
+    paste0(".*", folder, "([0-9]{4})/?$"), "\\1",
+    href[grepl(paste0(folder, "[0-9]{4}/?$"), href)]
+  ))
 
-  # keep links to year subdirectories
-  if (isTRUE(dom)) {
-    basica_urls <- href[
-      grepl("/tarifadomestica/2", href, fixed = TRUE)
-    ]
-  } else {
-    basica_urls <- href[
-      grepl("/tarifainternacional/2", href, fixed = TRUE)
-    ]
-  }
+  # links to data files, one request per year folder. NULL means the folder
+  # could not be read
+  href_by_year <- lapply(paste0(base_url, years, "/"), read_anac_listing)
+  failed_years <- years[vapply(href_by_year, is.null, logical(1))]
 
-  # get years available
-  years <- gsub(
-    "[^\\d]+",
-    "",
-    basica_urls,
-    perl = TRUE
-  )
-
-  # remove missing/empty values
-  years <- years[
-    !is.na(years) &
-      nzchar(years)
-  ]
-
-  # get URLs of year subdirectories
-  urls <- paste0(base_url, years)
-
-  # search for CSV/TXT files inside each year. returns NULL (as opposed to
-  # character(0)) when the request itself failed, so failures can be told
-  # apart from a year subdirectory that legitimately has no files
-  recursive_search <- function(url) {
-
-    h <- read_anac_html(url)
-
-    if (is.null(h)) {
-      return(NULL)
-    }
-
-    href <- h |>
-      rvest::html_elements("a") |>
-      rvest::html_attr("href")
-
-    files <- href[
-      grepl(
-        "\\.(csv|txt)$",
-        href,
-        ignore.case = TRUE
-      )
-    ]
-
-    return(files)
-  }
-
-  # get URLs of CSV/TXT files, one request per year subdirectory
-  csv_urls_by_year <- lapply(urls, recursive_search)
-
-  # a handful of individual year requests can still fail even after the
-  # retries in read_anac_html() -- track them instead of silently dropping
-  # them, so we can tell "ANAC is down" apart from "this year has no data"
-  failed_years <- sum(vapply(csv_urls_by_year, is.null, logical(1)))
-
-  if (failed_years == length(urls)) {
+  if (length(failed_years) == length(years)) {
     message("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
-  if (failed_years > 0) {
+  if (length(failed_years) > 0) {
     message(sprintf(
       paste0(
         "Could not reach %d of %d year(s) on the ANAC data server; the ",
         "list of available dates may be incomplete. Please try it again."
       ),
-      failed_years, length(urls)
+      length(failed_years), length(years)
     ))
   }
 
-  csv_urls <- unlist(csv_urls_by_year)
+  files <- airfare_files_from_hrefs(unlist(href_by_year), dom = dom)
+  files[, url := rvest::url_absolute(url, base_url)]
 
-  # get all dates available
-  if (isTRUE(dom)) {
-
-    # ANAC's domestic listings occasionally contain malformed, duplicate,
-    # or misplaced files (alternate naming like `yyyy-mm.csv`, re-uploads
-    # with `%20(1)` appended, stray .txt files, alternate-tariff variants
-    # like `tarifa_N_yyyymm.csv`). Keep only files that actually match the
-    # `yyyymm.csv` naming convention that get_airfares_url() builds URLs
-    # from, checked against the basename so it's unaffected by the length
-    # of the URL prefix.
-    csv_urls <- csv_urls[
-      grepl(
-        "^[0-9]{6}[.]csv$",
-        basename(csv_urls),
-        ignore.case = TRUE
-      )
-    ]
-
-    all_dates <- substr(
-      csv_urls,
-      nchar(csv_urls) - 9L,
-      nchar(csv_urls) - 4L
-    )
-
-  } else {
-
-    # ANAC's international listings occasionally contain malformed or
-    # misplaced files (typo'd filenames, files uploaded to the wrong year,
-    # duplicate uploads with a double extension). Keep only files that
-    # actually match the expected `internacional_yyyy-mm.csv`/`.txt`
-    # naming convention -- checked against the basename so it's unaffected
-    # by the length of the URL prefix.
-    csv_urls <- csv_urls[
-      grepl(
-        "^internacional_[0-9]{4}-[0-9]{2}[.](csv|txt)$",
-        basename(csv_urls),
-        ignore.case = TRUE
-      )
-    ]
-
-    all_dates <- substr(
-      csv_urls,
-      nchar(csv_urls) - 10L,
-      nchar(csv_urls) - 4L
-    )
-
-    all_dates <- gsub(
-      "-",
-      "",
-      all_dates,
-      fixed = TRUE
-    )
-  }
-
-  all_dates <- suppressWarnings(
-    as.numeric(all_dates)
-  )
-
-  all_dates <- all_dates[
-    !is.na(all_dates)
-  ]
-
-  # keep the contract strict: callers only need to check is.null() to
-  # detect failure, never an empty-but-non-null vector
-  if (length(all_dates) == 0) {
+  if (nrow(files) == 0) {
     message("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
-  saveRDS(all_dates, cache_file)
+  data.table::setattr(files, "failed_years", failed_years)
+  saveRDS(files, cache_file)
 
-  return(all_dates)
+  return(files)
 } # nocov end
 
 
-    # get_airfares_dates_available <- function(dom) { # nocov start
-    #
-    # # read html table
-    # if( isTRUE(dom) ) { base_url = 'https://sas.anac.gov.br/sas/tarifadomestica/' }
-    # if( isFALSE(dom)) { base_url = 'https://sas.anac.gov.br/sas/tarifainternacional/' }
-    #
-    # h <- try(rvest::read_html(base_url), silent = TRUE)
-    #
-    # # check if internet connection worked
-    # if (class(h)[1]=='try-error') {
-    #   message("Problem connecting to ANAC data server. Please try it again.")
-    #   return(invisible(NULL))
-    # }
-    #
-    # # filter elements of basica data
-    # elements <- rvest::html_elements(h, "a")
-    #
-    # if( isTRUE(dom) ) {
-    #   basica_urls <- elements[ data.table::like(elements, '/tarifadomestica/2') ]
-    # }
-    #
-    # if( isFALSE(dom)) {
-    #   basica_urls <- elements[ data.table::like(elements, '/tarifainternacional/2') ]
-    # }
-    #
-    #
-    # basica_urls <- lapply(X=basica_urls, FUN=function(i){rvest::html_attr(i,"href")})
-    #
-    # # get all dates available
-    # years <- gsub("[^\\d]+", "", basica_urls, perl=TRUE)
-    #
-    # # get url of subdirectories
-    # urls <- paste0(base_url, years)
-    #
-    # # function to search .csv data in subdirectories
-    # recursive_search <- function(i){ # i=urls[21]
-    #
-    #   # read html table
-    #   h2 <- try(rvest::read_html(i), silent = TRUE)
-    #
-    #   if (class(h2)[1]=='try-error') {
-    #     message("Problem connecting to ANAC data server. Please try it again.")
-    #     return(invisible(NULL))}
-    #
-    #   # get url of subdirectories
-    #   elements2 <- rvest::html_elements(h2, "a")
-    #   href2 <- rvest::html_attr(elements2, "href")
-    #   # files_all <- grep("../", href2, fixed = TRUE, value = TRUE, invert = TRUE)
-    #   files_csv <- href2[ data.table::like(href2, '.csv|.CSV|.txt')]
-    #   # temp_urls <- paste0(i, files_csv)
-    #   # return(temp_urls)
-    #   return(files_csv)
-    # }
-    #
-    # # get urls of .csv files
-    # csv_urls <- lapply(X=urls, FUN=recursive_search)
-    # csv_urls <- unlist(csv_urls)
-    #
-    # # get all dates available
-    # options(warn=-1) # suppress warnings
-    # if( isTRUE(dom) ) {
-    #   all_dates <- substr(csv_urls , (nchar(csv_urls ) + 1) -10, nchar(csv_urls )-4 ) }
-    #
-    # if( isFALSE(dom)) {
-    #   csv_urls <- csv_urls[ nchar(csv_urls)==55 ]
-    #   all_dates <- substr(csv_urls , (nchar(csv_urls ) + 1) -11, nchar(csv_urls )-4 )
-    #   all_dates <- gsub("[-]", "", all_dates)
-    # }
-    #
-    # all_dates <- as.numeric(all_dates)
-    # all_dates <- all_dates[ ! is.na(all_dates)]
-    # options(warn=0) # unsuppress warnings
-    #
-    # return(all_dates)
-    # } # nocov end
-    #
-    #
-
-#' Put together the url of airfare data files
+#' Read the links of an ANAC directory listing page
 #'
-#' @param dom Logical. Defaults to `TRUE` download airfares of domestic
-#'                 flights. If `FALSE`, the function downloads airfares of
-#'                 international flights.
-#' @param date Numeric. Date of the data in the format `yyyymm`. To download the
-#'             data for all months in a year, the user can pass a 4-digit year
-#'             input `yyyy`. The parameter also accepts a vector of dates such as
-#'             `c(202001, 202006, 202012)`.
+#' @param url String. Url of an ANAC directory listing.
 #'
-#' @return A url string.
-#'
+#' @return A character vector of hrefs, or `NULL` if the page could not be
+#'         read or is not a directory listing (e.g. a page blocking the
+#'         request).
 #' @keywords internal
-#' @examples \dontrun{ if (interactive()) {
-#' # Generate url
-#' a <- get_airfares_url(year=2002, month=11)
-#'}}
-get_airfares_url <- function(dom,
-                             date = parent.frame()$date) { # nocov start
+read_anac_listing <- function(url) { # nocov start
 
-  # Domestic flights
-  if( isTRUE(dom) ) {
-    url_root = 'https://sas.anac.gov.br/sas/tarifadomestica/'
+  # ANAC's server intermittently drops requests when many are made in a row,
+  # so each request gets a timeout and retries
+  resp <- try(
+    httr2::request(url) |>
+      httr2::req_user_agent(
+        "Mozilla/5.0 (compatible; flightsbr; +https://github.com/ipea/flightsbr)"
+      ) |>
+      httr2::req_headers(
+        Accept = paste0(
+          "text/html,application/xhtml+xml,application/xml;",
+          "q=0.9,*/*;q=0.8"
+        ),
+        `Accept-Language` = "pt-BR,pt;q=0.9,en;q=0.8"
+      ) |>
+      httr2::req_timeout(30) |>
+      httr2::req_retry(max_tries = 4, retry_on_failure = TRUE) |>
+      httr2::req_perform(),
+    silent = TRUE
+  )
 
-    # date with format yyyymm
-    if (all(nchar(date)==6)) {
-      years <- substring(date,1,4)
-      months <- substring(date,5,6)
-      file_urls <- paste0(url_root, years, '/', date, '.csv')
-    }
-
-    # date with format yyyy
-    if (all(nchar(date)==4)) {
-      all_dates <- generate_all_months(date)
-      years <- substring(all_dates,1,4)
-      months <- substring(all_dates,5,6)
-      file_urls <- paste0(url_root, years, '/', all_dates, '.csv')
-    }
+  if (inherits(resp, "try-error")) {
+    return(NULL)
   }
 
+  h <- httr2::resp_body_html(resp)
 
-  # International flights
-  if( isFALSE(dom)) {
+  # a real IIS directory listing always links back to its parent folder; a
+  # page blocking the request does not
+  if (!grepl("To Parent Directory", rvest::html_text2(h), fixed = TRUE)) {
+    return(NULL)
+  }
 
-    url_root = 'https://sas.anac.gov.br/sas/tarifainternacional/'
-
-    # date with format yyyymm
-    if (all(nchar(date)==6)) {
-      years <- substring(date,1,4)
-      months <- substring(date,5,6)
-      file_urls <- paste0(url_root, years, '/Internacional_', years, '-', months, '.csv')
-    }
-
-    # date with format yyyy
-    if (all(nchar(date)==4)) {
-      all_dates <- generate_all_months(date)
-      years <- substring(all_dates,1,4)
-      months <- substring(all_dates,5,6)
-      file_urls <- paste0(url_root, years, '/Internacional_', years, '-', months, '.csv')
-    }
-
-    # replace .csv with .txt for dates earlier than 2016
-    fix_file_extension <- function(url){
-      yyyy <- gsub(".*(199[0-9]|20[01][0-9]).*","\\1",url)[1] # detect year of reference
-      if(yyyy < 2017) { url <- gsub('.csv', '.txt', url) }
-      return(url)
-    }
-
-    file_urls <- lapply(X=file_urls, FUN=fix_file_extension)
-    file_urls <- unlist(file_urls)
-    }
-
-  return(file_urls)
+  rvest::html_attr(rvest::html_elements(h, "a"), "href")
 } # nocov end
 
 
+#' Pick one airfare file per month from the hrefs of ANAC's listings
+#'
+#' ANAC's folders contain duplicates and stray files (re-uploads named
+#' `yyyymm (1).csv`, `.CSV.csv` copies, the same month in two year folders,
+#' `.txt` and `.csv` versions). This keeps files that follow the naming
+#' convention and, for each month, prefers the file in the folder of its own
+#' year, then a `.csv` over a `.txt`, then a name without `(1)`.
+#'
+#' @param href Character vector of hrefs (relative or absolute).
+#' @inheritParams get_airfares_dates_available
+#'
+#' @return A data.table with columns `date` (numeric) and `url` (the href).
+#' @keywords internal
+airfare_files_from_hrefs <- function(href, dom) {
+
+  href <- unique(href[!is.na(href)])
+  file_name <- utils::URLdecode(basename(href))
+
+  if (isTRUE(dom)) {
+    pattern <- "^([0-9]{6})( \\(1\\))?[.]csv$"
+    ok <- grepl(pattern, file_name, ignore.case = TRUE)
+    date <- sub(pattern, "\\1", file_name[ok], ignore.case = TRUE)
+  } else {
+    pattern <- "^internacional_([0-9]{4})-([0-9]{2})[.](csv|txt)$"
+    ok <- grepl(pattern, file_name, ignore.case = TRUE)
+    date <- sub(pattern, "\\1\\2", file_name[ok], ignore.case = TRUE)
+  }
+
+  href <- href[ok]
+  file_name <- file_name[ok]
+
+  files <- data.table::data.table(
+    date = as.numeric(date),
+    url = href,
+    own_folder = basename(dirname(href)) == substr(date, 1, 4),
+    is_csv = grepl("[.]csv$", file_name, ignore.case = TRUE),
+    is_copy = grepl("(1)", file_name, fixed = TRUE)
+  )
+
+  data.table::setorderv(
+    files,
+    c("date", "own_folder", "is_csv", "is_copy"),
+    order = c(1L, -1L, -1L, 1L)
+  )
+  files <- unique(files, by = "date")
+
+  return(files[, c("date", "url"), with = FALSE])
+}
 
 
 #' Download and read ANAC air fares data
 #'
 #' @param file_urls String. A url passed from above.
 #' @template showProgress
-#' @template select
 #' @template cache
 #'
-#' @return A `"data.table" "data.frame"` object
+#' @return A `"data.table" "data.frame"` object with harmonized column
+#'         names, or `NULL` if the download failed.
 #'
 #' @keywords internal
 #' @examples \dontrun{ if (interactive()) {
-#' # Generate url
-#' file_url <- get_airfares_url(dom = TRUE, date=200211)
+#' files <- get_airfares_files_available(dom = TRUE)
 #'
-#' # download data
-#' a <- download_airfares_data(file_urls=file_url, showProgress=TRUE, select=NULL)
+#' a <- download_airfares_data(file_urls = files$url[1], showProgress = TRUE)
 #'}}
 download_airfares_data <- function(file_urls = parent.frame()$file_urls,
                                    showProgress = parent.frame()$showProgress,
-                                   select = parent.frame()$select,
                                    cache = parent.frame()$cache
                                    ){ # nocov start
 
-  # create temp local file
-  file_name <- basename(file_urls)
+  # the year folder is part of the name: the same file name can sit in two
+  # year folders
+  file_name <- utils::URLdecode(basename(file_urls))
+  file_name <- paste0(basename(dirname(file_urls)), "_", gsub(" ", "_", file_name))
   temp_local_file <- fs::path(fs::path_temp(), file_name)
 
+  # download files that are not cached yet
+  check_download <- download_flightsbr_file(file_url = file_urls,
+                                            showProgress = showProgress,
+                                            dest_file = temp_local_file,
+                                            cache = cache)
+  if (is.null(check_download)) { return(invisible(NULL)) }
 
-  # use cached files or not
-  if (any(cache==FALSE & file.exists(temp_local_file))) {
-    unlink(temp_local_file, recursive = T)
-  }
+  dt <- pbapply::pblapply(X = temp_local_file,
+                          FUN = read_airfare_file,
+                          showProgress = showProgress)
 
-  # has the file been downloaded already? If not, download it
-  if (any(cache==FALSE |
-          !file.exists(temp_local_file) |
-          file.info(temp_local_file)$size == 0)) {
-
-    # download data
-    check_download <- download_flightsbr_file(file_url=file_urls,
-                                              showProgress=showProgress,
-                                              dest_file = temp_local_file,
-                                              cache = cache)
-    # check if internet connection worked
-    if (is.null(check_download)) {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))
-    }
-  }
-
-
-  ### set threads for fread
-  orig_threads <- data.table::getDTthreads()
-  data.table::setDTthreads(percent = 100)
-
-  # read files stored locally
-  dt <- pbapply::pblapply(X=temp_local_file,
-                          FUN = function(x){
-
-                            # read
-                            temp_x <- data.table::fread(x,
-                                                        select = select,
-                                                        showProgress = showProgress,
-                                                        encoding = 'Latin-1',
-                                                        colClasses = 'character',
-                                                        sep = ';')
-                            })
-
-            # # isso aqui funciona
-            # dt <- duckplyr::read_csv_duckdb(
-            #   path = temp_local_file,
-            #   options = list(
-            #     delim = ";",
-            #     # types = list("VARCHAR"),
-            #     all_varchar = TRUE,
-            #     encoding = 'UTF-8'
-            #     , skip = 1
-            #   )
-            # )
-
-  dt <- data.table::rbindlist(dt, fill = TRUE)
-
-  # return to original threads
-  data.table::setDTthreads(orig_threads)
+  dt <- data.table::rbindlist(dt, use.names = TRUE, fill = TRUE)
 
   return(dt)
 } # nocov end
 
 
+#' Read one airfare file and harmonize its column names
+#'
+#' @param path String. Local file path.
+#' @template showProgress
+#'
+#' @return A data.table with ANAC's current column names.
+#' @keywords internal
+read_airfare_file <- function(path, showProgress = FALSE) {
+
+  dt <- data.table::fread(path,
+                          showProgress = showProgress,
+                          encoding = detect_header_encoding(path),
+                          colClasses = 'character',
+                          sep = ';')
+
+  harmonize_airfare_names(dt, file_name = basename(path))
+
+  return(dt)
+}
+
+
+#' Detect whether a file's header line is UTF-8 or Latin-1
+#'
+#' @param path String. Local file path.
+#'
+#' @return `"UTF-8"` or `"Latin-1"`.
+#' @keywords internal
+detect_header_encoding <- function(path) {
+
+  bytes <- readBin(path, what = "raw", n = 4096L)
+  bytes <- bytes[bytes != as.raw(0)]
+
+  newline <- which(bytes == as.raw(10))[1]
+  if (!is.na(newline)) {
+    bytes <- bytes[seq_len(newline - 1)]
+  }
+
+  if (validUTF8(rawToChar(bytes))) "UTF-8" else "Latin-1"
+}
+
+
+#' Rename airfare columns to ANAC's current names
+#'
+#' ANAC has used five different headers for the same columns over the years.
+#' Every version is mapped to the names ANAC uses in its current files (see
+#' `airfare_col_map`), so files from different periods bind into the same
+#' columns. A leading row-index column (empty header) is dropped.
+#'
+#' @param dt A data.table read from an airfare file. Modified by reference.
+#' @param file_name String. File name, used in error messages.
+#'
+#' @return `dt`, invisibly.
+#' @keywords internal
+harmonize_airfare_names <- function(dt, file_name = "") {
+
+  data.table::setnames(dt, janitor::make_clean_names(names(dt)))
+
+  # some files start with an unnamed row-index column
+  if (names(dt)[1] %in% c("v1", "x")) {
+    dt[, (names(dt)[1]) := NULL]
+  }
+
+  new_names <- airfare_col_map[names(dt)]
+
+  if (anyNA(new_names)) {
+    stop(
+      "ANAC file ", file_name, " has unexpected column(s): ",
+      paste(names(dt)[is.na(new_names)], collapse = ", "),
+      ". Please report this at https://github.com/ipea/flightsbr/issues"
+    )
+  }
+
+  data.table::setnames(dt, unname(new_names))
+
+  return(invisible(dt))
+}
+
+
+#' Map airfare column names to ANAC's current names
+#'
+#' @param x Character vector of column names (raw or clean).
+#'
+#' @return Character vector of current names, `NA` where a name is unknown.
+#' @keywords internal
+airfare_canonical_names <- function(x) {
+  unname(airfare_col_map[janitor::make_clean_names(x)])
+}
+
+
+# clean (janitor) column names used by ANAC over time -> current names
+airfare_col_map <- c(
+  # current names
+  nr_ano_referencia = "nr_ano_referencia",
+  nr_mes_referencia = "nr_mes_referencia",
+  sg_empresa_icao = "sg_empresa_icao",
+  sg_icao_origem = "sg_icao_origem",
+  sg_icao_destino = "sg_icao_destino",
+  sg_icao_retorno = "sg_icao_retorno",
+  cd_classe_ida = "cd_classe_ida",
+  cd_classe_volta = "cd_classe_volta",
+  nr_tarifa = "nr_tarifa",
+  nr_assentos = "nr_assentos",
+  # year
+  ano = "nr_ano_referencia",
+  ano_de_referencia = "nr_ano_referencia",
+  # month
+  mes = "nr_mes_referencia",
+  mes_de_referencia = "nr_mes_referencia",
+  # airline
+  empresa = "sg_empresa_icao",
+  icao_empresa_aerea = "sg_empresa_icao",
+  designador_icao_empresa = "sg_empresa_icao",
+  # origin
+  origem = "sg_icao_origem",
+  icao_aerodromo_origem = "sg_icao_origem",
+  designador_icao_aeroporto_origem = "sg_icao_origem",
+  # destination
+  destino = "sg_icao_destino",
+  icao_aerodromo_destino = "sg_icao_destino",
+  designador_icao_aeroporto_destino = "sg_icao_destino",
+  # return airport (international)
+  retorno = "sg_icao_retorno",
+  icao_aerodromo_retorno = "sg_icao_retorno",
+  designador_icao_aeroporto_retorno = "sg_icao_retorno",
+  # fare classes (international)
+  classe_ida = "cd_classe_ida",
+  classe_volta = "cd_classe_volta",
+  classe_retorno = "cd_classe_volta",
+  # fare
+  tarifa = "nr_tarifa",
+  tarifa_n = "nr_tarifa",
+  tarifa_nominal = "nr_tarifa",
+  valor_tarifa = "nr_tarifa",
+  # seats
+  assentos = "nr_assentos",
+  assentos_comercializados = "nr_assentos"
+)

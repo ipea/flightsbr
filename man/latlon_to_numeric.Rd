@@ -7,12 +7,14 @@
 latlon_to_numeric(df)
 }
 \arguments{
-\item{df}{A data.frame internal to the \code{read_airport()} function.}
+\item{df}{A data.table internal to the \code{read_airports()} function.}
 }
 \value{
-A \verb{"data.table" "data.frame"} object
+A \verb{"data.table" "data.frame"} object, modified by reference.
 }
 \description{
-Convert latitude and longitude columns to numeric
+Coordinates are written in degrees, minutes and seconds (e.g.
+\verb{30\\u00b050'39,8"S}). Some files use a decimal comma in the seconds, which
+\code{parzer} can't read, so commas are replaced with dots first.
 }
 \keyword{internal}

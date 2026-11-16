@@ -13,6 +13,9 @@ latest_flights_date <- function(){ # nocov start
   # get all dates available
   all_dates <- get_flight_dates_available()
 
+  # check if download failed
+  if (is.null(all_dates)) { return(invisible(NULL)) }
+
   # find latest date
   latest_date <- max(all_dates)
   return(latest_date)

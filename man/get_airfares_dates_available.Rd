@@ -24,7 +24,7 @@ Retrieve all dates available for airfares data from ANAC website
 \examples{
 \dontrun{ if (interactive()) {
 # check dates
-a <- get_airfares_dates_available(domestic = TRUE)
+a <- get_airfares_dates_available(dom = TRUE)
 }}
 }
 \keyword{internal}

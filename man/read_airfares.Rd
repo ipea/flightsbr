@@ -25,9 +25,10 @@ international flights.}
 
 \item{showProgress}{Logical. Defaults to \code{TRUE} display progress.}
 
-\item{select}{A vector of column names or positions to keep. The rest of the
-columns are not read. The order that the columns passed determines the
-order of the columns in the result.}
+\item{select}{A vector of column names or positions to keep. The order that
+the columns passed determines the order of the columns in the result.
+In \code{read_airfares()}, only column names are accepted, and both
+current and older ANAC names work (see Details).}
 
 \item{cache}{Logical. Whether the function should read cached data downloaded
 previously. Defaults to \code{TRUE}. If \code{FALSE}, the function will
@@ -43,6 +44,16 @@ of all variables included in the data for domestic airfares is available at
 \url{https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/voos-e-operacoes-aereas/tarifas-aereas-domesticas/46-tarifas-aereas-domesticas}.
 A description of all variables included in the data for international airfares
 is available at \url{https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/microdados-de-tarifas-aereas-comercializadas}.
+}
+\details{
+ANAC has changed the column names of these files several times. All files
+are returned with the names ANAC uses in its current files
+(\code{nr_ano_referencia}, \code{nr_mes_referencia}, \code{sg_empresa_icao},
+\code{sg_icao_origem}, \code{sg_icao_destino}, \code{nr_tarifa}, \code{nr_assentos} and, for
+international flights, \code{sg_icao_retorno}, \code{cd_classe_ida},
+\code{cd_classe_volta}), so files from different years can be combined.
+\code{select} accepts these names as well as older names such as \code{"TARIFA"} or
+\code{"ano"}.
 }
 \examples{
 \dontrun{ if (interactive()) {
