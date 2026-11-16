@@ -64,15 +64,23 @@ generate_all_months <- function(date) {
 
 
 
-#' Download file from url
+#' Download files from urls, reusing cached copies
+#'
+#' Downloads each file to a temporary `.part` file and only moves it to
+#' `dest_file` once the download succeeded and the content is not an HTML
+#' page. A failed or blocked request therefore never leaves a file at
+#' `dest_file`, so later calls with `cache = TRUE` cannot read an error page as
+#' data.
 #'
 #' @param file_url String. A url passed from above.
 #' @param showProgress Logical, passed from above.
 #' @param dest_file String. Local path(s) where the file(s) are saved, one per
 #'        `file_url`. Defaults to the temp dir plus `basename(file_url)`.
-#' @param cache Logical, passed from above.
+#' @param cache Logical, passed from above. If `FALSE`, existing files at
+#'        `dest_file` are deleted and downloaded again.
 #'
-#' @return Silently saves downloaded file to temp dir.
+#' @return `TRUE` (invisibly) if every file is available locally, otherwise
+#'         `NULL` (invisibly) with a message.
 #'
 #' @keywords internal
 #' @examples \dontrun{ if (interactive()) {
@@ -94,48 +102,141 @@ download_flightsbr_file <- function(file_url = parent.frame()$file_url,
     stop("'dest_file' must have the same length as 'file_url'.")
   }
 
-  reqs <- lapply(file_url, \(url) {
+  dest_file <- as.character(dest_file)
 
-    httr2::request(url) |>
-      httr2::req_user_agent(
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      ) |>
-      httr2::req_headers(
-        Accept = "application/zip, application/octet-stream, */*",
-        `Accept-Encoding` = "identity"
-      )
-  })
+  # two requests writing to the same path would collide
+  keep <- !duplicated(dest_file)
+  file_url <- file_url[keep]
+  dest_file <- dest_file[keep]
 
-  responses <- httr2::req_perform_parallel(
-    reqs,
-    paths = dest_file,
-    on_error = "continue",
-    progress = showProgress
-  )
-
-  success <- httr2::resps_ok(responses)
-
-  if (all(success)) {
-    return(TRUE)
+  if (isFALSE(cache)) {
+    unlink(dest_file)
   }
 
-  # retry failed downloads once
-  failed <- which(!success)
+  blocked <- character(0)
 
-  responses <- httr2::req_perform_parallel(
-    reqs[failed],
-    paths = dest_file[failed],
-    on_error = "continue",
-    progress = showProgress
-  )
+  # one download pass plus one retry pass for files that failed
+  for (pass in 1:2) {
 
-  if (all(httr2::resps_ok(responses))) {
-    return(TRUE)
+    todo <- !file.exists(dest_file)
+    if (!any(todo)) {
+      return(invisible(TRUE))
+    }
+
+    part_file <- vapply(
+      dest_file[todo],
+      \(d) tempfile(pattern = paste0(basename(d), "_"), tmpdir = dirname(d),
+                    fileext = ".part"),
+      character(1),
+      USE.NAMES = FALSE
+    )
+
+    reqs <- lapply(file_url[todo], anac_request)
+
+    responses <- httr2::req_perform_parallel(
+      reqs,
+      paths = part_file,
+      on_error = "continue",
+      progress = showProgress,
+      max_active = 4
+    )
+
+    ok <- vapply(responses, inherits, logical(1), what = "httr2_response")
+
+    # ANAC answers scripted bursts with an HTML page and HTTP status 200
+    html <- vapply(seq_along(responses), \(i) {
+      ok[i] && is_html_response(responses[[i]], part_file[i])
+    }, logical(1))
+
+    blocked <- unique(c(blocked, file_url[todo][html]))
+    ok <- ok & !html
+
+    renamed <- file.rename(part_file[ok], dest_file[todo][ok])
+    unlink(part_file[file.exists(part_file)])
+
+    # a file that could not be moved into place (e.g. locked on Windows) is
+    # not available
+    if (!all(renamed)) {
+      unlink(dest_file[todo][ok][!renamed])
+    }
   }
 
-  message("Internet connection not working. Try again later.")
+  if (all(file.exists(dest_file))) {
+    return(invisible(TRUE))
+  }
+
+  if (length(blocked) > 0) {
+    message(
+      "The ANAC data server refused the request (it returned a web page ",
+      "instead of the data file). Please wait a few minutes and try again."
+    )
+  } else {
+    message("Problem connecting to ANAC data server. Please try it again.")
+  }
   invisible(NULL)
 } # nocov end
+
+
+#' Build an httr2 request for an ANAC data file
+#'
+#' @param url String. File url.
+#'
+#' @return An `httr2_request`.
+#' @keywords internal
+anac_request <- function(url) { # nocov start
+  httr2::request(url) |>
+    httr2::req_user_agent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    ) |>
+    httr2::req_headers(
+      Accept = "application/zip, application/octet-stream, text/csv, */*",
+      `Accept-Encoding` = "identity"
+    ) |>
+    httr2::req_retry(max_tries = 3)
+} # nocov end
+
+
+#' Check whether a downloaded response is an HTML page instead of a data file
+#'
+#' @param resp An `httr2_response`.
+#' @param path String. Local file where the response body was written.
+#'
+#' @return Logical.
+#' @keywords internal
+is_html_response <- function(resp, path) {
+
+  type <- tryCatch(httr2::resp_content_type(resp), error = \(e) NA_character_)
+  if (isTRUE(type == "text/html")) {
+    return(TRUE)
+  }
+
+  starts_like_html(path)
+}
+
+
+#' Check whether a local file starts like an HTML document
+#'
+#' @param path String. Local file path.
+#'
+#' @return Logical. `FALSE` for missing or empty files.
+#' @keywords internal
+starts_like_html <- function(path) {
+
+  if (!file.exists(path) || isTRUE(file.info(path)$size == 0)) {
+    return(FALSE)
+  }
+
+  # work on raw bytes: data files may be Latin-1, which is not valid UTF-8
+  bytes <- readBin(path, what = "raw", n = 512L)
+
+  # skip a UTF-8 byte order mark, whitespace and NUL bytes
+  if (length(bytes) >= 3 && identical(bytes[1:3], as.raw(c(0xef, 0xbb, 0xbf)))) {
+    bytes <- bytes[-(1:3)]
+  }
+  bytes <- bytes[!bytes %in% as.raw(c(0x00, 0x09, 0x0a, 0x0d, 0x20))]
+
+  length(bytes) > 0 && bytes[1] == charToRaw("<")
+}
 
 
 

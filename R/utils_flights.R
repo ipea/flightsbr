@@ -290,76 +290,62 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
   file_name <- anac_file_name(file_url)
   temp_local_file <- fs::path(fs::path_temp(), file_name)
 
-  # use cached files or not
-  if (isFALSE(cache)) {
-    unlink(temp_local_file[file.exists(temp_local_file)])
+  # discard cached files that are not zip archives
+  bad_cache <- file.exists(temp_local_file) & !is_zip_file(temp_local_file)
+  unlink(temp_local_file[bad_cache])
+
+  # download files that are not cached yet
+  check_download <- download_flightsbr_file(
+    file_url = file_url,
+    showProgress = showProgress,
+    dest_file = temp_local_file,
+    cache = cache
+    )
+
+  if (is.null(check_download)) {
+    return(invisible(NULL))
   }
 
-  # download files that are missing or that are not valid zip files (e.g. an
-  # HTML page saved by an earlier failed download)
-  to_download <- !is_zip_file(temp_local_file)
-
-  if (any(to_download)) {
-
-    # download data
-    check_download <- download_flightsbr_file(
-      file_url = file_url[to_download],
-      showProgress = showProgress,
-      dest_file = temp_local_file[to_download],
-      cache = cache)
-
-    # check if internet connection worked
-    if (is.null(check_download)) {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))
-    }
-
-    # ANAC can answer with an HTML page (HTTP 200) instead of the zip file
-    not_zip <- !is_zip_file(temp_local_file)
-    if (any(not_zip)) {
-      unlink(temp_local_file[not_zip])
-      message(
-        "ANAC returned a web page instead of the data file for: ",
-        paste(file_name[not_zip], collapse = ", "),
-        ". Please try it again later."
-      )
-      return(invisible(NULL))
-    }
+  # ANAC can answer with a web page instead of the zip file
+  not_zip <- !is_zip_file(temp_local_file)
+  if (any(not_zip)) {
+    unlink(temp_local_file[not_zip])
+    message(
+      "ANAC returned a web page instead of the data file for: ",
+      paste(file_name[not_zip], collapse = ", "),
+      ". Please try it again later."
+    )
+    return(invisible(NULL))
   }
 
-
-  ### set threads for fread
-  orig_threads <- data.table::getDTthreads()
-  data.table::setDTthreads(percent = 100)
 
   ## unzip and fread
   unzip_and_fread <- function(single_temp_local_file,
                               showProgress = parent.frame()$showProgress,
                               select = parent.frame()$select){
 
-    # single_temp_local_file = temp_local_file[1]
+    # extract to a folder of its own, deleted after reading, so the large
+    # .txt files don't pile up in the temp dir
+    temp_local_dir <- tempfile(pattern = "flightsbr_")
+    on.exit(unlink(temp_local_dir, recursive = TRUE), add = TRUE)
 
-    # unzip file to tempdir
-    temp_local_dir <- fs::path_temp()
+    tryCatch({
+      archive::archive_extract(
+        archive = single_temp_local_file,
+        dir = temp_local_dir
+        )
 
-    #  utils::unzip(zipfile = single_temp_local_file, exdir = temp_local_dir)
-    archive::archive_extract(
-      archive = single_temp_local_file,
-      dir = temp_local_dir
-      )
+      txt_file <- list.files(temp_local_dir, full.names = TRUE, recursive = TRUE)
 
-
-    # get file name
-    file_name <- utils::unzip(single_temp_local_file, list = TRUE)$Name
-
-    # read file stored locally
-    temp_dt <- data.table::fread(fs::path(temp_local_dir, file_name),
-                                 select = select,
-                                 showProgress = showProgress,
-                                 colClasses = 'character',
-                                 sep = ';',
-                                 encoding = 'Latin-1')
-    return(temp_dt)
+      data.table::fread(txt_file[1],
+                        select = select,
+                        showProgress = showProgress,
+                        colClasses = 'character',
+                        sep = ';',
+                        encoding = 'Latin-1')
+      },
+      error = function(e) NULL
+    )
   }
 
   message('Unziping and reading data to memory.')
@@ -373,9 +359,18 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
                  showProgress = showProgress)
   }
 
-
-  # return to original threads
-  data.table::setDTthreads(orig_threads)
+  # a corrupt zip can't be read: drop it from the cache so the next call
+  # downloads it again
+  failed <- vapply(dt, is.null, logical(1))
+  if (any(failed)) {
+    unlink(temp_local_file[failed])
+    message(
+      "Could not read the data file for: ",
+      paste(file_name[failed], collapse = ", "),
+      ". The cached copy was removed; please try it again."
+    )
+    return(invisible(NULL))
+  }
 
   return(dt)
 

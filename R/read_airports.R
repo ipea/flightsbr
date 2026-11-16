@@ -42,199 +42,74 @@ read_airports <- function(type = 'all',
   url_public <- 'https://sistemas.anac.gov.br/dadosabertos/Aerodromos/Aer%C3%B3dromos%20P%C3%BAblicos/Lista%20de%20aer%C3%B3dromos%20p%C3%BAblicos/AerodromosPublicos.csv'
   url_private <- 'https://sistemas.anac.gov.br/dadosabertos/Aerodromos/Aer%C3%B3dromos%20Privados/Lista%20de%20aer%C3%B3dromos%20privados/Aerodromos%20Privados/AerodromosPrivados.csv'
 
-### download public airports
-if (any(type %in% c('public', 'all'))){
-
-  # create temp local file
-  file_name <- basename(url_public)
-  temp_local_file <- fs::path(fs::path_temp(), file_name)
-
-  # use cached files or not
-  if (any(cache==FALSE & file.exists(temp_local_file))) {
-    unlink(temp_local_file, recursive = T)
+  if (type %in% c('public', 'all')) {
+    dt_public <- download_airports_data(url_public, 'public', showProgress, cache)
+    if (is.null(dt_public)) { return(invisible(NULL)) }
+    if (type == 'public') { return(dt_public) }
   }
 
-  # has the file been downloaded already? If not, download it
-  if (any(cache==FALSE |
-          !file.exists(temp_local_file) |
-          file.info(temp_local_file)$size == 0)) {
-
-    # download data
-    check_download <- download_flightsbr_file(file_url=url_public,
-                                              showProgress=showProgress,
-                                              dest_file = temp_local_file,
-                                              cache = cache)
-  # check if internet connection worked
-  if (is.null(check_download)) {
-    message("Problem connecting to ANAC data server. Please try it again.")
-    return(invisible(NULL))
-    }
+  if (type %in% c('private', 'all')) {
+    dt_private <- download_airports_data(url_private, 'private', showProgress, cache)
+    if (is.null(dt_private)) { return(invisible(NULL)) }
+    if (type == 'private') { return(dt_private) }
   }
 
+  # type == 'all': keep only the columns both data sets have
+  cols_to_keep <- intersect(names(dt_private), names(dt_public))
 
-  ### set threads for fread
-  orig_threads <- data.table::getDTthreads()
-  data.table::setDTthreads(percent = 100)
+  dt <- data.table::rbindlist(
+    list(dt_public[, cols_to_keep, with = FALSE],
+         dt_private[, cols_to_keep, with = FALSE]),
+    use.names = TRUE
+    )
 
-  # download and read data
-  dt_public <- data.table::fread(temp_local_file,
-                                 skip = 1,
-                                 encoding = 'Latin-1',
-                                 colClasses = 'character',
-                                 sep = ';',
-                                 showProgress=showProgress)
-
-  # # isso aqui funciona
-  # dt_public <- duckplyr::read_csv_duckdb(
-  #   path = temp_local_file,
-  #   options = list(
-  #     delim = ";",
-  #     # types = list("VARCHAR"),
-  #     all_varchar = TRUE,
-  #     encoding = 'Latin-1'
-  #     , skip = 1 # 666666666666666666666666666666
-  #     )
-  #   )
-
-  # # isso aqui nao
-  # con <- duckdb::dbConnect(duckdb::duckdb())
-  # duckdb::duckdb_read_csv(
-  #   conn = con,
-  #   files = temp_local_file,
-  #   sep = ';',
-  #   header = T,
-  #   col.types = "VARCHAR",
-  #   encoding = 'Latin-1'
-  #   )
-  # # error "more columns than column names"
-
-
-  # return to original threads
-  data.table::setDTthreads(orig_threads)
-
-  # clean names
-  nnn <- names(dt_public)
-  data.table::setnames(
-    x = dt_public,
-    old = nnn,
-    new = janitor::make_clean_names(nnn)
-  )
-
-  # fix geographical coordinates
-  latlon_to_numeric(dt_public)
-  altitude_to_numeric(dt_public)
-
-  # add type info
-   data.table::setDT(dt_public)[, type := 'public']
-
-   # convert columns to numeric
-   convert_to_numeric(dt_public)
-
-  }
-
-
-### download private airports
-if (any(type %in% c('private', 'all'))){
-
-  # create temp local file
-  file_name <- basename(url_private)
-  temp_local_file <- fs::path(fs::path_temp(), file_name)
-
-  # use cached files or not
-  if (any(cache==FALSE & file.exists(temp_local_file))) {
-    unlink(temp_local_file, recursive = T)
-  }
-
-  # has the file been downloaded already? If not, download it
-  if (any(cache==FALSE |
-          !file.exists(temp_local_file) |
-          file.info(temp_local_file)$size == 0)) {
-
-    # download data
-    check_download <- download_flightsbr_file(file_url=url_private,
-                                              showProgress=showProgress,
-                                              dest_file = temp_local_file,
-                                              cache = cache)
-    # check if internet connection worked
-    if (is.null(check_download)) {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))
-    }
-  }
-
-
-  ### set threads for fread
-  orig_threads <- data.table::getDTthreads()
-  data.table::setDTthreads(percent = 100)
-
-  # download and read data
-  dt_private <- data.table::fread(temp_local_file,
-                                  skip = 1,
-                                  encoding = 'Latin-1',
-                                  colClasses = 'character',
-                                  sep = ';',
-                                  showProgress=showProgress)
-
-  # # isso aqui funciona
-  # dt_private <- duckplyr::read_csv_duckdb(
-  #   path = temp_local_file,
-  #   options = list(
-  #     delim = ";",
-  #     # types = list("VARCHAR"),
-  #     all_varchar = TRUE,
-  #     encoding = 'Latin-1'
-  #     , skip = 1 # 666666666666666666666666666666
-  #     )
-  #   )
-
-
-  # return to original threads
-  data.table::setDTthreads(orig_threads)
-
-  # clean names
-  nnn <- names(dt_private)
-  data.table::setnames(
-    x = dt_private,
-    old = nnn,
-    new = janitor::make_clean_names(nnn)
-  )
-
-  # duckplyr
-  # names(dt_private) <- janitor::make_clean_names(names(dt_private))
-
-  # fix geographical coordinates
-  latlon_to_numeric(dt_private)
-  altitude_to_numeric(dt_private)
-
-  # add type info
-   dt_private[, type := 'private']
-
-   # # duckplyr
-   # dt_private <- dt_private |>
-   #   dplyr::mutate(type = 'private')
-
-   # convert columns to numeric
-   convert_to_numeric(dt_private)
-  }
-
-
-### return results
-if (type == 'private') { return(dt_private) }
-if (type == 'public') { return(dt_public) }
-if (type == 'all') {
-                    ## find columns in common
-                    # cols_to_keep <- c("codigo_oaci", "ciad", "nome", "uf", "longitude", "latitude", "altitude")
-                    a <- names(dt_private)
-                    b <- names(dt_public)
-                    cols_to_keep <- a[a %in% b]
-
-                    ## subset columns in common
-                    dt_public <- dt_public[, cols_to_keep, with=FALSE]
-                    dt_private <- dt_private[, cols_to_keep, with=FALSE]
-
-                    dt <- data.table::rbindlist(list(dt_public, dt_private), use.names=FALSE)
-
-                    return(dt)
-                    }
+  return(dt)
 }
 
+
+#' Download and read one ANAC airports file
+#'
+#' @param file_url String. Url of the public or private airports file.
+#' @param airport_type String. `"public"` or `"private"`, stored in the `type`
+#'        column.
+#' @template showProgress
+#' @template cache
+#'
+#' @return A `"data.table" "data.frame"` object, or `NULL` if the download
+#'         failed.
+#' @keywords internal
+download_airports_data <- function(file_url,
+                                   airport_type,
+                                   showProgress,
+                                   cache) { # nocov start
+
+  temp_local_file <- fs::path(fs::path_temp(), basename(file_url))
+
+  check_download <- download_flightsbr_file(file_url = file_url,
+                                            showProgress = showProgress,
+                                            dest_file = temp_local_file,
+                                            cache = cache)
+  if (is.null(check_download)) { return(invisible(NULL)) }
+
+  dt <- data.table::fread(temp_local_file,
+                          skip = 1,
+                          encoding = 'Latin-1',
+                          colClasses = 'character',
+                          sep = ';',
+                          showProgress = showProgress)
+
+  # clean names
+  data.table::setnames(dt, janitor::make_clean_names(names(dt)))
+
+  # fix geographical coordinates
+  latlon_to_numeric(dt)
+  altitude_to_numeric(dt)
+
+  # add type info
+  dt[, type := airport_type]
+
+  # convert columns to numeric
+  convert_to_numeric(dt)
+
+  return(dt)
+} # nocov end

@@ -105,32 +105,14 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
   file_name <- basename(file_url)
   temp_local_file <- fs::path(fs::path_temp(), file_name)
 
-  # use cached files or not
-  if (any(cache==FALSE & file.exists(temp_local_file))) {
-    unlink(temp_local_file, recursive = T)
-    }
-
-  # has the file been downloaded already? If not, download it
-  if (any(cache==FALSE |
-          !file.exists(temp_local_file) |
-          file.info(temp_local_file)$size == 0)) {
-
-    # download data
-    check_download <- download_flightsbr_file(file_url=file_url,
-                            showProgress=showProgress,
-                            dest_file = temp_local_file,
-                            cache = cache)
-    # check if internet connection worked
-    if (is.null(check_download)) {
-      message("Problem connecting to ANAC data server. Please try it again.")
-      return(invisible(NULL))
-    }
-  }
+  # download files that are not cached yet
+  check_download <- download_flightsbr_file(file_url = file_url,
+                                            showProgress = showProgress,
+                                            dest_file = temp_local_file,
+                                            cache = cache)
+  if (is.null(check_download)) { return(invisible(NULL)) }
 
 
-  ### set threads for fread
-  orig_threads <- data.table::getDTthreads()
-  data.table::setDTthreads(percent = 100)
 
 
   # read files stored locally
@@ -167,8 +149,6 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
 
   dt <- data.table::rbindlist(dt, fill = TRUE)
 
-  # return to original threads
-  data.table::setDTthreads(orig_threads)
 
   return(dt)
 } # nocov end

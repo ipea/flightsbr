@@ -22,7 +22,7 @@ Imports:
       archive,
       data.table (>= 1.14.0),
       fs,
-      httr2,
+      httr2 (>= 1.1.1),
       lifecycle,
       parzer,
       pbapply,
