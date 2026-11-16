@@ -42,9 +42,11 @@ read_flights(
 
 - select:
 
-  A vector of column names or positions to keep. The rest of the columns
-  are not read. The order that the columns passed determines the order
-  of the columns in the result.
+  A vector of column names or positions to keep. The order that the
+  columns passed determines the order of the columns in the result. In
+  [`read_airfares()`](https://ipea.github.io/flightsbr/dev/reference/read_airfares.md),
+  only column names are accepted, and both current and older ANAC names
+  work (see Details).
 
 - cache:
 
@@ -54,14 +56,16 @@ read_flights(
 
 ## Value
 
-A `"data.table" "data.frame"` object. All columns are returned with
-`class` of type `"character"`.
+A `"data.table" "data.frame"` object. Columns of counts and measures are
+numeric; codes and identifiers (e.g. flight numbers, serial numbers,
+airport codes) are character, keeping leading zeros. A column with some
+values that are not numbers stays character, with a message.
 
 ## See also
 
 Other download flight data:
-[`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md),
-[`read_aircrafts()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircrafts.md)
+[`read_aircraft()`](https://ipea.github.io/flightsbr/dev/reference/read_aircraft.md),
+[`read_aircrafts()`](https://ipea.github.io/flightsbr/dev/reference/read_aircrafts.md)
 
 ## Examples
 

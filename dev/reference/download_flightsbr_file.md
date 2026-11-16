@@ -1,6 +1,10 @@
-# Download file from url
+# Download files from urls, reusing cached copies
 
-Download file from url
+Downloads each file to a temporary `.part` file and only moves it to
+`dest_file` once the download succeeded and the content is not an HTML
+page. A failed or blocked request therefore never leaves a file at
+`dest_file`, so later calls with `cache = TRUE` cannot read an error
+page as data.
 
 ## Usage
 
@@ -8,7 +12,7 @@ Download file from url
 download_flightsbr_file(
   file_url = parent.frame()$file_url,
   showProgress = parent.frame()$showProgress,
-  dest_file = temp_local_file,
+  dest_file = fs::path(fs::path_temp(), basename(file_url)),
   cache = cache
 )
 ```
@@ -25,15 +29,18 @@ download_flightsbr_file(
 
 - dest_file:
 
-  String, passed from above.
+  String. Local path(s) where the file(s) are saved, one per `file_url`.
+  Defaults to the temp dir plus `basename(file_url)`.
 
 - cache:
 
-  Logical, passed from above.
+  Logical, passed from above. If `FALSE`, existing files at `dest_file`
+  are deleted and downloaded again.
 
 ## Value
 
-Silently saves downloaded file to temp dir.
+`TRUE` (invisibly) if every file is available locally, otherwise `NULL`
+(invisibly) with a message.
 
 ## Examples
 

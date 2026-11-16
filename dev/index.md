@@ -4,7 +4,7 @@
 status](https://www.r-pkg.org/badges/version/flightsbr)](https://CRAN.R-project.org/package=flightsbr)
 [![CRAN/METACRAN Total
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/flightsbr?color=yellow)](https://CRAN.R-project.org/package=flightsbr)
-[![R-CMD-check](https://github.com/ipea/flightsbr/workflows/R-CMD-check/badge.svg)](https://github.com/ipea/flightsbr/actions)
+[![R-CMD-check](https://github.com/ipea/flightsbr/workflows/check/badge.svg)](https://github.com/ipea/flightsbr/actions)
 [![Lifecycle:
 active](https://img.shields.io/badge/lifecycle-active-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![Codecov test
@@ -35,11 +35,11 @@ and domestic flights within the country.
 The package currently includes [five main
 functions](https://ipea.github.io/flightsbr/reference/index.html):
 
-1.  [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
-2.  [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)
-3.  [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
-4.  [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
-5.  [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md)
+1.  [`read_flights()`](https://ipea.github.io/flightsbr/dev/reference/read_flights.md)
+2.  [`read_airports()`](https://ipea.github.io/flightsbr/dev/reference/read_airports.md)
+3.  [`read_aircraft()`](https://ipea.github.io/flightsbr/dev/reference/read_aircraft.md)
+4.  [`read_airport_movements()`](https://ipea.github.io/flightsbr/dev/reference/read_airport_movements.md)
+5.  [`read_airfares()`](https://ipea.github.io/flightsbr/dev/reference/read_airfares.md)
 
 #### 1) `read_flights()` to download data on national and international flights.
 

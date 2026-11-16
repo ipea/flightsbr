@@ -3,7 +3,7 @@
 **\[deprecated\]**
 
 This function was deprecated in favor of
-[`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
+[`read_aircraft()`](https://ipea.github.io/flightsbr/dev/reference/read_aircraft.md)
 simply to fix a typo in the function name.
 
 ## Usage
@@ -40,8 +40,8 @@ A `"data.table" "data.frame"` object. All columns are returned with
 ## See also
 
 Other download flight data:
-[`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md),
-[`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+[`read_aircraft()`](https://ipea.github.io/flightsbr/dev/reference/read_aircraft.md),
+[`read_flights()`](https://ipea.github.io/flightsbr/dev/reference/read_flights.md)
 
 ## Examples
 

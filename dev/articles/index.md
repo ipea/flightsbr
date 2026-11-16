@@ -3,8 +3,8 @@
 ### All vignettes
 
 - [Airport
-  data](https://ipeagit.github.io/flightsbr/dev/articles/airports.md):
+  data](https://ipea.github.io/flightsbr/dev/articles/airports.md):
 - [Flights
-  data](https://ipeagit.github.io/flightsbr/dev/articles/flights.md):
+  data](https://ipea.github.io/flightsbr/dev/articles/flights.md):
 - [Introduction to
-  flightsbr](https://ipeagit.github.io/flightsbr/dev/articles/intro_flightsbr.md):
+  flightsbr](https://ipea.github.io/flightsbr/dev/articles/intro_flightsbr.md):

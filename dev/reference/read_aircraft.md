@@ -34,21 +34,23 @@ read_aircraft(date = NULL, showProgress = TRUE, cache = TRUE)
 
 ## Value
 
-A `"data.table" "data.frame"` object. All columns are returned with
-`class` of type `"character"`.
+A `"data.table" "data.frame"` object. Columns of counts and measures are
+numeric; codes and identifiers (e.g. flight numbers, serial numbers,
+airport codes) are character, keeping leading zeros. A column with some
+values that are not numbers stays character, with a message.
 
 ## See also
 
 Other download flight data:
-[`read_aircrafts()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircrafts.md),
-[`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+[`read_aircrafts()`](https://ipea.github.io/flightsbr/dev/reference/read_aircrafts.md),
+[`read_flights()`](https://ipea.github.io/flightsbr/dev/reference/read_flights.md)
 
 ## Examples
 
 ``` r
 if (FALSE)  if (interactive()) {
 # Read aircraft data
-aircraft <- read_aircraft(date = 202001,
+aircraft <- read_aircraft(date = 202409,
                           showProgress = TRUE
                           )
 

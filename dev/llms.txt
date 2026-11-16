@@ -4,7 +4,7 @@
 status](https://www.r-pkg.org/badges/version/flightsbr)](https://CRAN.R-project.org/package=flightsbr)
 [![CRAN/METACRAN Total
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/flightsbr?color=yellow)](https://CRAN.R-project.org/package=flightsbr)
-[![R-CMD-check](https://github.com/ipea/flightsbr/workflows/R-CMD-check/badge.svg)](https://github.com/ipea/flightsbr/actions)
+[![R-CMD-check](https://github.com/ipea/flightsbr/workflows/check/badge.svg)](https://github.com/ipea/flightsbr/actions)
 [![Lifecycle:
 active](https://img.shields.io/badge/lifecycle-active-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![Codecov test
@@ -35,11 +35,11 @@ and domestic flights within the country.
 The package currently includes [five main
 functions](https://ipea.github.io/flightsbr/reference/index.html):
 
-1.  [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
-2.  [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)
-3.  [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
-4.  [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
-5.  [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md)
+1.  [`read_flights()`](https://ipea.github.io/flightsbr/dev/reference/read_flights.md)
+2.  [`read_airports()`](https://ipea.github.io/flightsbr/dev/reference/read_airports.md)
+3.  [`read_aircraft()`](https://ipea.github.io/flightsbr/dev/reference/read_aircraft.md)
+4.  [`read_airport_movements()`](https://ipea.github.io/flightsbr/dev/reference/read_airport_movements.md)
+5.  [`read_airfares()`](https://ipea.github.io/flightsbr/dev/reference/read_airfares.md)
 
 #### 1) `read_flights()` to download data on national and international flights.
 
@@ -107,22 +107,22 @@ developed by a team at the Institute for Applied Economic Research
 
 ## All functions
 
-- [`flightsbr`](https://ipeagit.github.io/flightsbr/dev/reference/flightsbr.md)
-  [`flightsbr-package`](https://ipeagit.github.io/flightsbr/dev/reference/flightsbr.md)
+- [`flightsbr`](https://ipea.github.io/flightsbr/dev/reference/flightsbr.md)
+  [`flightsbr-package`](https://ipea.github.io/flightsbr/dev/reference/flightsbr.md)
   : flightsbr: Download Flight and Airport Data from Brazil
-- [`latest_airfares_date()`](https://ipeagit.github.io/flightsbr/dev/reference/latest_airfares_date.md)
+- [`latest_airfares_date()`](https://ipea.github.io/flightsbr/dev/reference/latest_airfares_date.md)
   : Check the date of the latest airfare data available
-- [`latest_flights_date()`](https://ipeagit.github.io/flightsbr/dev/reference/latest_flights_date.md)
+- [`latest_flights_date()`](https://ipea.github.io/flightsbr/dev/reference/latest_flights_date.md)
   : Check the date of the latest flight data available
-- [`read_aircraft()`](https://ipeagit.github.io/flightsbr/dev/reference/read_aircraft.md)
+- [`read_aircraft()`](https://ipea.github.io/flightsbr/dev/reference/read_aircraft.md)
   : Download aircraft data from Brazil
-- [`read_airfares()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airfares.md)
+- [`read_airfares()`](https://ipea.github.io/flightsbr/dev/reference/read_airfares.md)
   : Download data on airfares flights in Brazil
-- [`read_airport_movements()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airport_movements.md)
+- [`read_airport_movements()`](https://ipea.github.io/flightsbr/dev/reference/read_airport_movements.md)
   : Download airport movement data from Brazil
-- [`read_airports()`](https://ipeagit.github.io/flightsbr/dev/reference/read_airports.md)
+- [`read_airports()`](https://ipea.github.io/flightsbr/dev/reference/read_airports.md)
   : Download airports data from Brazil
-- [`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+- [`read_flights()`](https://ipea.github.io/flightsbr/dev/reference/read_flights.md)
   : Download flight data from Brazil
 
 # Articles
@@ -130,8 +130,8 @@ developed by a team at the Institute for Applied Economic Research
 ### All vignettes
 
 - [Airport
-  data](https://ipeagit.github.io/flightsbr/dev/articles/airports.md):
+  data](https://ipea.github.io/flightsbr/dev/articles/airports.md):
 - [Flights
-  data](https://ipeagit.github.io/flightsbr/dev/articles/flights.md):
+  data](https://ipea.github.io/flightsbr/dev/articles/flights.md):
 - [Introduction to
-  flightsbr](https://ipeagit.github.io/flightsbr/dev/articles/intro_flightsbr.md):
+  flightsbr](https://ipea.github.io/flightsbr/dev/articles/intro_flightsbr.md):

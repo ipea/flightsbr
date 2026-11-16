@@ -5,7 +5,7 @@ articles:
   airports: airports.html
   flights: flights.html
   intro_flightsbr: intro_flightsbr.html
-last_built: 2026-08-20T11:06Z
+last_built: 2026-11-16T12:09Z
 urls:
-  reference: https://ipeagit.github.io/flightsbr/reference
-  article: https://ipeagit.github.io/flightsbr/articles
+  reference: https://ipea.github.io/flightsbr/reference
+  article: https://ipea.github.io/flightsbr/articles

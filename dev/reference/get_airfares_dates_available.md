@@ -30,6 +30,6 @@ Numeric vector.
 ``` r
 if (FALSE)  if (interactive()) {
 # check dates
-a <- get_airfares_dates_available(domestic = TRUE)
+a <- get_airfares_dates_available(dom = TRUE)
 } # \dontrun{}
 ```

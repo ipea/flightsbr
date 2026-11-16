@@ -42,7 +42,7 @@ df_various_years <- read_flights(date = c(2019, 2021, 2022))
 
 If you know already what data columns you need, you can pass a vector
 with their names to the `select` argument and
-[`read_flights()`](https://ipeagit.github.io/flightsbr/dev/reference/read_flights.md)
+[`read_flights()`](https://ipea.github.io/flightsbr/dev/reference/read_flights.md)
 will only load those columns. This will make the function a bit faster.
 
 ``` r

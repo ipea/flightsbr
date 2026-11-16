@@ -15,7 +15,7 @@ A numeric date in the format `yyyymm`.
 ## See also
 
 Other support function:
-[`latest_airfares_date()`](https://ipeagit.github.io/flightsbr/dev/reference/latest_airfares_date.md)
+[`latest_airfares_date()`](https://ipea.github.io/flightsbr/dev/reference/latest_airfares_date.md)
 
 ## Examples
 

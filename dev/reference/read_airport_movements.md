@@ -2,8 +2,8 @@
 
 Download airport movements data from Brazil’s Civil Aviation Agency
 (ANAC). The data covers all passenger, aircraft, cargo and mail movement
-data from airports regulated by ANAC. Data only available from Jan 2019
-onwards. A description of all variables included in the data is
+data from airports regulated by ANAC. Data only available from March
+2019 onwards. A description of all variables included in the data is
 available at
 <https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/operador-aeroportuario/dados-de-movimentacao-aeroportuaria/60-dados-de-movimentacao-aeroportuaria>.
 
@@ -35,8 +35,10 @@ read_airport_movements(date = NULL, showProgress = TRUE, cache = TRUE)
 
 ## Value
 
-A `"data.table" "data.frame"` object. All columns are returned with
-`class` of type `"character"`.
+A `"data.table" "data.frame"` object. Columns of counts and measures are
+numeric; codes and identifiers (e.g. flight numbers, serial numbers,
+airport codes) are character, keeping leading zeros. A column with some
+values that are not numbers stays character, with a message.
 
 ## Examples
 
