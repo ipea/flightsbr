@@ -15,7 +15,17 @@
 #' @template showProgress
 #' @template select
 #' @template cache
-
+#'
+#' @details
+#' ANAC has changed the column names of these files several times. All files
+#' are returned with the names ANAC uses in its current files
+#' (`nr_ano_referencia`, `nr_mes_referencia`, `sg_empresa_icao`,
+#' `sg_icao_origem`, `sg_icao_destino`, `nr_tarifa`, `nr_assentos` and, for
+#' international flights, `sg_icao_retorno`, `cd_classe_ida`,
+#' `cd_classe_volta`), so files from different years can be combined.
+#' `select` accepts these names as well as older names such as `"TARIFA"` or
+#' `"ano"`.
+#'
 #' @return A `"data.table" "data.frame"` object.
 #' @export
 #' @family download air fares data
@@ -33,7 +43,7 @@ read_airfares <- function(
   cache = TRUE
 ) {
   ### check inputs
-  if (!is.logical(domestic)) {
+  if (!(isTRUE(domestic) || isFALSE(domestic))) {
     stop(paste0("Argument 'domestic' must be either 'TRUE' or 'FALSE'."))
   }
   if (!is.logical(showProgress)) {
@@ -42,31 +52,45 @@ read_airfares <- function(
   if (!is.logical(cache)) {
     stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE'."))
   }
+  if (!is.null(select) && !is.character(select)) {
+    stop("Argument 'select' must be a character vector of column names.")
+  }
   check_input_date_format(date)
 
-  ### check date input
-  # get all dates available
-  all_dates <- get_airfares_dates_available(dom = domestic, cache = cache)
+  ### get files available
+  files <- get_airfares_files_available(dom = domestic, cache = cache)
 
-  # check if download failed
-  if (is.null(all_dates)) {
+  if (is.null(files)) {
     return(invisible(NULL))
   }
 
-  # check dates
+  # the cached listing may miss years ANAC failed to list last time: if the
+  # request touches one of them, list the files again
+  failed_years <- attr(files, "failed_years")
+  if (!is.null(date) && any(substr(date, 1, 4) %in% failed_years)) {
+    files <- get_airfares_files_available(dom = domestic, cache = FALSE)
+    if (is.null(files)) {
+      return(invisible(NULL))
+    }
+  }
+
+  all_dates <- files$date
+
+  ### check date input
   if (is.null(date)) {
     date <- max(all_dates)
   }
   check_date(date = date, all_dates)
 
-  # prepare address of online data
-  file_urls <- get_airfares_url(dom = domestic, date)
+  # expand years to the months available on ANAC
+  date <- available_months(date, all_dates)
+  requested_dates <- date
+  file_urls <- files[date %in% requested_dates]$url
 
-  # download and read data
+  ### download and read data
   dt <- download_airfares_data(
     file_urls = file_urls,
     showProgress = showProgress,
-    select = select,
     cache = cache
   )
 
@@ -75,13 +99,20 @@ read_airfares <- function(
     return(invisible(NULL))
   }
 
-  # clean names
-  nnn <- names(dt)
-  data.table::setnames(
-    x = dt,
-    old = nnn,
-    new = janitor::make_clean_names(nnn)
-  )
+  ### keep selected columns
+  if (!is.null(select)) {
+    select_cols <- airfare_canonical_names(select)
+
+    if (anyNA(select_cols)) {
+      warning(
+        "Column(s) not found in airfare data: ",
+        paste(select[is.na(select_cols)], collapse = ", ")
+      )
+    }
+
+    select_cols <- intersect(unique(select_cols[!is.na(select_cols)]), names(dt))
+    dt <- dt[, select_cols, with = FALSE]
+  }
 
   # convert columns to numeric
   convert_to_numeric(dt)
