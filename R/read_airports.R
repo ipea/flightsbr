@@ -83,7 +83,7 @@ download_airports_data <- function(file_url,
                                    showProgress,
                                    cache) { # nocov start
 
-  temp_local_file <- fs::path(fs::path_temp(), basename(file_url))
+  temp_local_file <- fs::path(flightsbr_cache_dir(), basename(file_url))
 
   check_download <- download_flightsbr_file(file_url = file_url,
                                             showProgress = showProgress,

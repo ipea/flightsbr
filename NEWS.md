@@ -1,5 +1,10 @@
 # flightsbr (development version)
 
+* Major changes:
+
+  * Downloaded files are now cached in `tools::R_user_dir("flightsbr", which = "cache")`, so they persist across R sessions and each file is downloaded only once. A cached file is downloaded again only if ANAC's copy has a different size, or when `cache = FALSE`. If ANAC can't be reached to check, the cached file is used. The cache folder can be changed with `options(flightsbr.cache_dir = "path/to/folder")`.
+  * New function `flightsbr_cache()` to list and delete cached files.
+
 * Breaking changes:
 
   * `read_airfares()` now returns the same column names for every period, using the names of ANAC's current files: `nr_ano_referencia`, `nr_mes_referencia`, `sg_empresa_icao`, `sg_icao_origem`, `sg_icao_destino`, `nr_tarifa`, `nr_assentos`, and for international flights also `sg_icao_retorno`, `cd_classe_ida` and `cd_classe_volta`. Older names such as `ano`, `tarifa` or `valor_tarifa` are no longer returned, but are still accepted by `select`.

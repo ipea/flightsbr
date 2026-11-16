@@ -7,7 +7,7 @@
 download_flightsbr_file(
   file_url = parent.frame()$file_url,
   showProgress = parent.frame()$showProgress,
-  dest_file = fs::path(fs::path_temp(), basename(file_url)),
+  dest_file = fs::path(flightsbr_cache_dir(), basename(file_url)),
   cache = cache
 )
 }
@@ -17,7 +17,8 @@ download_flightsbr_file(
 \item{showProgress}{Logical, passed from above.}
 
 \item{dest_file}{String. Local path(s) where the file(s) are saved, one per
-\code{file_url}. Defaults to the temp dir plus \code{basename(file_url)}.}
+\code{file_url}. Defaults to the flightsbr cache directory (see
+\code{\link[=flightsbr_cache]{flightsbr_cache()}}) plus \code{basename(file_url)}.}
 
 \item{cache}{Logical, passed from above. If \code{FALSE}, existing files at
 \code{dest_file} are deleted and downloaded again.}
@@ -32,6 +33,12 @@ Downloads each file to a temporary \code{.part} file and only moves it to
 page. A failed or blocked request therefore never leaves a file at
 \code{dest_file}, so later calls with \code{cache = TRUE} cannot read an error page as
 data.
+}
+\details{
+With \code{cache = TRUE}, a file already at \code{dest_file} is reused unless the
+ANAC server reports a different size for it (checked with a HEAD request).
+If the size can't be checked (no connection, no size header, or ANAC
+answers with a web page), the cached file is reused.
 }
 \examples{
 \dontrun{ if (interactive()) {

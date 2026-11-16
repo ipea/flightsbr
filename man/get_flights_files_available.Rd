@@ -8,8 +8,13 @@ get_flights_files_available(cache = TRUE)
 }
 \arguments{
 \item{cache}{Logical. Whether the function should read cached data downloaded
-previously. Defaults to \code{TRUE}. If \code{FALSE}, the function will
-always download the data and overwrite cached data.}
+previously. Defaults to \code{TRUE}. Downloaded files are cached
+in \code{tools::R_user_dir("flightsbr", which = "cache")}, so they
+persist across R sessions, and a cached file is downloaded
+again only if ANAC's copy has a different size. If \code{FALSE},
+the function will always download the data and overwrite
+cached data. See \code{\link[=flightsbr_cache]{flightsbr_cache()}} to list or delete cached
+files.}
 }
 \value{
 A data.table with columns \code{date}, \code{type}, and \code{url}.

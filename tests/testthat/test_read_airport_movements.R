@@ -36,6 +36,45 @@ testthat::test_that("read_airport_movements", {
  })
 
 
+# Download once -----------------------
+testthat::test_that("cached files are not downloaded again", {
+
+  withr::local_options(list(flightsbr.cache_dir = withr::local_tempdir()))
+  cached_file <- file.path(getOption("flightsbr.cache_dir"),
+                           "Movimentacoes_Aeroportuarias_202401.csv")
+
+  # first call downloads the file
+  f1 <- read_airport_movements(date = 202401, showProgress = FALSE)
+  testthat::expect_true(file.exists(cached_file))
+  mtime_first <- file.mtime(cached_file)
+
+  # second call reuses it: the file isn't rewritten
+  Sys.sleep(1.1)
+  testthat::expect_message(
+    f2 <- read_airport_movements(date = 202401, showProgress = TRUE),
+    "Using 1 cached file"
+  )
+  testthat::expect_equal(file.mtime(cached_file), mtime_first)
+  testthat::expect_equal(nrow(f1), nrow(f2))
+
+  # a broken cached file is replaced
+  writeLines("broken", cached_file)
+  f3 <- read_airport_movements(date = 202401, showProgress = FALSE)
+  testthat::expect_equal(nrow(f3), nrow(f1))
+
+  # cache = FALSE downloads again
+  Sys.sleep(1.1)
+  mtime_before <- file.mtime(cached_file)
+  f4 <- read_airport_movements(date = 202401, showProgress = FALSE, cache = FALSE)
+  testthat::expect_true(file.mtime(cached_file) > mtime_before)
+
+  # no .part files are left behind
+  testthat::expect_length(
+    list.files(getOption("flightsbr.cache_dir"), pattern = "\\.part$"), 0
+  )
+})
+
+
 # ERRORS and messages  -----------------------
 testthat::test_that("read_airport_movements", {
 
