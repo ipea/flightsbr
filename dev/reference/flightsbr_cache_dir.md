@@ -1,8 +1,10 @@
 # Directory where flightsbr caches downloaded files
 
-Defaults to `tools::R_user_dir("flightsbr", which = "cache")`, so cached
-files persist across R sessions. It can be changed with
-`options(flightsbr.cache_dir = "path/to/dir")`.
+The folder set with
+[`set_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/dev/reference/set_flightsbr_cache_dir.md),
+or by default `tools::R_user_dir("flightsbr", which = "cache")`, so
+cached files persist across R sessions. See
+[`get_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/dev/reference/get_flightsbr_cache_dir.md).
 
 ## Usage
 

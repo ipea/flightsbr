@@ -31,7 +31,7 @@ download_flightsbr_file(
 
   String. Local path(s) where the file(s) are saved, one per `file_url`.
   Defaults to the flightsbr cache directory (see
-  [`flightsbr_cache()`](https://ipea.github.io/flightsbr/dev/reference/flightsbr_cache.md))
+  [`get_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/dev/reference/get_flightsbr_cache_dir.md))
   plus `basename(file_url)`.
 
 - cache:

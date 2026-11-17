@@ -47,8 +47,8 @@
 <h2 class="pkg-version" data-toc-text="development version" id="flightsbr-development-version">flightsbr (development version)<a class="anchor" aria-label="anchor" href="#flightsbr-development-version"></a></h2>
 <ul><li>
 <p>Major changes:</p>
-<ul><li>Downloaded files are now cached in <code>tools::R_user_dir("flightsbr", which = "cache")</code>, so they persist across R sessions and each file is downloaded only once. A cached file is downloaded again only if ANAC’s copy has a different size, or when <code>cache = FALSE</code>. If ANAC can’t be reached to check, the cached file is used. The cache folder can be changed with <code>options(flightsbr.cache_dir = "path/to/folder")</code>.</li>
-<li>New function <code><a href="../reference/flightsbr_cache.html">flightsbr_cache()</a></code> to list and delete cached files.</li>
+<ul><li>Downloaded files are now cached in <code>tools::R_user_dir("flightsbr", which = "cache")</code>, so they persist across R sessions and each file is downloaded only once. A cached file is downloaded again only if ANAC’s copy has a different size, or when <code>cache = FALSE</code>. If ANAC can’t be reached to check, the cached file is used.</li>
+<li>New functions to manage the cache, similar to those in {geocodebr}: <code><a href="../reference/set_flightsbr_cache_dir.html">set_flightsbr_cache_dir()</a></code> sets the cache folder (the choice is kept across R sessions), <code><a href="../reference/get_flightsbr_cache_dir.html">get_flightsbr_cache_dir()</a></code> returns it, <code><a href="../reference/list_flightsbr_cache.html">list_flightsbr_cache()</a></code> lists the cached files, and <code><a href="../reference/delete_flightsbr_cache.html">delete_flightsbr_cache()</a></code> deletes some or all of them.</li>
 </ul></li>
 <li>
 <p>Breaking changes:</p>

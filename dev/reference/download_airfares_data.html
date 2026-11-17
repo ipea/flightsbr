@@ -72,12 +72,13 @@
 <dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
 <dd><p>Logical. Whether the function should read cached data downloaded
 previously. Defaults to <code>TRUE</code>. Downloaded files are cached
-in <code>tools::R_user_dir("flightsbr", which = "cache")</code>, so they
-persist across R sessions, and a cached file is downloaded
-again only if ANAC's copy has a different size. If <code>FALSE</code>,
-the function will always download the data and overwrite
-cached data. See <code><a href="flightsbr_cache.html">flightsbr_cache()</a></code> to list or delete cached
-files.</p></dd>
+in a folder that persists across R sessions (see
+<code><a href="get_flightsbr_cache_dir.html">get_flightsbr_cache_dir()</a></code> and <code><a href="set_flightsbr_cache_dir.html">set_flightsbr_cache_dir()</a></code>),
+and a cached file is downloaded again only if ANAC's copy has
+a different size. If <code>FALSE</code>, the function will always
+download the data and overwrite cached data. See
+<code><a href="list_flightsbr_cache.html">list_flightsbr_cache()</a></code> and <code><a href="delete_flightsbr_cache.html">delete_flightsbr_cache()</a></code> to
+manage cached files.</p></dd>
 
 </dl></div>
     <div class="section level2">
