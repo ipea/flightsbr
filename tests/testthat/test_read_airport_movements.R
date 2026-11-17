@@ -39,8 +39,10 @@ testthat::test_that("read_airport_movements", {
 # Download once -----------------------
 testthat::test_that("cached files are not downloaded again", {
 
-  withr::local_options(list(flightsbr.cache_dir = withr::local_tempdir()))
-  cached_file <- file.path(getOption("flightsbr.cache_dir"),
+  cache_dir <- withr::local_tempdir()
+  set_flightsbr_cache_dir(cache_dir, verbose = FALSE)
+  withr::defer(set_flightsbr_cache_dir(NULL, verbose = FALSE))
+  cached_file <- file.path(cache_dir,
                            "Movimentacoes_Aeroportuarias_202401.csv")
 
   # first call downloads the file
@@ -70,7 +72,7 @@ testthat::test_that("cached files are not downloaded again", {
 
   # no .part files are left behind
   testthat::expect_length(
-    list.files(getOption("flightsbr.cache_dir"), pattern = "\\.part$"), 0
+    list.files(cache_dir, pattern = "\\.part$"), 0
   )
 })
 

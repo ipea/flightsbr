@@ -97,9 +97,9 @@ available_months <- function(date, all_dates) {
 
 #' Directory where flightsbr caches downloaded files
 #'
-#' Defaults to `tools::R_user_dir("flightsbr", which = "cache")`, so cached
-#' files persist across R sessions. It can be changed with
-#' `options(flightsbr.cache_dir = "path/to/dir")`.
+#' The folder set with [set_flightsbr_cache_dir()], or by default
+#' `tools::R_user_dir("flightsbr", which = "cache")`, so cached files persist
+#' across R sessions. See [get_flightsbr_cache_dir()].
 #'
 #' @param create Logical. Whether to create the directory if it does not
 #'        exist. Defaults to `TRUE`.
@@ -109,10 +109,7 @@ available_months <- function(date, all_dates) {
 #' @keywords internal
 flightsbr_cache_dir <- function(create = TRUE) {
 
-  cache_dir <- getOption(
-    "flightsbr.cache_dir",
-    default = tools::R_user_dir("flightsbr", which = "cache")
-  )
+  cache_dir <- get_flightsbr_cache_dir()
 
   if (isTRUE(create)) fs::dir_create(cache_dir)
   return(fs::path(cache_dir))
@@ -178,7 +175,7 @@ remote_sizes <- function(file_url, timeout = 30) { # nocov start
 #' @param showProgress Logical, passed from above.
 #' @param dest_file String. Local path(s) where the file(s) are saved, one per
 #'        `file_url`. Defaults to the flightsbr cache directory (see
-#'        [flightsbr_cache()]) plus `basename(file_url)`.
+#'        [get_flightsbr_cache_dir()]) plus `basename(file_url)`.
 #' @param cache Logical, passed from above. If `FALSE`, existing files at
 #'        `dest_file` are deleted and downloaded again.
 #'
