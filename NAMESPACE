@@ -2,19 +2,22 @@
 
 export(check_date)
 export(check_input_date_format)
-export(flightsbr_cache)
+export(delete_flightsbr_cache)
 export(get_aircraft_dates_available)
 export(get_airfares_dates_available)
 export(get_airport_movement_dates_available)
 export(get_flight_dates_available)
+export(get_flightsbr_cache_dir)
 export(latest_airfares_date)
 export(latest_flights_date)
+export(list_flightsbr_cache)
 export(read_aircraft)
 export(read_aircrafts)
 export(read_airfares)
 export(read_airport_movements)
 export(read_airports)
 export(read_flights)
+export(set_flightsbr_cache_dir)
 importFrom(data.table,
   "%like%",
   ":=",

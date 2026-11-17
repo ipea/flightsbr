@@ -14,8 +14,8 @@ exist. Defaults to \code{TRUE}.}
 The path to the cache directory.
 }
 \description{
-Defaults to \code{tools::R_user_dir("flightsbr", which = "cache")}, so cached
-files persist across R sessions. It can be changed with
-\code{options(flightsbr.cache_dir = "path/to/dir")}.
+The folder set with \code{\link[=set_flightsbr_cache_dir]{set_flightsbr_cache_dir()}}, or by default
+\code{tools::R_user_dir("flightsbr", which = "cache")}, so cached files persist
+across R sessions. See \code{\link[=get_flightsbr_cache_dir]{get_flightsbr_cache_dir()}}.
 }
 \keyword{internal}

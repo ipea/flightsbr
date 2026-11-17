@@ -18,7 +18,7 @@ download_flightsbr_file(
 
 \item{dest_file}{String. Local path(s) where the file(s) are saved, one per
 \code{file_url}. Defaults to the flightsbr cache directory (see
-\code{\link[=flightsbr_cache]{flightsbr_cache()}}) plus \code{basename(file_url)}.}
+\code{\link[=get_flightsbr_cache_dir]{get_flightsbr_cache_dir()}}) plus \code{basename(file_url)}.}
 
 \item{cache}{Logical, passed from above. If \code{FALSE}, existing files at
 \code{dest_file} are deleted and downloaded again.}
