@@ -294,7 +294,7 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
   # create temp local file. The name comes from the url without its
   # '/@@download/file' suffix, otherwise every month would be saved as 'file'
   file_name <- anac_file_name(file_url)
-  temp_local_file <- fs::path(fs::path_temp(), file_name)
+  temp_local_file <- fs::path(flightsbr_cache_dir(), file_name)
 
   # discard cached files that are not zip archives
   bad_cache <- file.exists(temp_local_file) & !is_zip_file(temp_local_file)

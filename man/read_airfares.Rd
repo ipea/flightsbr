@@ -31,8 +31,13 @@ In \code{read_airfares()}, only column names are accepted, and both
 current and older ANAC names work (see Details).}
 
 \item{cache}{Logical. Whether the function should read cached data downloaded
-previously. Defaults to \code{TRUE}. If \code{FALSE}, the function will
-always download the data and overwrite cached data.}
+previously. Defaults to \code{TRUE}. Downloaded files are cached
+in \code{tools::R_user_dir("flightsbr", which = "cache")}, so they
+persist across R sessions, and a cached file is downloaded
+again only if ANAC's copy has a different size. If \code{FALSE},
+the function will always download the data and overwrite
+cached data. See \code{\link[=flightsbr_cache]{flightsbr_cache()}} to list or delete cached
+files.}
 }
 \value{
 A \verb{"data.table" "data.frame"} object.

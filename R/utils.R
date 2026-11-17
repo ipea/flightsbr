@@ -95,6 +95,72 @@ available_months <- function(date, all_dates) {
 
 
 
+#' Directory where flightsbr caches downloaded files
+#'
+#' Defaults to `tools::R_user_dir("flightsbr", which = "cache")`, so cached
+#' files persist across R sessions. It can be changed with
+#' `options(flightsbr.cache_dir = "path/to/dir")`.
+#'
+#' @param create Logical. Whether to create the directory if it does not
+#'        exist. Defaults to `TRUE`.
+#'
+#' @return The path to the cache directory.
+#'
+#' @keywords internal
+flightsbr_cache_dir <- function(create = TRUE) {
+
+  cache_dir <- getOption(
+    "flightsbr.cache_dir",
+    default = tools::R_user_dir("flightsbr", which = "cache")
+  )
+
+  if (isTRUE(create)) fs::dir_create(cache_dir)
+  return(fs::path(cache_dir))
+}
+
+
+
+#' Get the size of remote files with HEAD requests
+#'
+#' @param file_url Character vector of urls.
+#' @param timeout Numeric. Seconds to wait for each HEAD request.
+#'
+#' @return A numeric vector with the remote `Content-Length` of each file.
+#'         `NA` when the request failed, the server sent no size, or the
+#'         server answered with an HTML page (ANAC's error / rate-limit page).
+#'
+#' @keywords internal
+remote_sizes <- function(file_url, timeout = 30) { # nocov start
+
+  if (length(file_url) == 0) return(numeric(0))
+
+  reqs <- lapply(file_url, function(url) {
+    anac_request(url) |>
+      httr2::req_method("HEAD") |>
+      httr2::req_retry(max_tries = 1) |>
+      httr2::req_timeout(timeout)
+  })
+
+  resps <- tryCatch(
+    httr2::req_perform_parallel(reqs, on_error = "continue",
+                                progress = FALSE, max_active = 4),
+    error = function(e) vector("list", length(reqs))
+  )
+
+  vapply(resps, function(r) {
+    if (!inherits(r, "httr2_response")) return(NA_real_)
+
+    type <- tryCatch(httr2::resp_content_type(r), error = \(e) NA_character_)
+    if (isTRUE(type == "text/html")) return(NA_real_)
+
+    h <- httr2::resp_header(r, "content-length")
+    if (is.null(h)) return(NA_real_)
+    suppressWarnings(as.numeric(h))
+  }, numeric(1))
+} # nocov end
+
+
+
 #' Download files from urls, reusing cached copies
 #'
 #' Downloads each file to a temporary `.part` file and only moves it to
@@ -103,10 +169,16 @@ available_months <- function(date, all_dates) {
 #' `dest_file`, so later calls with `cache = TRUE` cannot read an error page as
 #' data.
 #'
+#' With `cache = TRUE`, a file already at `dest_file` is reused unless the
+#' ANAC server reports a different size for it (checked with a HEAD request).
+#' If the size can't be checked (no connection, no size header, or ANAC
+#' answers with a web page), the cached file is reused.
+#'
 #' @param file_url String. A url passed from above.
 #' @param showProgress Logical, passed from above.
 #' @param dest_file String. Local path(s) where the file(s) are saved, one per
-#'        `file_url`. Defaults to the temp dir plus `basename(file_url)`.
+#'        `file_url`. Defaults to the flightsbr cache directory (see
+#'        [flightsbr_cache()]) plus `basename(file_url)`.
 #' @param cache Logical, passed from above. If `FALSE`, existing files at
 #'        `dest_file` are deleted and downloaded again.
 #'
@@ -126,7 +198,7 @@ available_months <- function(date, all_dates) {
 #'}}
 download_flightsbr_file <- function(file_url = parent.frame()$file_url,
                                     showProgress = parent.frame()$showProgress,
-                                    dest_file = fs::path(fs::path_temp(), basename(file_url)),
+                                    dest_file = fs::path(flightsbr_cache_dir(), basename(file_url)),
                                     cache = cache) { # nocov start
 
   if (length(dest_file) != length(file_url)) {
@@ -142,6 +214,23 @@ download_flightsbr_file <- function(file_url = parent.frame()$file_url,
 
   if (isFALSE(cache)) {
     unlink(dest_file)
+
+  } else {
+    # re-download a cached file only if ANAC reports a different size; keep
+    # it when the size can't be checked (e.g. offline)
+    cached <- which(file.exists(dest_file))
+    if (length(cached) > 0) {
+      remote_size <- remote_sizes(file_url[cached])
+      local_size <- file.info(dest_file[cached])$size
+      outdated <- cached[!is.na(remote_size) & remote_size != local_size]
+      unlink(dest_file[outdated])
+
+      n_reused <- length(cached) - length(outdated)
+      if (isTRUE(showProgress) && n_reused > 0) {
+        message("Using ", n_reused, " cached file(s); downloading ",
+                length(file_url) - n_reused, ".")
+      }
+    }
   }
 
   blocked <- character(0)

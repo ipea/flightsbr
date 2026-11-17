@@ -2,6 +2,7 @@
 
 export(check_date)
 export(check_input_date_format)
+export(flightsbr_cache)
 export(get_aircraft_dates_available)
 export(get_airfares_dates_available)
 export(get_airport_movement_dates_available)

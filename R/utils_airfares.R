@@ -233,7 +233,7 @@ download_airfares_data <- function(file_urls = parent.frame()$file_urls,
   # year folders
   file_name <- utils::URLdecode(basename(file_urls))
   file_name <- paste0(basename(dirname(file_urls)), "_", gsub(" ", "_", file_name))
-  temp_local_file <- fs::path(fs::path_temp(), file_name)
+  temp_local_file <- fs::path(flightsbr_cache_dir(), file_name)
 
   # download files that are not cached yet
   check_download <- download_flightsbr_file(file_url = file_urls,

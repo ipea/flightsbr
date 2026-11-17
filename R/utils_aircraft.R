@@ -93,7 +93,7 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
 
   # create temp local file
   file_name <- basename(file_url)
-  temp_local_file <- fs::path(fs::path_temp(), file_name)
+  temp_local_file <- fs::path(flightsbr_cache_dir(), file_name)
 
   # download files that are not cached yet
   check_download <- download_flightsbr_file(file_url = file_url,
