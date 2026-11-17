@@ -12,7 +12,7 @@ page as data.
 download_flightsbr_file(
   file_url = parent.frame()$file_url,
   showProgress = parent.frame()$showProgress,
-  dest_file = fs::path(fs::path_temp(), basename(file_url)),
+  dest_file = fs::path(flightsbr_cache_dir(), basename(file_url)),
   cache = cache
 )
 ```
@@ -30,7 +30,9 @@ download_flightsbr_file(
 - dest_file:
 
   String. Local path(s) where the file(s) are saved, one per `file_url`.
-  Defaults to the temp dir plus `basename(file_url)`.
+  Defaults to the flightsbr cache directory (see
+  [`flightsbr_cache()`](https://ipea.github.io/flightsbr/dev/reference/flightsbr_cache.md))
+  plus `basename(file_url)`.
 
 - cache:
 
@@ -41,6 +43,13 @@ download_flightsbr_file(
 
 `TRUE` (invisibly) if every file is available locally, otherwise `NULL`
 (invisibly) with a message.
+
+## Details
+
+With `cache = TRUE`, a file already at `dest_file` is reused unless the
+ANAC server reports a different size for it (checked with a HEAD
+request). If the size can't be checked (no connection, no size header,
+or ANAC answers with a web page), the cached file is reused.
 
 ## Examples
 

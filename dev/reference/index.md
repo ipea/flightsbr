@@ -5,6 +5,8 @@
 - [`flightsbr`](https://ipea.github.io/flightsbr/dev/reference/flightsbr.md)
   [`flightsbr-package`](https://ipea.github.io/flightsbr/dev/reference/flightsbr.md)
   : flightsbr: Download Flight and Airport Data from Brazil
+- [`flightsbr_cache()`](https://ipea.github.io/flightsbr/dev/reference/flightsbr_cache.md)
+  : Manage the cache of files downloaded by flightsbr
 - [`latest_airfares_date()`](https://ipea.github.io/flightsbr/dev/reference/latest_airfares_date.md)
   : Check the date of the latest airfare data available
 - [`latest_flights_date()`](https://ipea.github.io/flightsbr/dev/reference/latest_flights_date.md)

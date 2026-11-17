@@ -65,7 +65,7 @@ data.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">download_flightsbr_file</span><span class="op">(</span></span>
 <span>  file_url <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">file_url</span>,</span>
 <span>  showProgress <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">showProgress</span>,</span>
-<span>  dest_file <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">path_temp</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">file_url</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  dest_file <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="fu"><a href="flightsbr_cache_dir.html">flightsbr_cache_dir</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">file_url</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  cache <span class="op">=</span> <span class="va">cache</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -84,7 +84,8 @@ data.</p>
 
 <dt id="arg-dest-file">dest_file<a class="anchor" aria-label="anchor" href="#arg-dest-file"></a></dt>
 <dd><p>String. Local path(s) where the file(s) are saved, one per
-<code>file_url</code>. Defaults to the temp dir plus <code>basename(file_url)</code>.</p></dd>
+<code>file_url</code>. Defaults to the flightsbr cache directory (see
+<code><a href="flightsbr_cache.html">flightsbr_cache()</a></code>) plus <code>basename(file_url)</code>.</p></dd>
 
 
 <dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
@@ -96,6 +97,13 @@ data.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>TRUE</code> (invisibly) if every file is available locally, otherwise
 <code>NULL</code> (invisibly) with a message.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>With <code>cache = TRUE</code>, a file already at <code>dest_file</code> is reused unless the
+ANAC server reports a different size for it (checked with a HEAD request).
+If the size can't be checked (no connection, no size header, or ANAC
+answers with a web page), the cached file is reused.</p>
     </div>
 
     <div class="section level2">

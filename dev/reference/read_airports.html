@@ -80,8 +80,13 @@ data sets.</p></dd>
 
 <dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
 <dd><p>Logical. Whether the function should read cached data downloaded
-previously. Defaults to <code>TRUE</code>. If <code>FALSE</code>, the function will
-always download the data and overwrite cached data.</p></dd>
+previously. Defaults to <code>TRUE</code>. Downloaded files are cached
+in <code>tools::R_user_dir("flightsbr", which = "cache")</code>, so they
+persist across R sessions, and a cached file is downloaded
+again only if ANAC's copy has a different size. If <code>FALSE</code>,
+the function will always download the data and overwrite
+cached data. See <code><a href="flightsbr_cache.html">flightsbr_cache()</a></code> to list or delete cached
+files.</p></dd>
 
 </dl></div>
     <div class="section level2">

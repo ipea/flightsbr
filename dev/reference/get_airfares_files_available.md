@@ -21,8 +21,13 @@ get_airfares_files_available(dom, cache = TRUE)
 - cache:
 
   Logical. Whether the function should read cached data downloaded
-  previously. Defaults to `TRUE`. If `FALSE`, the function will always
-  download the data and overwrite cached data.
+  previously. Defaults to `TRUE`. Downloaded files are cached in
+  `tools::R_user_dir("flightsbr", which = "cache")`, so they persist
+  across R sessions, and a cached file is downloaded again only if
+  ANAC's copy has a different size. If `FALSE`, the function will always
+  download the data and overwrite cached data. See
+  [`flightsbr_cache()`](https://ipea.github.io/flightsbr/dev/reference/flightsbr_cache.md)
+  to list or delete cached files.
 
 ## Value
 

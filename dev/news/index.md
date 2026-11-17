@@ -2,6 +2,19 @@
 
 ## flightsbr (development version)
 
+- Major changes:
+
+  - Downloaded files are now cached in
+    `tools::R_user_dir("flightsbr", which = "cache")`, so they persist
+    across R sessions and each file is downloaded only once. A cached
+    file is downloaded again only if ANAC’s copy has a different size,
+    or when `cache = FALSE`. If ANAC can’t be reached to check, the
+    cached file is used. The cache folder can be changed with
+    `options(flightsbr.cache_dir = "path/to/folder")`.
+  - New function
+    [`flightsbr_cache()`](https://ipea.github.io/flightsbr/dev/reference/flightsbr_cache.md)
+    to list and delete cached files.
+
 - Breaking changes:
 
   - [`read_airfares()`](https://ipea.github.io/flightsbr/dev/reference/read_airfares.md)
