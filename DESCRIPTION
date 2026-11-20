@@ -26,7 +26,6 @@ Imports:
       httr2 (>= 1.1.1),
       lifecycle,
       parzer,
-      pbapply,
       janitor,
       rlang,
       rvest

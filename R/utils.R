@@ -258,11 +258,18 @@ download_flightsbr_file <- function(file_url = parent.frame()$file_url,
 
     reqs <- lapply(file_url[todo], anac_request)
 
+    # one file: a byte bar for that download; several files: httr2's bar
+    # counting finished files
+    single <- isTRUE(showProgress) && length(reqs) == 1
+    if (single) {
+      reqs[[1]] <- httr2::req_progress(reqs[[1]], type = "down")
+    }
+
     responses <- httr2::req_perform_parallel(
       reqs,
       paths = part_file,
       on_error = "continue",
-      progress = showProgress,
+      progress = isTRUE(showProgress) && !single,
       max_active = 4
     )
 
@@ -319,6 +326,30 @@ anac_request <- function(url) { # nocov start
     ) |>
     httr2::req_retry(max_tries = 3)
 } # nocov end
+
+
+#' Read files with a cli progress bar
+#'
+#' `lapply()` over `x` with a cli progress bar when there are 2+ files. `FUN`
+#' gets its own `showProgress` (fread's bar) only when there is a single file,
+#' so the two bars never share a line. The `lapply()` must stay inside this
+#' function: `cli_progress_along()` closes its bar when the calling frame exits.
+#'
+#' @param x Vector of local file paths.
+#' @param FUN Function that reads one file; must take `showProgress`.
+#' @param ... Other arguments passed to `FUN` (never `showProgress`).
+#' @param .progress Logical, the user's `showProgress`.
+#' @param .name String. Name shown next to the progress bar.
+#'
+#' @return A list with one element per file.
+#' @noRd
+lapply_progress <- function(x, FUN, ..., .progress, .name = "Reading files") {
+  many <- isTRUE(.progress) && length(x) > 1
+  idx <- if (many) cli::cli_progress_along(x, name = .name) else seq_along(x)
+  lapply(idx, function(i) {
+    FUN(x[[i]], ..., showProgress = isTRUE(.progress) && !many)
+  })
+}
 
 
 #' Check whether a downloaded response is an HTML page instead of a data file

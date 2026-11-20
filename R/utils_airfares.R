@@ -241,9 +241,8 @@ download_airfares_data <- function(file_urls = parent.frame()$file_urls,
                                             cache = cache)
   if (is.null(check_download)) { return(invisible(NULL)) }
 
-  dt <- pbapply::pblapply(X = temp_local_file,
-                          FUN = read_airfare_file,
-                          showProgress = showProgress)
+  dt <- lapply_progress(temp_local_file, read_airfare_file,
+                        .progress = showProgress)
 
   dt <- data.table::rbindlist(dt, use.names = TRUE, fill = TRUE)
 

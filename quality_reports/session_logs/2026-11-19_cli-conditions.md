@@ -26,3 +26,9 @@
 - Added 2 offline tests: `check_flag()` input rejection and call naming, and braces in data printed literally.
 - `devtools::document()` produced no Rd changes. The offline tests pass.
 - A manual console check confirmed that headers name `read_*()` and that `{cat("RAN")}` in data prints literally. Fixed a wrong plural in the unknown-airfare-header error.
+
+## 2026-11-20 — progress bars (plan: [2026-11-20_progress-bars.md](../plans/2026-11-20_progress-bars.md))
+- Q: pbapply bars only cover reading (1 tick per file), and `read_aircraft/airfares/airport_movements` ignored `showProgress = FALSE` (pblapply has no such arg).
+- Plan v1 → 3 adversarial reviews → v2. CRITICAL caught: a helper taking `showProgress` would swallow it, `unzip_and_fread()`'s `parent.frame()$showProgress` default becomes NULL, fread errors, tryCatch deletes cached files. Fix: helper arg `.progress`, passes `showProgress` to FUN explicitly. Custom httr2 bar format dropped (needs httr2 >= 1.2.0; floor is 1.1.1).
+- Implemented: single-file downloads use `httr2::req_progress()` (byte bar); `lapply_progress()` (cli) replaces the 4 `pblapply()`; pbapply removed from Imports; "Unzipping" message gated on showProgress; 1 offline test.
+- Rendering checked in Rscript: byte bar, httr2 count bar for 2 files, "Reading files" cli bar; nothing printed with showProgress = FALSE.

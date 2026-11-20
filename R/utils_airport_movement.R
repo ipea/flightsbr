@@ -151,11 +151,10 @@ download_airport_movement_data <- function(file_url = parent.frame()$file_url,
   #                    ITime =c('HH_PREVISTO', 'HH_CALCO', 'HH_TOQUE'))
 
   # download data and read .csv data file
-  dt <- pbapply::pblapply(X=temp_local_file, FUN= data.table::fread,
-                          showProgress = showProgress,
-                          colClasses = 'character',
-                          sep = ';'
-  )
+  dt <- lapply_progress(temp_local_file, data.table::fread,
+                        colClasses = 'character',
+                        sep = ';',
+                        .progress = showProgress)
 
   dt <- data.table::rbindlist(dt, fill = TRUE)
 

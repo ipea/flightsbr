@@ -103,9 +103,8 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
   if (is.null(check_download)) { return(invisible(NULL)) }
 
   # read files stored locally
-  dt <- pbapply::pblapply(X = temp_local_file,
-                          FUN = read_aircraft_file,
-                          showProgress = showProgress)
+  dt <- lapply_progress(temp_local_file, read_aircraft_file,
+                        .progress = showProgress)
 
   # ANAC changed the RAB layout in 2026: warn when months with different
   # layouts are combined

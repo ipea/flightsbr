@@ -353,16 +353,13 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
     )
   }
 
-  cli::cli_inform("Unzipping and reading data to memory.")
   if (isTRUE(showProgress)) {
-    dt <- pbapply::pblapply(X=temp_local_file, FUN=unzip_and_fread,
-                            select = select,
-                            showProgress = showProgress)
-  } else {
-    dt <- lapply(X=temp_local_file, FUN=unzip_and_fread,
-                 select = select,
-                 showProgress = showProgress)
+    cli::cli_inform("Unzipping and reading data to memory.")
   }
+  dt <- lapply_progress(temp_local_file, unzip_and_fread,
+                        select = select,
+                        .progress = showProgress,
+                        .name = "Unzipping and reading files")
 
   # a corrupt zip can't be read: drop it from the cache so the next call
   # downloads it again

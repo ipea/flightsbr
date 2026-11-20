@@ -5,6 +5,7 @@
   * Downloaded files are now cached in `tools::R_user_dir("flightsbr", which = "cache")`, so they persist across R sessions and each file is downloaded only once. A cached file is downloaded again only if ANAC's copy has a different size, or when `cache = FALSE`. If ANAC can't be reached to check, the cached file is used.
   * New functions to manage the cache, similar to those in {geocodebr}: `set_flightsbr_cache_dir()` sets the cache folder (the choice is kept across R sessions), `get_flightsbr_cache_dir()` returns it, `list_flightsbr_cache()` lists the cached files, and `delete_flightsbr_cache()` deletes some or all of them.
   * Errors, warnings and messages are now formatted with {cli}.
+  * Progress bars now come from {httr2} for downloads (a byte bar when a single file is downloaded) and from {cli} for reading several files. `showProgress = FALSE` now hides all of them, and {pbapply} is no longer a dependency.
 
 * Breaking changes:
 
