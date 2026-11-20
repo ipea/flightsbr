@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">flightsbr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,8 @@
 
 <p>Corrections and learned facts that persist across sessions for <strong>flightsbr</strong>. When a mistake is corrected, or a non-obvious approach is confirmed, append a <code>[LEARN:category]</code> entry below.</p>
 <p>Prior content (inherited from the workflow template’s own development history, not about flightsbr) is archived at <a href="quality_reports/archive/inherited-template-memory.html"><code>quality_reports/archive/inherited-template-memory.md</code></a>.</p>
-<hr><!-- Append new entries below. Most recent at bottom. --></div>
+<hr><!-- Append new entries below. Most recent at bottom. --><p>[LEARN:anac] 2026-11: gov.br flights page links are relative (<code>/anac/.../x.zip</code>) and lead to an HTML landing page → resolve with <code><a href="http://xml2.r-lib.org/reference/url_absolute.html" class="external-link">rvest::url_absolute()</a></code> and append <code>/@@download/file</code>. [LEARN:anac] sas.anac.gov.br (airfares) blocks bursts of scripted requests with an HTML “Requisição Bloqueada” page served as <strong>HTTP 200</strong> → status codes alone don’t prove success; check content type / first bytes, keep <code>max_active</code> low. [LEARN:anac] 404s on sas/sistemas hosts still write the HTML error page to the <code>paths=</code> file in <code><a href="https://httr2.r-lib.org/reference/req_perform_parallel.html" class="external-link">httr2::req_perform_parallel()</a></code> → download to a temp <code>.part</code> file, rename only on success. [LEARN:anac] Airfare headers changed 5 times (ANO/TARIFA; Ano de Referência/Tarifa-N; designador_<em>/VALOR_TARIFA; leading “” index col; nr_</em>/sg_*), interleaved month by month, never reordered. 202005 is UTF-8, other Portuguese-header files Latin-1. Map by name (<code>airfare_col_map</code>), never by date. [LEARN:anac] RAB layout changed 2026-01→2026-03: MARCA→MARCAS; owner/operator columns became JSON arrays (restructured, not renamed). Every field is quoted, so fread’s <code>na.strings</code> does nothing and <code>""</code> escapes are kept literally → clean after reading. [LEARN:anac] <code>nr_*</code> column names are not a numeric signal: movements <code>nr_aeroporto_referencia</code> = “SBAR”, RAB <code>nr_serie</code> = “LA-189”, flights <code>nr_voo</code>/<code>nr_chave</code> are IDs. Convert only if all values parse. [LEARN:anac] Private airports file writes coordinate seconds with a decimal comma (<code>39,8"S</code>) that parzer can’t read; <code>",0"</code> is ANAC’s missing-altitude code.</p>
+</div>
 
   </main></div>
 

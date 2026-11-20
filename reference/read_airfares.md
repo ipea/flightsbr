@@ -42,19 +42,41 @@ read_airfares(
 
 - select:
 
-  A vector of column names or positions to keep. The rest of the columns
-  are not read. The order that the columns passed determines the order
-  of the columns in the result.
+  A vector of column names or positions to keep. The order that the
+  columns passed determines the order of the columns in the result. In
+  `read_airfares()`, only column names are accepted, and both current
+  and older ANAC names work (see Details).
 
 - cache:
 
   Logical. Whether the function should read cached data downloaded
-  previously. Defaults to `TRUE`. If `FALSE`, the function will always
-  download the data and overwrite cached data.
+  previously. Defaults to `TRUE`. Downloaded files are cached in a
+  folder that persists across R sessions (see
+  [`get_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/get_flightsbr_cache_dir.md)
+  and
+  [`set_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/set_flightsbr_cache_dir.md)),
+  and a cached file is downloaded again only if ANAC's copy has a
+  different size. If `FALSE`, the function will always download the data
+  and overwrite cached data. See
+  [`list_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/list_flightsbr_cache.md)
+  and
+  [`delete_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/delete_flightsbr_cache.md)
+  to manage cached files.
 
 ## Value
 
 A `"data.table" "data.frame"` object.
+
+## Details
+
+ANAC has changed the column names of these files several times. All
+files are returned with the names ANAC uses in its current files
+(`nr_ano_referencia`, `nr_mes_referencia`, `sg_empresa_icao`,
+`sg_icao_origem`, `sg_icao_destino`, `nr_tarifa`, `nr_assentos` and, for
+international flights, `sg_icao_retorno`, `cd_classe_ida`,
+`cd_classe_volta`), so files from different years can be combined.
+`select` accepts these names as well as older names such as `"TARIFA"`
+or `"ano"`.
 
 ## Examples
 

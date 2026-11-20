@@ -29,13 +29,25 @@ read_aircraft(date = NULL, showProgress = TRUE, cache = TRUE)
 - cache:
 
   Logical. Whether the function should read cached data downloaded
-  previously. Defaults to `TRUE`. If `FALSE`, the function will always
-  download the data and overwrite cached data.
+  previously. Defaults to `TRUE`. Downloaded files are cached in a
+  folder that persists across R sessions (see
+  [`get_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/get_flightsbr_cache_dir.md)
+  and
+  [`set_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/set_flightsbr_cache_dir.md)),
+  and a cached file is downloaded again only if ANAC's copy has a
+  different size. If `FALSE`, the function will always download the data
+  and overwrite cached data. See
+  [`list_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/list_flightsbr_cache.md)
+  and
+  [`delete_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/delete_flightsbr_cache.md)
+  to manage cached files.
 
 ## Value
 
-A `"data.table" "data.frame"` object. All columns are returned with
-`class` of type `"character"`.
+A `"data.table" "data.frame"` object. Columns of counts and measures are
+numeric; codes and identifiers (e.g. flight numbers, serial numbers,
+airport codes) are character, keeping leading zeros. A column with some
+values that are not numbers stays character, with a message.
 
 ## See also
 
@@ -48,7 +60,7 @@ Other download flight data:
 ``` r
 if (FALSE)  if (interactive()) {
 # Read aircraft data
-aircraft <- read_aircraft(date = 202001,
+aircraft <- read_aircraft(date = 202409,
                           showProgress = TRUE
                           )
 

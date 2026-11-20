@@ -17,7 +17,7 @@ is available at https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/micr
 
     <a class="navbar-brand me-2" href="../index.html">flightsbr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,20 +97,38 @@ international flights.</p></dd>
 
 
 <dt id="arg-select">select<a class="anchor" aria-label="anchor" href="#arg-select"></a></dt>
-<dd><p>A vector of column names or positions to keep. The rest of the
-columns are not read. The order that the columns passed determines the
-order of the columns in the result.</p></dd>
+<dd><p>A vector of column names or positions to keep. The order that
+the columns passed determines the order of the columns in the result.
+In <code>read_airfares()</code>, only column names are accepted, and both
+current and older ANAC names work (see Details).</p></dd>
 
 
 <dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
 <dd><p>Logical. Whether the function should read cached data downloaded
-previously. Defaults to <code>TRUE</code>. If <code>FALSE</code>, the function will
-always download the data and overwrite cached data.</p></dd>
+previously. Defaults to <code>TRUE</code>. Downloaded files are cached
+in a folder that persists across R sessions (see
+<code><a href="get_flightsbr_cache_dir.html">get_flightsbr_cache_dir()</a></code> and <code><a href="set_flightsbr_cache_dir.html">set_flightsbr_cache_dir()</a></code>),
+and a cached file is downloaded again only if ANAC's copy has
+a different size. If <code>FALSE</code>, the function will always
+download the data and overwrite cached data. See
+<code><a href="list_flightsbr_cache.html">list_flightsbr_cache()</a></code> and <code><a href="delete_flightsbr_cache.html">delete_flightsbr_cache()</a></code> to
+manage cached files.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>"data.table" "data.frame"</code> object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>ANAC has changed the column names of these files several times. All files
+are returned with the names ANAC uses in its current files
+(<code>nr_ano_referencia</code>, <code>nr_mes_referencia</code>, <code>sg_empresa_icao</code>,
+<code>sg_icao_origem</code>, <code>sg_icao_destino</code>, <code>nr_tarifa</code>, <code>nr_assentos</code> and, for
+international flights, <code>sg_icao_retorno</code>, <code>cd_classe_ida</code>,
+<code>cd_classe_volta</code>), so files from different years can be combined.
+<code>select</code> accepts these names as well as older names such as <code>"TARIFA"</code> or
+<code>"ano"</code>.</p>
     </div>
 
     <div class="section level2">

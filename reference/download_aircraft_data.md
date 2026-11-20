@@ -37,9 +37,9 @@ A `"data.table" "data.frame"` object
 ``` r
 if (FALSE)  if (interactive()) {
 # Generate url
-file_url <- get_airfares_url(dom = TRUE, year=2002, month=11)
+file_url <- get_aircraft_url(date = 202409)
 
 # download data
-a <- download_airfares_data(file_url=file_url, showProgress=TRUE, select=NULL)
+a <- download_aircraft_data(file_url = file_url, showProgress = TRUE, cache = TRUE)
 } # \dontrun{}
 ```

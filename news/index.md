@@ -1,9 +1,117 @@
 # Changelog
 
-## flightsbr (development version)
+## flightsbr v1.3.0
+
+- Major changes:
+
+  - Downloaded files are now cached in
+    `tools::R_user_dir("flightsbr", which = "cache")`, so they persist
+    across R sessions and each file is downloaded only once. A cached
+    file is downloaded again only if ANAC’s copy has a different size,
+    or when `cache = FALSE`. If ANAC can’t be reached to check, the
+    cached file is used. Closes
+    [\#49](https://github.com/ipea/flightsbr/issues/49).
+  - New functions to manage the cache, similar to those in {geocodebr}:
+    - [`set_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/set_flightsbr_cache_dir.md)
+      sets the cache folder (the choice is kept across R sessions),
+    - [`get_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/get_flightsbr_cache_dir.md)
+      returns path to cache dir
+    - [`list_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/list_flightsbr_cache.md)
+      lists the cached files
+    - [`delete_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/delete_flightsbr_cache.md)
+      deletes some or all of the cached files.
+
+- Minor changes:
+
+  - Errors, warnings and messages are now formatted with {cli}.
+  - Progress bars now come from {httr2} for downloads (a byte bar when a
+    single file is downloaded) and from {cli} for reading several files.
+    `showProgress = FALSE` now hides all of them, and {pbapply} is no
+    longer a dependency.
+
+- Breaking changes:
+
+  - [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md)
+    now returns the same column names for every period, using the names
+    of ANAC’s current files: `nr_ano_referencia`, `nr_mes_referencia`,
+    `sg_empresa_icao`, `sg_icao_origem`, `sg_icao_destino`, `nr_tarifa`,
+    `nr_assentos`, and for international flights also `sg_icao_retorno`,
+    `cd_classe_ida` and `cd_classe_volta`. Older names such as `ano`,
+    `tarifa` or `valor_tarifa` are no longer returned, but are still
+    accepted by `select`.
+  - Identifier columns are no longer converted to numbers, so they keep
+    their leading zeros: `nr_voo` and `nr_chave`
+    ([`read_flights()`](https://ipea.github.io/flightsbr/reference/read_flights.md)),
+    `nr_voo_numero`
+    ([`read_airport_movements()`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md)),
+    and `nr_serie` and `nr_cert_matricula`
+    ([`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md)).
+  - More generally, a column named like a number (`nr_*`, `qt_*`, …) is
+    converted to numeric only if all its values are numbers. Otherwise
+    it stays character, with a message when only a few values are the
+    problem (e.g. `nr_preco_venda` in recent RAB files). The type of
+    such a column can therefore differ between requests for different
+    months.
+  - [`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md):
+    the registration “marca” column is always called `marcas` (it was
+    `marca` in files before 2026), and empty cells and the text `"null"`
+    are returned as `NA`.
 
 - Bug fixes:
 
+  - Fixed
+    [`read_airport_movements()`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md)
+    returning `NA` for every airport, airline and aircraft code: the
+    codes in `nr_*` columns were converted to numbers.
+  - Fixed
+    [`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md)
+    returning `NA` for many serial numbers and almost all sale prices,
+    which use Brazilian number formatting (`"1.500.000,00"`).
+  - Fixed failed downloads being cached: ANAC answers missing files and
+    blocked requests with an HTML page, which was saved and later read
+    as data with `cache = TRUE`. Files are now downloaded to a temporary
+    file and only kept when the download succeeded and is not a web
+    page. Downloads are retried and run at most four at a time.
+  - Fixed
+    [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md)
+    splitting fares and other columns into separate, half-empty columns
+    when the requested months use different ANAC headers. Files with an
+    unknown header now fail with an error.
+  - Fixed
+    [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md)
+    failing for months that ANAC re-uploaded under another name
+    (e.g. May 2026, `202605 (1).csv`). Download links now come from
+    ANAC’s listing.
+  - Fixed
+    [`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md),
+    [`read_airport_movements()`](https://ipea.github.io/flightsbr/reference/read_airport_movements.md)
+    and
+    [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md)
+    with a year (`date = yyyy`) failing whenever any month of that year
+    is not available on ANAC. They now read the available months and
+    list the missing ones in a message.
+  - Fixed
+    [`read_airports()`](https://ipea.github.io/flightsbr/reference/read_airports.md)
+    returning `NA` coordinates for about 29% of private airports
+    (seconds written with a decimal comma), and altitude `0` for
+    airports whose altitude is missing (`",0"`). `latgeopoint` and
+    `longeopoint` are now numeric.
+  - Fixed the JSON owner and operator columns of recent RAB files
+    (`proprietarios`, `operadores`) not being valid JSON.
+    [`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md)
+    warns when the requested months use different RAB layouts.
+  - Fixed a page without the flight file table being cached as a bogus
+    listing, which broke
+    [`read_flights()`](https://ipea.github.io/flightsbr/reference/read_flights.md)
+    for the rest of the session.
+    [`latest_flights_date()`](https://ipea.github.io/flightsbr/reference/latest_flights_date.md)
+    returns `NULL` instead of `-Inf` when ANAC can’t be reached.
+  - [`read_airfares()`](https://ipea.github.io/flightsbr/reference/read_airfares.md)
+    rejects `domestic = NA` and vectors of length \> 1.
+  - Large text files extracted from the flight zip files are deleted
+    after being read.
+  - Functions no longer change the number of threads used by
+    `data.table`.
   - Fixed
     [`read_flights()`](https://ipea.github.io/flightsbr/reference/read_flights.md)
     failing to download any data. ANAC’s website now lists flight files
@@ -39,7 +147,7 @@ CRAN release: 2026-08-21
   - Files are now downloaded using
     [`httr2::req_perform_parallel()`](https://httr2.r-lib.org/reference/req_perform_parallel.html),
     replacing
-    [`curl::multi_download()`](https://jeroen.r-universe.dev/curl/reference/multi_download.html).
+    [`curl::multi_download()`](https://rdrr.io/pkg/curl/man/multi_download.html).
 
 - Bug fixes:
 
@@ -159,7 +267,7 @@ CRAN release: 2024-09-18
     [`read_aircraft()`](https://ipea.github.io/flightsbr/reference/read_aircraft.md)
     now has a `cache` parameter.
   - The package is now significantly faster because it is using
-    [`curl::multi_download()`](https://jeroen.r-universe.dev/curl/reference/multi_download.html)
+    [`curl::multi_download()`](https://rdrr.io/pkg/curl/man/multi_download.html)
     to download files in parallel. This brings the advantage that the
     package now automatically detects whether the data file has been
     updated and should be downloaded again.

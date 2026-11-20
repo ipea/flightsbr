@@ -8,7 +8,6 @@ Download and read ANAC air fares data
 download_airfares_data(
   file_urls = parent.frame()$file_urls,
   showProgress = parent.frame()$showProgress,
-  select = parent.frame()$select,
   cache = parent.frame()$cache
 )
 ```
@@ -23,30 +22,33 @@ download_airfares_data(
 
   Logical. Defaults to `TRUE` display progress.
 
-- select:
-
-  A vector of column names or positions to keep. The rest of the columns
-  are not read. The order that the columns passed determines the order
-  of the columns in the result.
-
 - cache:
 
   Logical. Whether the function should read cached data downloaded
-  previously. Defaults to `TRUE`. If `FALSE`, the function will always
-  download the data and overwrite cached data.
+  previously. Defaults to `TRUE`. Downloaded files are cached in a
+  folder that persists across R sessions (see
+  [`get_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/get_flightsbr_cache_dir.md)
+  and
+  [`set_flightsbr_cache_dir()`](https://ipea.github.io/flightsbr/reference/set_flightsbr_cache_dir.md)),
+  and a cached file is downloaded again only if ANAC's copy has a
+  different size. If `FALSE`, the function will always download the data
+  and overwrite cached data. See
+  [`list_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/list_flightsbr_cache.md)
+  and
+  [`delete_flightsbr_cache()`](https://ipea.github.io/flightsbr/reference/delete_flightsbr_cache.md)
+  to manage cached files.
 
 ## Value
 
-A `"data.table" "data.frame"` object
+A `"data.table" "data.frame"` object with harmonized column names, or
+`NULL` if the download failed.
 
 ## Examples
 
 ``` r
 if (FALSE)  if (interactive()) {
-# Generate url
-file_url <- get_airfares_url(dom = TRUE, date=200211)
+files <- get_airfares_files_available(dom = TRUE)
 
-# download data
-a <- download_airfares_data(file_urls=file_url, showProgress=TRUE, select=NULL)
+a <- download_airfares_data(file_urls = files$url[1], showProgress = TRUE)
 } # \dontrun{}
 ```
