@@ -20,6 +20,7 @@ Depends:
     R (>= 4.1.0)
 Imports:
       archive,
+      cli,
       data.table (>= 1.14.0),
       fs,
       httr2 (>= 1.1.1),
@@ -27,6 +28,7 @@ Imports:
       parzer,
       pbapply,
       janitor,
+      rlang,
       rvest
 Suggests:
     dplyr,
@@ -39,4 +41,4 @@ VignetteBuilder:
     knitr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

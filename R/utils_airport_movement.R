@@ -19,7 +19,7 @@ get_airport_movement_dates_available <- function() { # nocov start
 
   # check if internet connection worked
   if (class(h)[1]=='try-error') {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
@@ -53,16 +53,15 @@ get_airport_movement_dates_available <- function() { # nocov start
 
   failed <- vapply(csv_urls, is.null, logical(1))
   if (all(failed)) {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
   if (any(failed)) {
-    message(sprintf(
-      paste0(
-        "Could not reach %d of %d year(s) on the ANAC data server; the ",
-        "list of available dates may be incomplete. Please try it again."
-      ),
-      sum(failed), length(failed)
+    n_failed <- sum(failed)
+    n_years <- length(failed)
+    cli::cli_inform(paste(
+      "Could not reach {n_failed} of {n_years} year{?s} on the ANAC data server;",
+      "the list of available dates may be incomplete. Please try it again."
     ))
   }
 

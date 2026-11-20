@@ -44,7 +44,7 @@ get_flights_files_available <- function(cache = TRUE) { # nocov start
   )
 
   if (inherits(resp, "try-error")) {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
@@ -126,7 +126,7 @@ get_flights_files_available <- function(cache = TRUE) { # nocov start
 
   # no table with the expected columns, e.g. ANAC served a maintenance page
   if (nrow(files) == 0 || !all(c("date", "type", "url") %in% names(files))) {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
@@ -316,10 +316,9 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
   not_zip <- !is_zip_file(temp_local_file)
   if (any(not_zip)) {
     unlink(temp_local_file[not_zip])
-    message(
-      "ANAC returned a web page instead of the data file for: ",
-      paste(file_name[not_zip], collapse = ", "),
-      ". Please try it again later."
+    web_page <- file_name[not_zip]
+    cli::cli_inform(
+      "ANAC returned a web page instead of the data file for: {.file {web_page}}. Please try it again later."
     )
     return(invisible(NULL))
   }
@@ -354,7 +353,7 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
     )
   }
 
-  message('Unziping and reading data to memory.')
+  cli::cli_inform("Unzipping and reading data to memory.")
   if (isTRUE(showProgress)) {
     dt <- pbapply::pblapply(X=temp_local_file, FUN=unzip_and_fread,
                             select = select,
@@ -370,10 +369,9 @@ download_flights_data <- function(file_url = parent.frame()$file_url,
   failed <- vapply(dt, is.null, logical(1))
   if (any(failed)) {
     unlink(temp_local_file[failed])
-    message(
-      "Could not read the data file for: ",
-      paste(file_name[failed], collapse = ", "),
-      ". The cached copy was removed; please try it again."
+    unreadable <- file_name[failed]
+    cli::cli_inform(
+      "Could not read the data file for: {.file {unreadable}}. The cached copy was removed; please try it again."
     )
     return(invisible(NULL))
   }

@@ -43,17 +43,11 @@ read_airfares <- function(
   cache = TRUE
 ) {
   ### check inputs
-  if (!(isTRUE(domestic) || isFALSE(domestic))) {
-    stop(paste0("Argument 'domestic' must be either 'TRUE' or 'FALSE'."))
-  }
-  if (!is.logical(showProgress)) {
-    stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE'."))
-  }
-  if (!is.logical(cache)) {
-    stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE'."))
-  }
+  check_flag(domestic, "domestic")
+  check_flag(showProgress, "showProgress")
+  check_flag(cache, "cache")
   if (!is.null(select) && !is.character(select)) {
-    stop("Argument 'select' must be a character vector of column names.")
+    cli::cli_abort("{.arg select} must be a character vector of column names or {.code NULL}.")
   }
   check_input_date_format(date)
 
@@ -104,10 +98,8 @@ read_airfares <- function(
     select_cols <- airfare_canonical_names(select)
 
     if (anyNA(select_cols)) {
-      warning(
-        "Column(s) not found in airfare data: ",
-        paste(select[is.na(select_cols)], collapse = ", ")
-      )
+      not_found <- select[is.na(select_cols)]
+      cli::cli_warn("Column{?s} not found in airfare data: {.val {not_found}}.")
     }
 
     select_cols <- intersect(unique(select_cols[!is.na(select_cols)]), names(dt))

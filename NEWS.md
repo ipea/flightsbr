@@ -4,8 +4,12 @@
 
   * Downloaded files are now cached in `tools::R_user_dir("flightsbr", which = "cache")`, so they persist across R sessions and each file is downloaded only once. A cached file is downloaded again only if ANAC's copy has a different size, or when `cache = FALSE`. If ANAC can't be reached to check, the cached file is used.
   * New functions to manage the cache, similar to those in {geocodebr}: `set_flightsbr_cache_dir()` sets the cache folder (the choice is kept across R sessions), `get_flightsbr_cache_dir()` returns it, `list_flightsbr_cache()` lists the cached files, and `delete_flightsbr_cache()` deletes some or all of them.
+  * Errors, warnings and messages are now formatted with {cli}.
 
 * Breaking changes:
+
+  * `showProgress`, `cache` and `domestic` must be a single `TRUE` or `FALSE`: `NA` and vectors longer than one are now rejected.
+  * `read_flights(type = )` no longer accepts partial matches such as `"comb"`; use `"basica"` or `"combinada"`.
 
   * `read_airfares()` now returns the same column names for every period, using the names of ANAC's current files: `nr_ano_referencia`, `nr_mes_referencia`, `sg_empresa_icao`, `sg_icao_origem`, `sg_icao_destino`, `nr_tarifa`, `nr_assentos`, and for international flights also `sg_icao_retorno`, `cd_classe_ida` and `cd_classe_volta`. Older names such as `ano`, `tarifa` or `valor_tarifa` are no longer returned, but are still accepted by `select`.
   * Identifier columns are no longer converted to numbers, so they keep their leading zeros: `nr_voo` and `nr_chave` (`read_flights()`), `nr_voo_numero` (`read_airport_movements()`), and `nr_serie` and `nr_cert_matricula` (`read_aircraft()`).

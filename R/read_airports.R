@@ -32,9 +32,9 @@ read_airports <- function(type = 'all',
                           ){
 
 ### check inputs
-  if( ! type %in% c('public', 'private', 'all') ){ stop(paste0("Argument 'type' must be either 'all, 'public' or 'private'")) }
-  if( ! is.logical(showProgress) ){ stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE.")) }
-  if( ! is.logical(cache) ){ stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE.")) }
+  type <- rlang::arg_match(type, c("all", "public", "private"))
+  check_flag(showProgress, "showProgress")
+  check_flag(cache, "cache")
 
   # data url
   # https://www.gov.br/anac/pt-br/assuntos/regulados/aerodromos/lista-de-aerodromos-civis-cadastrados
