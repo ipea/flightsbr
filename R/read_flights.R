@@ -42,14 +42,9 @@ read_flights <- function(
   ){
 
   ### check inputs
-  requested_type <- match.arg(type, c("basica", "combinada"))
-
-  if (!is.logical(showProgress)) {
-    stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE."))
-  }
-  if (!is.logical(cache)) {
-    stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE."))
-  }
+  requested_type <- rlang::arg_match(type, c("basica", "combinada"))
+  check_flag(showProgress, "showProgress")
+  check_flag(cache, "cache")
   check_input_date_format(date)
 
   ### get files available

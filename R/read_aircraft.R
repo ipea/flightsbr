@@ -32,8 +32,8 @@ read_aircraft <- function(date = NULL,
                           ){
 
 ### check inputs
-  if( ! is.logical(showProgress) ){ stop(paste0("Argument 'showProgress' must be either 'TRUE' or 'FALSE.")) }
-  if( ! is.logical(cache) ){ stop(paste0("Argument 'cache' must be either 'TRUE' or 'FALSE.")) }
+  check_flag(showProgress, "showProgress")
+  check_flag(cache, "cache")
   check_input_date_format(date)
 
   ### check date input

@@ -67,7 +67,7 @@ get_airfares_files_available <- function(dom, cache = TRUE) { # nocov start
   href <- read_anac_listing(base_url)
 
   if (is.null(href)) {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
@@ -84,17 +84,16 @@ get_airfares_files_available <- function(dom, cache = TRUE) { # nocov start
   failed_years <- years[vapply(href_by_year, is.null, logical(1))]
 
   if (length(failed_years) == length(years)) {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
   if (length(failed_years) > 0) {
-    message(sprintf(
-      paste0(
-        "Could not reach %d of %d year(s) on the ANAC data server; the ",
-        "list of available dates may be incomplete. Please try it again."
-      ),
-      length(failed_years), length(years)
+    n_failed <- length(failed_years)
+    n_years <- length(years)
+    cli::cli_inform(paste(
+      "Could not reach {n_failed} of {n_years} year{?s} on the ANAC data server;",
+      "the list of available dates may be incomplete. Please try it again."
     ))
   }
 
@@ -102,7 +101,7 @@ get_airfares_files_available <- function(dom, cache = TRUE) { # nocov start
   files[, url := rvest::url_absolute(url, base_url)]
 
   if (nrow(files) == 0) {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
@@ -242,9 +241,8 @@ download_airfares_data <- function(file_urls = parent.frame()$file_urls,
                                             cache = cache)
   if (is.null(check_download)) { return(invisible(NULL)) }
 
-  dt <- pbapply::pblapply(X = temp_local_file,
-                          FUN = read_airfare_file,
-                          showProgress = showProgress)
+  dt <- lapply_progress(temp_local_file, read_airfare_file,
+                        .progress = showProgress)
 
   dt <- data.table::rbindlist(dt, use.names = TRUE, fill = TRUE)
 
@@ -317,10 +315,11 @@ harmonize_airfare_names <- function(dt, file_name = "") {
   new_names <- airfare_col_map[names(dt)]
 
   if (anyNA(new_names)) {
-    stop(
-      "ANAC file ", file_name, " has unexpected column(s): ",
-      paste(names(dt)[is.na(new_names)], collapse = ", "),
-      ". Please report this at https://github.com/ipea/flightsbr/issues"
+    unexpected <- names(dt)[is.na(new_names)]
+    cli::cli_abort(
+      c("ANAC file {.file {file_name}} has {length(unexpected)} unexpected column{?s}: {.field {unexpected}}.",
+        "i" = "Please report this at {.url https://github.com/ipea/flightsbr/issues}"),
+      call = NULL
     )
   }
 

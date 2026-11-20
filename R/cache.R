@@ -24,8 +24,10 @@ cache_config_file <- function() {
 #' @return `TRUE` invisibly, or an error.
 #' @keywords internal
 check_flag <- function(x, name) {
-  if (!is.logical(x) || length(x) != 1 || is.na(x)) {
-    stop("Argument '", name, "' must be either 'TRUE' or 'FALSE'.", call. = FALSE)
+  if (!isTRUE(x) && !isFALSE(x)) {
+    # name the user-facing function that called check_flag() in the error
+    cli::cli_abort("{.arg {name}} must be {.code TRUE} or {.code FALSE}.",
+                   call = rlang::caller_env())
   }
   invisible(TRUE)
 }
@@ -67,7 +69,7 @@ set_flightsbr_cache_dir <- function(path = NULL, verbose = TRUE) {
   # checks
   if (!is.null(path) &&
       (!is.character(path) || length(path) != 1 || is.na(path) || !nzchar(path))) {
-    stop("Argument 'path' must be a single folder path or NULL.", call. = FALSE)
+    cli::cli_abort("{.arg path} must be a single folder path or {.code NULL}.")
   }
   check_flag(verbose, "verbose")
 
@@ -86,7 +88,7 @@ set_flightsbr_cache_dir <- function(path = NULL, verbose = TRUE) {
   cache_dir <- as.character(cache_dir)
 
   if (isTRUE(verbose)) {
-    message("flightsbr cache folder set to: ", cache_dir)
+    cli::cli_inform("flightsbr cache folder set to: {.file {cache_dir}}")
   }
 
   return(invisible(cache_dir))
@@ -162,7 +164,7 @@ list_flightsbr_cache <- function(print_tree = FALSE) {
   }
 
   if (length(cached_files) == 0) {
-    message("The flightsbr cache is empty: ", cache_dir)
+    cli::cli_inform("The flightsbr cache is empty: {.file {cache_dir}}")
     return(cached_files)
   }
 
@@ -209,8 +211,7 @@ delete_flightsbr_cache <- function(file = NULL, verbose = TRUE) {
 
   # checks
   if (!is.null(file) && (!is.character(file) || anyNA(file))) {
-    stop("Argument 'file' must be a character vector of file names or NULL.",
-         call. = FALSE)
+    cli::cli_abort("{.arg file} must be a character vector of file names or {.code NULL}.")
   }
   check_flag(verbose, "verbose")
 
@@ -228,8 +229,7 @@ delete_flightsbr_cache <- function(file = NULL, verbose = TRUE) {
 
     not_found <- setdiff(basename(file), basename(cached_files))
     if (length(not_found) > 0 && isTRUE(verbose)) {
-      message("File(s) not found in the flightsbr cache: ",
-              paste(not_found, collapse = ", "))
+      cli::cli_inform("File{?s} not found in the flightsbr cache: {.file {not_found}}")
     }
   }
 
@@ -242,8 +242,8 @@ delete_flightsbr_cache <- function(file = NULL, verbose = TRUE) {
   }
 
   if (isTRUE(verbose)) {
-    message("Deleted ", length(to_delete), " file(s) from the flightsbr cache: ",
-            cache_dir)
+    n_deleted <- length(to_delete)
+    cli::cli_inform("Deleted {n_deleted} file{?s} from the flightsbr cache: {.file {cache_dir}}")
   }
 
   return(invisible(cache_dir))

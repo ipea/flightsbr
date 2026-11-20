@@ -15,7 +15,7 @@ get_aircraft_dates_available <- function() { # nocov start
 
   # check if internet connection worked
   if (class(h)[1]=='try-error') {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
     return(invisible(NULL))
   }
 
@@ -103,9 +103,8 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
   if (is.null(check_download)) { return(invisible(NULL)) }
 
   # read files stored locally
-  dt <- pbapply::pblapply(X = temp_local_file,
-                          FUN = read_aircraft_file,
-                          showProgress = showProgress)
+  dt <- lapply_progress(temp_local_file, read_aircraft_file,
+                        .progress = showProgress)
 
   # ANAC changed the RAB layout in 2026: warn when months with different
   # layouts are combined
@@ -113,11 +112,10 @@ download_aircraft_data <- function(file_url = parent.frame()$file_url,
   if (length(layouts) > 1) {
     all_cols <- unique(unlist(layouts))
     partial <- all_cols[!vapply(all_cols, \(col) all(vapply(dt, \(x) col %in% names(x), logical(1))), logical(1))]
-    warning(
-      "The requested months use different RAB file layouts. These columns ",
-      "only exist in some months and are NA in the others: ",
-      paste(janitor::make_clean_names(partial), collapse = ", "),
-      call. = FALSE
+    partial <- janitor::make_clean_names(partial)
+    cli::cli_warn(
+      "The requested months use different RAB file layouts. These columns only exist in some months and are NA in the others: {.field {partial}}",
+      call = NULL
     )
   }
 

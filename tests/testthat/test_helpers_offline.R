@@ -241,3 +241,52 @@ test_that("RAB files: MARCA becomes MARCAS, null becomes NA, quotes un-escaped",
   expect_equal(dt$NR_ASSENTOS, c(NA, "4"))
   expect_equal(dt$reference_date, c("202601", "202601"))
 })
+
+
+# cli messages -----------------------------------------------------------------
+
+test_that("check_flag accepts only a single TRUE or FALSE", {
+
+  f <- function(showProgress) check_flag(showProgress, "showProgress")
+
+  expect_silent(f(TRUE))
+  expect_silent(f(FALSE))
+
+  # the error names the argument and the calling function, not check_flag()
+  err <- expect_error(f(NA), "showProgress")
+  expect_identical(err$call, quote(f(NA)))
+  expect_error(f(c(TRUE, FALSE)), "showProgress")
+  expect_error(f("banana"), "showProgress")
+  expect_error(f(NULL), "showProgress")
+})
+
+test_that("values with braces are printed literally in cli messages", {
+
+  # cli evaluates {} in its templates: ANAC values must never be part of the
+  # template, or a stray brace would break (or run code in) the message
+  dt <- data.table::data.table(
+    nr_preco = c(as.character(1:20), "{1,978}")
+  )
+
+  expect_message(convert_to_numeric(dt), "{1,978}", fixed = TRUE)
+  expect_type(dt$nr_preco, "character")
+})
+
+test_that("lapply_progress() reads every file and passes showProgress on", {
+
+  f <- function(x, showProgress) list(x, showProgress)
+
+  for (x in list(character(0), "a", c("a", "b", "c"))) {
+    # FUN shows its own bar (fread's) only for a single file with progress on
+    expect_identical(lapply_progress(x, f, .progress = TRUE),
+                     lapply(x, f, showProgress = length(x) == 1))
+    expect_identical(lapply_progress(x, f, .progress = FALSE),
+                     lapply(x, f, showProgress = FALSE))
+    expect_silent(lapply_progress(x, f, .progress = FALSE))
+  }
+
+  # other arguments reach FUN
+  g <- function(x, y, showProgress) paste(x, y)
+  expect_identical(lapply_progress(c("a", "b"), g, y = "z", .progress = TRUE),
+                   list("a z", "b z"))
+})

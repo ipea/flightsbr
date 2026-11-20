@@ -16,15 +16,22 @@
 #'}}
 check_date <- function(date, all_dates) {
 
-  error_message <-  paste0("The data is currently only available for dates between ", min(all_dates), " and ", max(all_dates), ".")
+  first_date <- min(all_dates)
+  last_date <- max(all_dates)
 
   for(d in date){
-    if (nchar(d)==6) {
-      if (!(d %in% all_dates)) {stop(error_message)}
-      }
+    available <- if (nchar(d) == 6) {
+      d %in% all_dates
+    } else {
+      d %in% unique(substr(all_dates, 1, 4))
+    }
 
-    if (nchar(d)!=6) {
-      if (!(d %in% unique(substr(all_dates, 1, 4)) )) {stop(error_message)}
+    if (!available) {
+      # name the read_*() function that called check_date() in the error
+      cli::cli_abort(
+        "The data is currently only available for dates between {first_date} and {last_date}.",
+        call = rlang::caller_env()
+      )
     }
   }
 }
@@ -46,7 +53,9 @@ check_date <- function(date, all_dates) {
 generate_all_months <- function(date) {
 
   # check
-  if (any(nchar(date)!=4)) { stop(paste0("Argument 'date' must be 4-digit in the format `yyyy`.")) }
+  if (any(nchar(date)!=4)) {
+    cli::cli_abort("{.arg date} must be 4-digit in the format {.code yyyy}.")
+  }
 
   get_all_months <- function(yyyy){
     jan <- as.numeric(paste0(yyyy, '01'))
@@ -83,9 +92,8 @@ available_months <- function(date, all_dates) {
   missing <- setdiff(requested, available)
 
   if (length(missing) > 0) {
-    message(
-      "Data for these months is not available on ANAC and was skipped: ",
-      paste(missing, collapse = ", ")
+    cli::cli_inform(
+      "Data for these months is not available on ANAC and was skipped: {missing}"
     )
   }
 
@@ -199,7 +207,7 @@ download_flightsbr_file <- function(file_url = parent.frame()$file_url,
                                     cache = cache) { # nocov start
 
   if (length(dest_file) != length(file_url)) {
-    stop("'dest_file' must have the same length as 'file_url'.")
+    cli::cli_abort("{.arg dest_file} must have the same length as {.arg file_url}.")
   }
 
   dest_file <- as.character(dest_file)
@@ -224,8 +232,8 @@ download_flightsbr_file <- function(file_url = parent.frame()$file_url,
 
       n_reused <- length(cached) - length(outdated)
       if (isTRUE(showProgress) && n_reused > 0) {
-        message("Using ", n_reused, " cached file(s); downloading ",
-                length(file_url) - n_reused, ".")
+        n_download <- length(file_url) - n_reused
+        cli::cli_inform("Using {n_reused} cached file{?s}; downloading {n_download}.")
       }
     }
   }
@@ -250,11 +258,18 @@ download_flightsbr_file <- function(file_url = parent.frame()$file_url,
 
     reqs <- lapply(file_url[todo], anac_request)
 
+    # one file: a byte bar for that download; several files: httr2's bar
+    # counting finished files
+    single <- isTRUE(showProgress) && length(reqs) == 1
+    if (single) {
+      reqs[[1]] <- httr2::req_progress(reqs[[1]], type = "down")
+    }
+
     responses <- httr2::req_perform_parallel(
       reqs,
       paths = part_file,
       on_error = "continue",
-      progress = showProgress,
+      progress = isTRUE(showProgress) && !single,
       max_active = 4
     )
 
@@ -283,12 +298,12 @@ download_flightsbr_file <- function(file_url = parent.frame()$file_url,
   }
 
   if (length(blocked) > 0) {
-    message(
-      "The ANAC data server refused the request (it returned a web page ",
+    cli::cli_inform(paste(
+      "The ANAC data server refused the request (it returned a web page",
       "instead of the data file). Please wait a few minutes and try again."
-    )
+    ))
   } else {
-    message("Problem connecting to ANAC data server. Please try it again.")
+    cli::cli_inform("Problem connecting to ANAC data server. Please try it again.")
   }
   invisible(NULL)
 } # nocov end
@@ -311,6 +326,30 @@ anac_request <- function(url) { # nocov start
     ) |>
     httr2::req_retry(max_tries = 3)
 } # nocov end
+
+
+#' Read files with a cli progress bar
+#'
+#' `lapply()` over `x` with a cli progress bar when there are 2+ files. `FUN`
+#' gets its own `showProgress` (fread's bar) only when there is a single file,
+#' so the two bars never share a line. The `lapply()` must stay inside this
+#' function: `cli_progress_along()` closes its bar when the calling frame exits.
+#'
+#' @param x Vector of local file paths.
+#' @param FUN Function that reads one file; must take `showProgress`.
+#' @param ... Other arguments passed to `FUN` (never `showProgress`).
+#' @param .progress Logical, the user's `showProgress`.
+#' @param .name String. Name shown next to the progress bar.
+#'
+#' @return A list with one element per file.
+#' @noRd
+lapply_progress <- function(x, FUN, ..., .progress, .name = "Reading files") {
+  many <- isTRUE(.progress) && length(x) > 1
+  idx <- if (many) cli::cli_progress_along(x, name = .name) else seq_along(x)
+  lapply(idx, function(i) {
+    FUN(x[[i]], ..., showProgress = isTRUE(.progress) && !many)
+  })
+}
 
 
 #' Check whether a downloaded response is an HTML page instead of a data file
@@ -371,8 +410,12 @@ starts_like_html <- function(path) {
 latlon_to_numeric <- function(df){
 
   # check if df has lat lon colnames
-  if(!'latitude' %in% names(df)){ stop("Column 'latitude' is missing from original ANAC data.") }
-  if(!'longitude' %in% names(df)){ stop("Column 'longitude' is missing from original ANAC data.") }
+  if(!'latitude' %in% names(df)){
+    cli::cli_abort("Column {.field latitude} is missing from original ANAC data.", call = NULL)
+  }
+  if(!'longitude' %in% names(df)){
+    cli::cli_abort("Column {.field longitude} is missing from original ANAC data.", call = NULL)
+  }
 
   # ref
   # https://semba-blog.netlify.app/02/25/2020/geographical-coordinates-conversion-made-easy-with-parzer-package-in-r/
@@ -399,7 +442,9 @@ latlon_to_numeric <- function(df){
 #' @keywords internal
 altitude_to_numeric <- function(df){
 
-  if(!'altitude' %in% names(df)){ stop("Column 'altitude' is missing from original ANAC data.") }
+  if(!'altitude' %in% names(df)){
+    cli::cli_abort("Column {.field altitude} is missing from original ANAC data.", call = NULL)
+  }
 
   alt <- trimws(gsub(" m", "", df$altitude, fixed = TRUE))
   alt[grepl("^,", alt)] <- NA
@@ -476,9 +521,10 @@ convert_to_numeric <- function(dt) {
   }
 
   if (length(kept_as_character) > 0) {
-    message(
-      "These columns were kept as character because some values are not ",
-      "numbers: ", paste(kept_as_character, collapse = "; ")
+    # the descriptions hold raw ANAC values, so they are substituted into the
+    # message, never pasted into the cli template (which would evaluate {})
+    cli::cli_inform(
+      "These columns were kept as character because some values are not numbers: {kept_as_character}"
     )
   }
 
@@ -540,7 +586,11 @@ check_input_date_format <- function(date = parent.frame()$date) {
   yyyymm <- (all(nchar(date)==6))
 
   if(yyyy + yyyymm == 0){
-  stop("The 'date' input must be consistent in either a 6-digit format `yyyymm` OR a 4-digit format `yyyy`.")
+    # name the read_*() function that called check_input_date_format() in the error
+    cli::cli_abort(
+      "{.arg date} must be consistently either a 6-digit {.code yyyymm} OR a 4-digit {.code yyyy}.",
+      call = rlang::caller_env()
+    )
   }
 }
 
